@@ -1,0 +1,20 @@
+{
+  "name": "adrift",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild ./client/main.jsx --bundle --outfile=client/dist.js",
+    "watch": "esbuild ./client/main.jsx --bundle --outfile=client/dist.js --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "corium": "file:corium",
+    "dotenv": "^16.3.1",
+    "esbuild": "0.19.0",
+    "preact": "^10.16.0",
+    "wrtc": "^0.4.7"
+  }
+}
