@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild ./client/main.jsx --bundle --outfile=client/dist.js",
-    "watch": "esbuild ./client/main.jsx --bundle --outfile=client/dist.js --watch"
+    "build": "esbuild ./client/main.jsx --bundle --outfile=client/dist.js --sourcemap --jsx-factory=h --jsx-fragment=Fragment",
+    "watch": "esbuild ./client/main.jsx --bundle --outfile=client/dist.js --sourcemap --jsx-factory=h --jsx-fragment=Fragment --watch"
   },
   "keywords": [],
   "author": "",
