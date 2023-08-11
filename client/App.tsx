@@ -2,6 +2,10 @@ import { openWindow, deleteWindow } from "corium";
 import { h, render, Component, Fragment } from 'preact';
 import { RTCConnection } from "./rtc";
 
+
+import { setOffer, setCallback } from "./firebase";
+
+
 export default class App extends Component {
   rtc = new RTCConnection({
     onmessage: console.log,
@@ -21,17 +25,19 @@ export default class App extends Component {
   }
 
   render(props, state) {
+    setCallback(this.rtc.answer.bind(this.rtc));
     return <>
       <div>
 
       </div>
 
       <button onClick={async () => {
-        console.log("whra");
         let offer = await this.rtc.createOffer();
+        console.log("offer created", offer);
 
-        console.log("hra");
-        this.setState(prev => ({ ...prev, offer: JSON.stringify(offer) }));
+        setOffer(JSON.stringify(offer));
+
+        // this.setState(prev => ({ ...prev, offer: JSON.stringify(offer) }));
 
 
       }}>create offer</button>
