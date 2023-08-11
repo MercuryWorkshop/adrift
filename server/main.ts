@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
+import expressWs from "express-ws";
 import * as wrtc from "wrtc";
 
 const configuration = {
@@ -66,7 +67,9 @@ async function connect(
   }
 }
 
-const app = express();
+const app = express() as unknown as expressWs.Application;
+expressWs(app);
+
 app.use(express.json());
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -85,6 +88,13 @@ app.post("/connect", (req, res) => {
       }
     });
   }
+});
+
+app.ws("/dev-ws", (ws, req) => {
+  console.log("ws connect");
+  ws.on("message", (msg) => {
+    console.log({ msg });
+  });
 });
 
 app.listen(3000, () => console.log("listening"));
