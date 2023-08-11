@@ -1,4 +1,5 @@
 import {
+  BareClient,
   registerRemoteListener,
   setBareClientImplementation,
 } from "bare-client-custom";
@@ -46,6 +47,8 @@ let bare = new AdriftBareClient(connection);
 setBareClientImplementation(bare);
 registerRemoteListener();
 
+window["bare"] = new BareClient();
+
 export default class App extends Component {
   rtc = rtc;
 
@@ -79,6 +82,8 @@ export default class App extends Component {
               const { answer, candidates } = await r.json();
               await this.rtc.answer(answer, candidates);
               alert("connected");
+            } else {
+              window["bare"].fetch("https://httpbin.org/get");
             }
 
             // setOffer(JSON.stringify(offer));
