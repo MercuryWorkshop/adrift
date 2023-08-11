@@ -2,13 +2,35 @@ import { Component, Fragment, h, render } from "preact";
 import { RTCConnection } from "./rtc";
 
 const _ = [h, render, Component, Fragment];
+// import { setOffer, setCallback } from "./firebase";
+import { BareClient as BareClientCustom, registerRemoteListener, setBareClientImplementation, Client, GetRequestHeadersCallback, MetaCallback, ReadyStateCallback, WebSocketImpl, BareHeaders, BareResponse } from "bare-client-custom";
+
+import { createBareClient } from "@tomphttp/bare-client";
+
+
+class AdriftClient extends Client {
+  
+  async request(method: string, requestHeaders: BareHeaders, body: BodyInit | null, remote: URL, cache: string | undefined, duplex: string | undefined, signal: AbortSignal | undefined): Promise<BareResponse> {
+    return new Response("test") as BareResponse;
+  }
+  async connect(remote: URL, protocols: string[], getRequestHeaders: GetRequestHeadersCallback, onMeta: MetaCallback, onReadyState: ReadyStateCallback, webSocketImpl: WebSocketImpl): WebSocket {
+    
+  }
+}
+
 
 export default class App extends Component {
   rtc = new RTCConnection({
     onmessage: console.log,
     onopen: () => {
       this.rtc.dataChannel.send("test message");
-    },
+
+
+      let client = new AdriftClient;
+      setBareClientImplementation(client);
+
+
+    }
   });
 
   state = {};

@@ -1,3 +1,9 @@
 [submodule "corium"]
 	path = corium
 	url = https://github.com/CoolElectronics/corium
+[submodule "bare-client-custom"]
+	path = bare-client-custom
+	url = https://github.com/MercuryWorkshop/bare-client-custom
+[submodule "Ultraviolet"]
+	path = Ultraviolet
+	url = https://github.com/titaniumnetwork-dev/Ultraviolet
