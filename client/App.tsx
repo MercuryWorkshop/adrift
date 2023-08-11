@@ -1,37 +1,40 @@
 import { Component, Fragment, h, render } from "preact";
-import { RTCConnection } from "./rtc";
+import { RTCTransport } from "./RTCTransport";
 
 const _ = [h, render, Component, Fragment];
-// import { setOffer, setCallback } from "./firebase";
+import "./firebase";
 import { BareClient as BareClientCustom, registerRemoteListener, setBareClientImplementation, Client, GetRequestHeadersCallback, MetaCallback, ReadyStateCallback, WebSocketImpl, BareHeaders, BareResponse } from "bare-client-custom";
 
 import { createBareClient } from "@tomphttp/bare-client";
+import { AdriftBareClient } from "./AdriftClient";
+import Connection from "./Connection";
+
+let rtc = new RTCTransport(
+  console.log,
+  () => {
+    // rtc.dataChannel.send("test message");
 
 
-class AdriftClient extends Client {
-  
-  async request(method: string, requestHeaders: BareHeaders, body: BodyInit | null, remote: URL, cache: string | undefined, duplex: string | undefined, signal: AbortSignal | undefined): Promise<BareResponse> {
-    return new Response("test") as BareResponse;
-  }
-  async connect(remote: URL, protocols: string[], getRequestHeaders: GetRequestHeadersCallback, onMeta: MetaCallback, onReadyState: ReadyStateCallback, webSocketImpl: WebSocketImpl): WebSocket {
-    
-  }
-}
+    // let client = new AdriftBareClient;
+    // setBareClientImplementation(client);
+    //
+
+  },
+  console.log,
+  console.log,
+  console.log
+);
+let connection = new Connection(rtc);
+window["co"] = connection;
+// connection.httprequest({ a: 1, b: 2 });
+
+let bare = new AdriftBareClient(connection);
+setBareClientImplementation(bare);
+registerRemoteListener();
 
 
 export default class App extends Component {
-  rtc = new RTCConnection({
-    onmessage: console.log,
-    onopen: () => {
-      this.rtc.dataChannel.send("test message");
-
-
-      let client = new AdriftClient;
-      setBareClientImplementation(client);
-
-
-    }
-  });
+  rtc = rtc;
 
   state = {};
 

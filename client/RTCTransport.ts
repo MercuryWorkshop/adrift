@@ -1,3 +1,6 @@
+import Transport from "./Transport";
+import Connection from "./Connection";
+
 const rtcConf = {
   iceServers: [
     {
@@ -19,56 +22,41 @@ interface RTCOptions {
   onmessage?
 }
 
-export class RTCConnection {
+export class RTCTransport extends Transport {
   peer: RTCPeerConnection;
 
   dataChannel: RTCDataChannel;
-
-  constructor(options: RTCOptions) {
-    let {
-
-      onconnectionstatechange,
-      onsignalingstatechange,
-      oniceconnectionstatechange,
-      onicegatheringstatechange,
-      onopen,
-      onclose,
-      onmessage
-    } = options;
-
+  constructor(onopen, onclose,
+    public onconnectionstatechange: () => void,
+    public onsignalingstatechange: () => void,
+    public onicegatheringstatechange: () => void,
+  ) {
+    super(onopen, onclose);
     this.peer = new RTCPeerConnection(rtcConf);
     this.peer.onconnectionstatechange = onconnectionstatechange;
-    //   (event) => {
-    //   console.log('Connection state:', this.peer.connectionState);
-    // };
-    this.peer.onsignalingstatechange = onsignalingstatechange;
-    //   (event) => {
-    //   console.log('Signaling state:', this.peer.signalingState);
-    // };
-    this.peer.oniceconnectionstatechange = oniceconnectionstatechange;
-    //   (event) => {
-    //   console.log('ICE connection state:', this.peer.iceConnectionState);
-    //   if (this.peer.iceConnectionState == "disconnected" || this.peer.iceConnectionState == "failed") {
-    //     console.log("disconnected");
-    //     // ondisconnect();
-    //   }
-    // };
-    this.peer.onicegatheringstatechange = onicegatheringstatechange;
-    //   (event) => {
-    //   console.log('ICE gathering state:', this.peer.iceGatheringState);
-    // };
 
+    this.peer.onsignalingstatechange = onsignalingstatechange;
+
+    this.peer.oniceconnectionstatechange =
+      (event) => {
+        console.log('ICE connection state:', this.peer.iceConnectionState);
+        if (this.peer.iceConnectionState == "disconnected" || this.peer.iceConnectionState == "failed") {
+          console.log("disconnected");
+          onclose();
+        }
+      };
+    this.peer.onicegatheringstatechange = onicegatheringstatechange;
     this.dataChannel = this.peer.createDataChannel('host-server');
     this.dataChannel.onopen = onopen;
-    //   () => {
-    //   console.log("READY!!!");
-    //
-    //   dataChannel.send("test data");
-    // };
+
     this.dataChannel.onclose = onclose;
-    this.dataChannel.onmessage = onmessage;
+    this.dataChannel.onmessage = (event) => {
+      this.ondata(event.data)
+    };
+  }
 
-
+  send(data: ArrayBuffer) {
+    this.dataChannel.send(data);
   }
 
 
