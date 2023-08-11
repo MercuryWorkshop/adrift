@@ -6,6 +6,10 @@ const rtcConf = {
   ]
 }
 
+enum RequestType {
+  HttpRequest,
+}
+
 
 type Offer = { offer: any, localCandidates: any };
 interface RTCOptions {
