@@ -40,5 +40,7 @@ export class AdriftBareClient extends Client {
     onMeta: MetaCallback,
     onReadyState: ReadyStateCallback,
     webSocketImpl: WebSocketImpl
-  ): WebSocket {}
+  ): WebSocket {
+    throw new Error("unimplemented");
+  }
 }
