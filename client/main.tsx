@@ -9,3 +9,5 @@ window.addEventListener("load", () => {
   console.log(app);
   render(<App />, container);
 });
+
+navigator.serviceWorker.register("/sw.js");

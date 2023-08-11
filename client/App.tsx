@@ -3,7 +3,21 @@ import { h, render, Component, Fragment } from 'preact';
 import { RTCConnection } from "./rtc";
 
 
-import { setOffer, setCallback } from "./firebase";
+// import { setOffer, setCallback } from "./firebase";
+import { BareClient as BareClientCustom, registerRemoteListener, setBareClientImplementation, Client, GetRequestHeadersCallback, MetaCallback, ReadyStateCallback, WebSocketImpl, BareHeaders, BareResponse } from "bare-client-custom";
+
+import { createBareClient } from "@tomphttp/bare-client";
+
+
+class AdriftClient extends Client {
+  
+  async request(method: string, requestHeaders: BareHeaders, body: BodyInit | null, remote: URL, cache: string | undefined, duplex: string | undefined, signal: AbortSignal | undefined): Promise<BareResponse> {
+    return new Response("test") as BareResponse;
+  }
+  async connect(remote: URL, protocols: string[], getRequestHeaders: GetRequestHeadersCallback, onMeta: MetaCallback, onReadyState: ReadyStateCallback, webSocketImpl: WebSocketImpl): WebSocket {
+    
+  }
+}
 
 
 export default class App extends Component {
@@ -11,6 +25,11 @@ export default class App extends Component {
     onmessage: console.log,
     onopen: () => {
       this.rtc.dataChannel.send("test message");
+
+      let client = new AdriftClient;
+      setBareClientImplementation(client);
+
+
     }
   });
 
@@ -25,17 +44,19 @@ export default class App extends Component {
   }
 
   render(props, state) {
-    setCallback(this.rtc.answer.bind(this.rtc));
+
+
+
+    // setCallback(this.rtc.answer.bind(this.rtc));
     return <>
       <div>
-
       </div>
 
       <button onClick={async () => {
         let offer = await this.rtc.createOffer();
         console.log("offer created", offer);
 
-        setOffer(JSON.stringify(offer));
+        // setOffer(JSON.stringify(offer));
 
         // this.setState(prev => ({ ...prev, offer: JSON.stringify(offer) }));
 
