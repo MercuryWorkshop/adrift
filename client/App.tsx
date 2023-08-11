@@ -4,7 +4,7 @@ import {
 } from "bare-client-custom";
 import { Component, Fragment, h, render } from "preact";
 import { RTCTransport } from "./RTCTransport";
-import "./firebase";
+//import "./firebase";
 
 const _ = [h, render, Component, Fragment];
 
