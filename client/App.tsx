@@ -29,6 +29,18 @@ export default class App extends Component {
             console.log("offer created", offer);
             console.log(JSON.stringify(offer));
 
+            const r = await fetch("http://localhost:3000/connect", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(offer),
+            });
+            if (r.status != 200) {
+              throw new Error("connect: " + r.status + " " + r.statusText);
+            }
+            const { answer, candidates } = await r.json();
+            await this.rtc.answer(answer, candidates);
+            alert("connected");
+
             // setOffer(JSON.stringify(offer));
 
             // this.setState(prev => ({ ...prev, offer: JSON.stringify(offer) }));

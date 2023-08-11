@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import express from "express";
 import * as wrtc from "wrtc";
 
 const configuration = {
@@ -10,7 +11,11 @@ const configuration = {
 };
 dotenv.config();
 
-async function connect(offer, candidates) {
+async function connect(
+  offer,
+  candidates,
+  onAnswer: (answer: Record<string, any>) => void
+) {
   const localCandidates: any[] = [];
   let dataChannel;
   const peer = new wrtc.RTCPeerConnection(configuration);
@@ -49,8 +54,7 @@ async function connect(offer, candidates) {
       answer: peer.localDescription,
       candidates: localCandidates,
     };
-    let string = JSON.stringify(payload);
-    console.log(string);
+    onAnswer(payload);
   };
   await peer.setRemoteDescription(offer);
   let answer = await peer.createAnswer();
@@ -62,31 +66,25 @@ async function connect(offer, candidates) {
   }
 }
 
-function addPeer(data) {
+const app = express();
+app.use(express.json());
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  next();
+});
+
+app.post("/connect", (req, res) => {
+  const data = req.body;
   if (data && data.offer && data.localCandidates) {
     const { offer, localCandidates } = data;
-    connect(offer, localCandidates);
+    let didAnswer = false;
+    connect(offer, localCandidates, (answer) => {
+      if (!didAnswer) {
+        didAnswer = true;
+        res.json(answer);
+      }
+    });
   }
-}
-
-addPeer({
-  offer: {
-    type: "offer",
-    sdp: "v=0\r\no=mozilla...THIS_IS_SDPARTA-99.0 1516055380756088130 0 IN IP4 0.0.0.0\r\ns=-\r\nt=0 0\r\na=fingerprint:sha-256 A1:67:6E:32:56:AC:94:67:35:BF:55:F9:A5:53:F7:73:42:82:9F:85:80:F6:CA:FB:2E:97:52:04:42:2C:9E:E2\r\na=group:BUNDLE 0\r\na=ice-options:trickle\r\na=msid-semantic:WMS *\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=sendrecv\r\na=ice-pwd:4e784021c6dce7679ceb6493b1fcaa15\r\na=ice-ufrag:8e234e4a\r\na=mid:0\r\na=setup:actpass\r\na=sctp-port:5000\r\na=max-message-size:1073741823\r\n",
-  },
-  localCandidates: [
-    {
-      candidate:
-        "candidate:1 1 UDP 1686052863 64.98.208.26 44197 typ srflx raddr 0.0.0.0 rport 0",
-      sdpMid: "0",
-      sdpMLineIndex: 0,
-      usernameFragment: "8e234e4a",
-    },
-    {
-      candidate: "",
-      sdpMid: "0",
-      sdpMLineIndex: 0,
-      usernameFragment: "8e234e4a",
-    },
-  ],
 });
+
+app.listen(3000, () => console.log("listening"));
