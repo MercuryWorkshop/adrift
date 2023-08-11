@@ -1,36 +1,17 @@
+import {
+  C2SRequestType,
+  C2SRequestTypes,
+  S2CRequestType,
+  S2CRequestTypes,
+} from "../protocol";
 import Transport from "./Transport";
 
-
-type ObjectValues<T> = T[keyof T];
-const C2SRequestTypes = {
-  HTTPRequest: 0,
-  WSOpen: 1,
-  WSClose: 2,
-  WSSendText: 3,
-  WSSendBinary: 4,
-} as const;
-type C2SRequestType = ObjectValues<typeof C2SRequestTypes>
-
-const S2CRequestTypes = {
-  HTTPResponse: 0,
-  WSOpen: 1,
-  WSDataText: 2,
-  WSDataBinary: 3,
-} as const;
-type S2CRequestType = ObjectValues<typeof S2CRequestTypes>
-
-
-
-
 export default class Connection {
-
-
   callbacks: Record<number, Function> = {};
 
   counter: number = 0;
 
   constructor(public transport: Transport) {
-
     transport.ondata = this.ondata.bind(this);
   }
 
@@ -61,7 +42,6 @@ export default class Connection {
   }
 
   async send(data: ArrayBuffer | Blob, type: C2SRequestType): Promise<number> {
-
     let requestID = this.counter++;
 
     let header = new ArrayBuffer(2 + 1);
@@ -80,14 +60,12 @@ export default class Connection {
     console.log(buf);
 
     return requestID;
-
   }
 
   httprequest(data: object): Promise<object> {
     let json = JSON.stringify(data);
 
     return new Promise(async (resolve) => {
-
       let id = this.counter;
       this.callbacks[id] = resolve;
       await this.send(new Blob([json]), C2SRequestTypes.HTTPRequest);
