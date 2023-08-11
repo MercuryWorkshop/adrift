@@ -1,37 +1,50 @@
+import {
+  registerRemoteListener,
+  setBareClientImplementation,
+} from "bare-client-custom";
 import { Component, Fragment, h, render } from "preact";
 import { RTCTransport } from "./RTCTransport";
+import "./firebase";
 
 const _ = [h, render, Component, Fragment];
-import "./firebase";
-import { BareClient as BareClientCustom, registerRemoteListener, setBareClientImplementation, Client, GetRequestHeadersCallback, MetaCallback, ReadyStateCallback, WebSocketImpl, BareHeaders, BareResponse } from "bare-client-custom";
 
-import { createBareClient } from "@tomphttp/bare-client";
 import { AdriftBareClient } from "./AdriftClient";
 import Connection from "./Connection";
+import { DevWsTransport } from "./DevWsTransport";
 
-let rtc = new RTCTransport(
-  console.log,
-  () => {
-    // rtc.dataChannel.send("test message");
+const rtcEnable = false;
 
+let rtc;
+let connection;
+if (rtcEnable) {
+  rtc = new RTCTransport(
+    console.log,
+    () => {
+      // rtc.dataChannel.send("test message");
+      // let client = new AdriftBareClient;
+      // setBareClientImplementation(client);
+      //
+    },
+    console.log,
+    console.log,
+    console.log
+  );
+  connection = new Connection(rtc);
+} else {
+  connection = new Connection(
+    new DevWsTransport(
+      () => console.log("onopen"),
+      () => console.log("onclose")
+    )
+  );
+}
 
-    // let client = new AdriftBareClient;
-    // setBareClientImplementation(client);
-    //
-
-  },
-  console.log,
-  console.log,
-  console.log
-);
-let connection = new Connection(rtc);
 window["co"] = connection;
 // connection.httprequest({ a: 1, b: 2 });
 
 let bare = new AdriftBareClient(connection);
 setBareClientImplementation(bare);
 registerRemoteListener();
-
 
 export default class App extends Component {
   rtc = rtc;
@@ -50,21 +63,23 @@ export default class App extends Component {
         <div></div>
         <button
           onClick={async () => {
-            let offer = await this.rtc.createOffer();
-            console.log("offer created", offer);
-            console.log(JSON.stringify(offer));
+            if (rtcEnable) {
+              let offer = await this.rtc.createOffer();
+              console.log("offer created", offer);
+              console.log(JSON.stringify(offer));
 
-            const r = await fetch("http://localhost:3000/connect", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(offer),
-            });
-            if (r.status != 200) {
-              throw new Error("connect: " + r.status + " " + r.statusText);
+              const r = await fetch("http://localhost:3000/connect", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(offer),
+              });
+              if (r.status != 200) {
+                throw new Error("connect: " + r.status + " " + r.statusText);
+              }
+              const { answer, candidates } = await r.json();
+              await this.rtc.answer(answer, candidates);
+              alert("connected");
             }
-            const { answer, candidates } = await r.json();
-            await this.rtc.answer(answer, candidates);
-            alert("connected");
 
             // setOffer(JSON.stringify(offer));
 
