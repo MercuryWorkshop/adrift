@@ -13,18 +13,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@rollup/browser": "^3.28.0",
     "@sveltejs/vite-plugin-svelte": "^2.4.5",
+    "bare-client-custom": "file:../bare-client-custom",
+    "client": "workspace:*",
+    "corium": "file:../corium",
     "firebase": "^10.1.0",
+    "firebase-config": "workspace:*",
+    "protocol": "workspace:*",
     "svelte": "^4.2.0",
     "svelte-preprocess": "^5.0.4",
     "typescript": "^5.1.6",
     "vite": "^4.4.9",
-    "vite-plugin-singlefile": "^0.13.5",
-    "vite-plugin-svelte": "^3.0.1",
-    "bare-client-custom": "file:../bare-client-custom",
-    "firebase-config": "workspace:*",
-    "client": "workspace:*",
-    "protocol": "workspace:*"
-  },
-  "devDependencies": {}
+    "vite-plugin-singlefile": "git://github.com/CoolElectronics/vite-plugin-singlefile.git",
+    "vite-plugin-svelte": "^3.0.1"
+  }
 }

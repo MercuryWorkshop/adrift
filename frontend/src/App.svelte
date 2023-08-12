@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    BareClient,
     registerRemoteListener,
     setBareClientImplementation,
   } from "bare-client-custom";
@@ -15,6 +16,8 @@
   import { getDatabase, onValue, ref, set } from "firebase/database";
   import type { Transport } from "protocol";
 
+  import { openWindow } from "../../corium";
+
   let transport: Transport;
 
   let wstransport: DevWsTransport | undefined;
@@ -22,6 +25,11 @@
 
   let email = "test@test.com";
   let password = "123456";
+
+  let ready = false;
+
+  let url: string;
+  let proxyIframe: HTMLIFrameElement;
 
   if (import.meta.env.VITE_ADRIFT_DEV) {
     console.log(
@@ -46,6 +54,7 @@
     let connection = new Connection(transport);
     let bare = new AdriftBareClient(connection);
     setBareClientImplementation(bare);
+    ready = true;
   }
 
   function onTransportClose() {
@@ -114,6 +123,15 @@
       console.log("onclose")
     );
   }
+
+  function visitURL() {
+    if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
+      alert("TODO");
+    } else {
+      let bare = new BareClient();
+      openWindow(new Request(url), "_self", bare, "replace");
+    }
+  }
 </script>
 
 {#if !import.meta.env.VITE_ADRIFT_DEV}
@@ -129,6 +147,12 @@
     >Connect with dev webrtc (http signaling server)</button
   >
   <button on:click={connectDevWS}>Connect with dev websocket</button>
+{/if}
+
+{#if ready}
+  <input bind:value={url} type="text" />
+  <button on:click={visitURL}>Go!</button>
+  <iframe bind:this={proxyIframe} />
 {/if}
 
 <style>

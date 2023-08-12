@@ -7,3 +7,6 @@
 [submodule "Ultraviolet"]
 	path = Ultraviolet
 	url = https://github.com/titaniumnetwork-dev/Ultraviolet
+[submodule "vite-plugin-singlefile"]
+	path = vite-plugin-singlefile
+	url = https://github.com/CoolElectronics/vite-plugin-singlefile
