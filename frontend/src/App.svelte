@@ -16,7 +16,7 @@
   import { getDatabase, onValue, ref, set } from "firebase/database";
   import type { Transport } from "protocol";
 
-  import { openWindow } from "../../corium";
+  import { Win, openWindow } from "../../corium";
 
   let transport: Transport;
 
@@ -124,17 +124,32 @@
     );
   }
 
-  function visitURL() {
+  function visitURL(url: string) {
     if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
-      alert("TODO");
+      let path = `${__uv$config.prefix}${__uv$config.encodeUrl(url)}`;
+      proxyIframe.src = path;
     } else {
       let bare = new BareClient();
-      openWindow(new Request(url), "_self", bare, "replace");
+      openWindow(
+        new Request(url),
+        "_self",
+        proxyIframe.contentWindow! as unknown as Win,
+        bare,
+        "replace"
+      );
     }
   }
 </script>
 
-{#if !import.meta.env.VITE_ADRIFT_DEV}
+{#if ready}
+  <div class="container h-full w-full">
+    <div class="container">
+      <input bind:value={url} type="text" />
+      <button on:click={() => visitURL(url)}>Go!</button>
+    </div>
+    <iframe class="h-full w-full" bind:this={proxyIframe} />
+  </div>
+{:else if !import.meta.env.VITE_ADRIFT_DEV}
   <div class="container">
     <label for="email">email</label>
     <input name="email" type="text" bind:value={email} />
@@ -149,16 +164,26 @@
   <button on:click={connectDevWS}>Connect with dev websocket</button>
 {/if}
 
-{#if ready}
-  <input bind:value={url} type="text" />
-  <button on:click={visitURL}>Go!</button>
-  <iframe bind:this={proxyIframe} />
-{/if}
-
 <style>
+  :global(body, html, #app) {
+    width: 100vw;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+  }
+  iframe {
+    outline: none;
+    border: none;
+  }
   .container {
     display: flex;
     flex-direction: column;
     width: max-content;
+  }
+  .h-full {
+    height: 100%;
+  }
+  .w-full {
+    width: 100%;
   }
 </style>
