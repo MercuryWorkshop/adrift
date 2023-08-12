@@ -114,47 +114,6 @@ app.post("/connect", (req, res) => {
   }
 });
 
-const forbiddenForwardHeaders: string[] = [
-  "connection",
-  "transfer-encoding",
-  "host",
-  "connection",
-  "origin",
-  "referer",
-];
-
-const forbiddenPassHeaders: string[] = [
-  "vary",
-  "connection",
-  "transfer-encoding",
-  "access-control-allow-headers",
-  "access-control-allow-methods",
-  "access-control-expose-headers",
-  "access-control-max-age",
-  "access-control-request-headers",
-  "access-control-request-method",
-];
-
-// common defaults
-const defaultForwardHeaders: string[] = ["accept-encoding", "accept-language"];
-
-const defaultPassHeaders: string[] = [
-  "content-encoding",
-  "content-length",
-  "last-modified",
-];
-
-// defaults if the client provides a cache key
-const defaultCacheForwardHeaders: string[] = [
-  "if-modified-since",
-  "if-none-match",
-  "cache-control",
-];
-
-const defaultCachePassHeaders: string[] = ["cache-control", "etag"];
-
-const cacheNotModified = 304;
-
 export interface BareErrorBody {
   code: string;
   id: string;
@@ -247,61 +206,6 @@ const options: BareServerOptions = {
   }),
   database: new Map<string, string>(),
 };
-
-export interface MetaV1 {
-  v: 1;
-  response?: {
-    headers: ProtoBareHeaders;
-  };
-}
-
-export interface MetaV2 {
-  v: 2;
-  response?: { status: number; statusText: string; headers: ProtoBareHeaders };
-  sendHeaders: ProtoBareHeaders;
-  remote: string;
-  forwardHeaders: string[];
-}
-
-export default interface CommonMeta {
-  value: MetaV1 | MetaV2;
-  expires: number;
-}
-
-export class JSONDatabaseAdapter {
-  impl: Map<string, string>;
-
-  constructor(impl) {
-    this.impl = impl;
-  }
-  async get(key: string) {
-    const res = await this.impl.get(key);
-    if (typeof res === "string") return JSON.parse(res) as CommonMeta;
-  }
-  async set(key: string, value: CommonMeta) {
-    return await this.impl.set(key, JSON.stringify(value));
-  }
-  async has(key: string) {
-    return await this.impl.has(key);
-  }
-  async delete(key: string) {
-    return await this.impl.delete(key);
-  }
-  async *[Symbol.asyncIterator]() {
-    for (const [id, value] of await this.impl.entries()) {
-      yield [id, JSON.parse(value)] as [string, CommonMeta];
-    }
-  }
-}
-
-async function cleanupDatabase(database: Map<string, string>) {
-  const adapter = new JSONDatabaseAdapter(database);
-
-  for await (const [id, { expires }] of adapter)
-    if (expires < Date.now()) database.delete(id);
-}
-
-const interval = setInterval(() => cleanupDatabase(options.database), 1000);
 
 function outgoingError<T>(error: T): T | BareError {
   if (error instanceof Error) {
