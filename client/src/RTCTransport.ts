@@ -42,10 +42,12 @@ export class RTCTransport extends Transport {
     this.peer.onicegatheringstatechange = onicegatheringstatechange;
     this.dataChannel = this.peer.createDataChannel("host-server");
     this.dataChannel.onopen = onopen;
+    this.dataChannel.binaryType = "arraybuffer";
 
     this.dataChannel.onclose = onclose;
     this.dataChannel.onmessage = async (event) => {
-      let buf = await event.data.arrayBuffer();
+      console.log(event);
+      let buf = event.data;
       this.ondata(buf);
     };
   }
