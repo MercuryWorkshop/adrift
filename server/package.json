@@ -4,9 +4,8 @@
   "description": "",
   "main": "src/main.ts",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "watch": "vite build --watch"
+    "dev": "nodemon src/main.ts",
+    "start": "ts-node src/main.ts"
   },
   "keywords": [],
   "author": "",
