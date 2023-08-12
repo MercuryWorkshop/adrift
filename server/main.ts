@@ -498,11 +498,11 @@ class Client {
 
   sendHTTPResponse(seq: number, payload: HTTPResponsePayload, body: Buffer) {
     const payloadBuffer = Buffer.from(JSON.stringify(payload));
-    const buf = Buffer.alloc(2 + 2 + 4 + payloadBuffer.length + body.length);
+    const buf = Buffer.alloc(2 + 1 + 4 + payloadBuffer.length + body.length);
     let cursor = 0;
-    cursor += buf.writeUInt16BE(seq, cursor);
-    cursor += buf.writeUInt16BE(S2CRequestTypes.HTTPResponse, cursor);
-    cursor += buf.writeUInt32BE(payloadBuffer.length, cursor);
+    cursor = buf.writeUInt16BE(seq, cursor);
+    cursor = buf.writeUInt8(S2CRequestTypes.HTTPResponse, cursor);
+    cursor = buf.writeUInt32BE(payloadBuffer.length, cursor);
     cursor += payloadBuffer.copy(buf, cursor);
     body.copy(buf, cursor);
     this.send(buf);

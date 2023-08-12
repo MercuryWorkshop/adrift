@@ -37,7 +37,7 @@ export class AdriftBareClient extends Client {
       console.log({ body });
       throw new Error("bare-client-custom passed an unexpected body type");
     }
-    let rawResponse = await this.connection.httprequest({
+    let { payload, body: respBody } = await this.connection.httprequest({
       method,
       requestHeaders,
       body,
@@ -45,8 +45,18 @@ export class AdriftBareClient extends Client {
       cache,
       duplex,
     });
+    const headers = new Headers();
+    for (const [header, values] of Object.entries(payload.headers)) {
+      for (const value of values) {
+        headers.append(header, value);
+      }
+    }
 
-    return new Response(JSON.stringify(rawResponse)) as BareResponse;
+    return new Response(respBody, {
+      status: payload.status,
+      statusText: payload.statusText,
+      headers,
+    }) as BareResponse;
   }
   connect(
     remote: URL,

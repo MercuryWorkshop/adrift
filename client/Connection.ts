@@ -2,6 +2,7 @@ import {
   C2SRequestType,
   C2SRequestTypes,
   HTTPRequestPayload,
+  HTTPResponsePayload,
   S2CRequestType,
   S2CRequestTypes,
 } from "../protocol";
@@ -29,14 +30,17 @@ export default class Connection {
 
     switch (requestType) {
       case S2CRequestTypes.HTTPResponse: {
-        let decoder = new TextDecoder();
-        let text = decoder.decode(data.slice(cursor));
-        console.log(text);
-        let json = JSON.parse(text);
+        const payloadLen = view.getUint32(cursor);
+        cursor += 4;
+        const decoder = new TextDecoder();
+        const payloadRaw = decoder.decode(
+          data.slice(cursor, cursor + payloadLen)
+        );
+        console.log({ payloadLen, payloadRaw });
+        const payload = JSON.parse(payloadRaw);
+        cursor += payloadLen;
 
-        console.log(requestID);
-
-        this.callbacks[requestID](json);
+        this.callbacks[requestID]({ payload, body: data.slice(cursor) });
         break;
       }
     }
@@ -63,7 +67,9 @@ export default class Connection {
     console.log(buf);
   }
 
-  httprequest(data: HTTPRequestPayload): Promise<object> {
+  httprequest(
+    data: HTTPRequestPayload
+  ): Promise<{ payload: HTTPResponsePayload; body: ArrayBuffer }> {
     let json = JSON.stringify(data);
 
     return new Promise(async (resolve) => {
