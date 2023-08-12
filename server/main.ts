@@ -4,6 +4,10 @@ import expressWs from "express-ws";
 
 import wrtc from "wrtc";
 import { Client } from "./client.js";
+import { signInWithEmailAndPassword } from "firebase/auth";
+
+import { auth } from "../firebase-config.js";
+import { getDatabase, onValue, ref, set } from "firebase/database";
 
 const configuration = {
   iceServers: [
@@ -141,4 +145,40 @@ app.ws("/dev-ws", (ws, req) => {
   });
 });
 
-app.listen(3000, () => console.log("listening"));
+async function connectFirebase() {
+  let creds = await signInWithEmailAndPassword(
+    auth,
+    "test@test.com",
+    "123456"
+  );
+
+  const db = getDatabase();
+  let peer = ref(db, `/peers/${creds.user.uid}`);
+
+
+
+  set(peer, "");
+
+  onValue(peer, (snapshot) => {
+    const str = snapshot.val();
+
+    if (str) {
+      let data = JSON.parse(str);
+      console.log(data);
+      console.log(data.offer);
+      console.log(data.localCandidates);
+      if (data && data.offer && data.localCandidates) {
+        console.log("answerng");
+        answerRtc(data, (answer) => {
+          console.log("answering");
+          set(peer, JSON.stringify(answer));
+        })
+      }
+    }
+  });
+}
+connectFirebase();
+
+// app.listen(3000, () => console.log("listening"));
+
+

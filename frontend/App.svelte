@@ -71,12 +71,16 @@
     set(peer, JSON.stringify(offer));
 
     onValue(peer, (snapshot) => {
-      const data = snapshot.val();
-      console.log(data);
-      if (data && data.answer && data.candidates) {
-        set(peer, null);
-        const { answer, candidates } = JSON.parse(data);
-        rtctransport?.answer(answer, candidates);
+      const str = snapshot.val();
+      if (str) {
+        console.log(str);
+        let data = JSON.parse(str);
+        console.log(data);
+        if (data && data.answer && data.candidates) {
+          set(peer, null);
+          const { answer, candidates } = data;
+          rtctransport?.answer(answer, candidates);
+        }
       }
     });
   }
@@ -97,7 +101,7 @@
     const { answer, candidates } = await r.json();
     await rtctransport?.answer(answer, candidates);
   }
-  connectDevHttp();
+  // connectDevHttp();
 </script>
 
 <h1>
