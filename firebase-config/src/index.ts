@@ -2,7 +2,6 @@
 import { initializeApp } from "firebase/app";
 
 import { getAuth } from "firebase/auth";
-import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -15,8 +14,7 @@ const firebaseConfig = {
   storageBucket: "adrift-6c1f6.appspot.com",
   messagingSenderId: "175846512414",
   appId: "1:175846512414:web:5c6e06d231ab58e9029b0f",
-  measurementId: "G-L0P2EF6Q72"
-
+  measurementId: "G-L0P2EF6Q72",
 };
 console.warn("firebase is initializing");
 

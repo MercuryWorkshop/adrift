@@ -1,0 +1,6 @@
+packages:
+  - protocol
+  - server
+  - frontend
+  - client
+  - firebase-config

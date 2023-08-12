@@ -2,11 +2,11 @@ import dotenv from "dotenv";
 import express from "express";
 import expressWs from "express-ws";
 
-import wrtc from "wrtc";
-import { Client } from "./client.js";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import wrtc from "wrtc";
+import { Client } from "./client";
 
-import { auth } from "../firebase-config.js";
+import { auth } from "firebase-config";
 import { getDatabase, onValue, ref, set } from "firebase/database";
 
 const configuration = {
@@ -19,14 +19,13 @@ const configuration = {
 dotenv.config();
 
 async function connect(
-  offer,
-  candidates,
-  onAnswer: (answer: Record<string, any>) => void,
-
+  offer: RTCSessionDescriptionInit,
+  candidates: RTCIceCandidateInit[],
+  onAnswer: (answer: Record<string, any>) => void
 ): Promise<RTCDataChannel> {
   const localCandidates: any[] = [];
   let dataChannel;
-  const peer = new wrtc.RTCPeerConnection(configuration);
+  const peer: RTCPeerConnection = new wrtc.RTCPeerConnection(configuration);
   let promise = new Promise((resolve) => {
     peer.ondatachannel = (event) => {
       dataChannel = event.channel;
@@ -73,7 +72,7 @@ const app = express() as unknown as expressWs.Application;
 expressWs(app);
 
 app.use(express.json());
-app.use((req, res, next) => {
+app.use((_req, res, next) => {
   res.header("x-robots-tag", "noindex");
   res.header("access-control-allow-headers", "*");
   res.header("access-control-allow-origin", "*");
@@ -82,16 +81,12 @@ app.use((req, res, next) => {
   next();
 });
 
-
 async function answerRtc(data: any, onrespond: (answer: any) => void) {
   if (data && data.offer && data.localCandidates) {
     const { offer, localCandidates } = data;
     let didAnswer = false;
 
-
-
     let dataChannel = await connect(offer, localCandidates, (answer) => {
-
       if (!didAnswer) {
         didAnswer = true;
         onrespond(answer);
@@ -104,9 +99,8 @@ async function answerRtc(data: any, onrespond: (answer: any) => void) {
     dataChannel.onopen = () => {
       console.log("opened");
       client = new Client((msg) => dataChannel.send(msg));
-
     };
-    dataChannel.onclose = (event) => {
+    dataChannel.onclose = () => {
       console.log("closed");
       client.onClose();
     };
@@ -114,7 +108,6 @@ async function answerRtc(data: any, onrespond: (answer: any) => void) {
       console.log("messaged");
       client.onMsg(Buffer.from(event.data));
     };
-
   }
 }
 
@@ -125,10 +118,7 @@ app.post("/connect", (req, res) => {
   });
 });
 
-
-
-
-app.ws("/dev-ws", (ws, req) => {
+app.ws("/dev-ws", (ws, _req) => {
   console.log("ws connect");
   const client = new Client((msg) => ws.send(msg));
 
@@ -146,16 +136,10 @@ app.ws("/dev-ws", (ws, req) => {
 });
 
 async function connectFirebase() {
-  let creds = await signInWithEmailAndPassword(
-    auth,
-    "test@test.com",
-    "123456"
-  );
+  let creds = await signInWithEmailAndPassword(auth, "test@test.com", "123456");
 
   const db = getDatabase();
   let peer = ref(db, `/peers/${creds.user.uid}`);
-
-
 
   set(peer, "");
 
@@ -172,7 +156,7 @@ async function connectFirebase() {
         answerRtc(data, (answer) => {
           console.log("answering");
           set(peer, JSON.stringify(answer));
-        })
+        });
       }
     }
   });
@@ -180,5 +164,3 @@ async function connectFirebase() {
 connectFirebase();
 
 // app.listen(3000, () => console.log("listening"));
-
-
