@@ -6,7 +6,7 @@ import {
   S2CRequestType,
   S2CRequestTypes,
 } from "../protocol";
-import Transport from "./Transport";
+import Transport from "../protocol/Transport";
 
 export default class Connection {
   callbacks: Record<number, Function> = {};

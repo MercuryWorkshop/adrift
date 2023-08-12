@@ -3,9 +3,9 @@
   import Connection from "../client/Connection";
   import { DevWsTransport } from "../client/DevWsTransport";
   import { RTCTransport } from "../client/RTCTransport";
-  import type Transport from "../client/Transport";
   // note: even though we import firebase, due to the tree shaking, it will only run if we use "auth" so if ADRIFT_DEV is set it won't import
   import { auth } from "../firebase-config";
+  import type Transport from "../protocol/Transport";
   import {
     BareClient,
     registerRemoteListener,
@@ -80,6 +80,24 @@
       }
     });
   }
+
+  async function connectDevHttp() {
+    let offer = await rtctransport?.createOffer();
+    console.log("offer created", offer);
+    console.log(JSON.stringify(offer));
+
+    const r = await fetch("http://localhost:3000/connect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(offer),
+    });
+    if (r.status != 200) {
+      throw new Error("connect: " + r.status + " " + r.statusText);
+    }
+    const { answer, candidates } = await r.json();
+    await rtctransport?.answer(answer, candidates);
+  }
+  connectDevHttp();
 </script>
 
 <h1>

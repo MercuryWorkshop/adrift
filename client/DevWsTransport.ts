@@ -1,4 +1,4 @@
-import Transport from "./Transport";
+import Transport from "../protocol/Transport";
 
 export class DevWsTransport extends Transport {
   ws: WebSocket;

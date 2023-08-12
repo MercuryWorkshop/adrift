@@ -14,6 +14,9 @@ dependencies:
   '@tomphttp/bare-client':
     specifier: ^2.2.0-alpha
     version: 2.2.0-alpha
+  '@types/webrtc':
+    specifier: ^0.0.36
+    version: 0.0.36
   bare-client-custom:
     specifier: file:bare-client-custom
     version: file:bare-client-custom
@@ -3016,6 +3019,10 @@ packages:
 
   /@types/uuid@9.0.2:
     resolution: {integrity: sha512-kNnC1GFBLuhImSnV7w4njQkUiJi0ZXUycu1rUaouPqiKlXkh77JKgdRnTAp1x5eBwcIwbtI+3otwzuIDEuDoxQ==}
+    dev: false
+
+  /@types/webrtc@0.0.36:
+    resolution: {integrity: sha512-tYFarc92EluXU7XyRmWbkQXSbZIOHTdDOudFPal9u/TNTQuouWpIHV/2o9bNAdqvTJFjLJh/zflCOLWbL30tEQ==}
     dev: false
 
   /@types/ws@8.5.5:

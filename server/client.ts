@@ -8,6 +8,7 @@ import {
     request as httpRequest,
 } from "http";
 
+import { Readable } from "stream";
 import EventEmitter from "events";
 
 import {

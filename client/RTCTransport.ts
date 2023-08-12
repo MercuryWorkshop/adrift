@@ -1,4 +1,4 @@
-import Transport from "./Transport";
+import Transport from "../protocol/Transport";
 import Connection from "./Connection";
 
 const rtcConf = {
@@ -54,8 +54,9 @@ export class RTCTransport extends Transport {
     this.dataChannel.onopen = onopen;
 
     this.dataChannel.onclose = onclose;
-    this.dataChannel.onmessage = (event) => {
-      this.ondata(event.data)
+    this.dataChannel.onmessage = async (event) => {
+      let buf = await event.data.arrayBuffer();
+      this.ondata(buf)
     };
   }
 

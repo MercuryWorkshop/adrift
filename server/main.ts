@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import expressWs from "express-ws";
 
-import * as wrtc from "wrtc";
+import wrtc from "wrtc";
 import { Client } from "./client.js";
 
 const configuration = {
@@ -17,24 +17,18 @@ dotenv.config();
 async function connect(
   offer,
   candidates,
-  onAnswer: (answer: Record<string, any>) => void
-) {
+  onAnswer: (answer: Record<string, any>) => void,
+
+): Promise<RTCDataChannel> {
   const localCandidates: any[] = [];
   let dataChannel;
   const peer = new wrtc.RTCPeerConnection(configuration);
-  peer.ondatachannel = (event) => {
-    dataChannel = event.channel;
-    dataChannel.onopen = () => {
-      console.log("opened");
+  let promise = new Promise((resolve) => {
+    peer.ondatachannel = (event) => {
+      dataChannel = event.channel;
+      resolve(dataChannel);
     };
-    dataChannel.onclose = (event) => {
-      console.log("closed");
-    };
-    dataChannel.onmessage = (event) => {
-      console.log("messaged");
-      console.log(event);
-    };
-  };
+  });
   peer.onconnectionstatechange = () => {
     console.log("Connection state:", peer.connectionState);
   };
@@ -67,6 +61,8 @@ async function connect(
     console.log({ candidate });
     await peer.addIceCandidate(candidate);
   }
+
+  return promise as any;
 }
 
 const app = express() as unknown as expressWs.Application;
@@ -82,18 +78,47 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post("/connect", (req, res) => {
-  const data = req.body;
+
+async function answerRtc(data: any, onrespond: (answer: any) => void) {
   if (data && data.offer && data.localCandidates) {
     const { offer, localCandidates } = data;
     let didAnswer = false;
-    connect(offer, localCandidates, (answer) => {
+
+
+
+    let dataChannel = await connect(offer, localCandidates, (answer) => {
+
       if (!didAnswer) {
         didAnswer = true;
-        res.json(answer);
+        onrespond(answer);
+        // res.json(answer);
       }
     });
+
+    let client: Client;
+
+    dataChannel.onopen = () => {
+      console.log("opened");
+      client = new Client((msg) => dataChannel.send(msg));
+
+    };
+    dataChannel.onclose = (event) => {
+      console.log("closed");
+      client.onClose();
+    };
+    dataChannel.onmessage = (event) => {
+      console.log("messaged");
+      client.onMsg(Buffer.from(event.data));
+    };
+
   }
+}
+
+app.post("/connect", (req, res) => {
+  const data = req.body;
+  answerRtc(data, (d) => {
+    res.json(d);
+  });
 });
 
 
