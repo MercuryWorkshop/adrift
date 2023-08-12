@@ -1,6 +1,7 @@
 import {
   C2SRequestType,
   C2SRequestTypes,
+  HTTPRequestPayload,
   S2CRequestType,
   S2CRequestTypes,
 } from "../protocol";
@@ -41,9 +42,11 @@ export default class Connection {
     }
   }
 
-  async send(data: ArrayBuffer | Blob, type: C2SRequestType): Promise<number> {
-    let requestID = this.counter++;
-
+  async send(
+    requestID: number,
+    data: ArrayBuffer | Blob,
+    type: C2SRequestType
+  ): Promise<void> {
     let header = new ArrayBuffer(2 + 1);
     let view = new DataView(header);
 
@@ -58,17 +61,15 @@ export default class Connection {
 
     this.transport.send(buf);
     console.log(buf);
-
-    return requestID;
   }
 
-  httprequest(data: object): Promise<object> {
+  httprequest(data: HTTPRequestPayload): Promise<object> {
     let json = JSON.stringify(data);
 
     return new Promise(async (resolve) => {
-      let id = this.counter;
+      let id = ++this.counter;
       this.callbacks[id] = resolve;
-      await this.send(new Blob([json]), C2SRequestTypes.HTTPRequest);
+      await this.send(id, new Blob([json]), C2SRequestTypes.HTTPRequest);
     });
   }
 }

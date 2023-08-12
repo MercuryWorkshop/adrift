@@ -15,3 +15,20 @@ export const S2CRequestTypes = {
   WSDataBinary: 3,
 } as const;
 export type S2CRequestType = ObjectValues<typeof S2CRequestTypes>;
+
+export type ProtoBareHeaders = Record<string, string | string[]>;
+
+export type HTTPRequestPayload = {
+  method: string;
+  requestHeaders: ProtoBareHeaders;
+  body: string | null;
+  remote: URL;
+  cache: string | undefined;
+  duplex: string | undefined;
+};
+
+export type HTTPResponsePayload = {
+  status: number;
+  statusText: string;
+  headers: ProtoBareHeaders;
+};

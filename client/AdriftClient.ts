@@ -29,11 +29,26 @@ export class AdriftBareClient extends Client {
     duplex: string | undefined,
     signal: AbortSignal | undefined
   ): Promise<BareResponse> {
-    let rawResponse = await this.connection.httprequest({ a: "test data" });
+    if (
+      body !== null &&
+      typeof body !== "undefined" &&
+      typeof body !== "string"
+    ) {
+      console.log({ body });
+      throw new Error("bare-client-custom passed an unexpected body type");
+    }
+    let rawResponse = await this.connection.httprequest({
+      method,
+      requestHeaders,
+      body,
+      remote,
+      cache,
+      duplex,
+    });
 
     return new Response(JSON.stringify(rawResponse)) as BareResponse;
   }
-  async connect(
+  connect(
     remote: URL,
     protocols: string[],
     getRequestHeaders: GetRequestHeadersCallback,
