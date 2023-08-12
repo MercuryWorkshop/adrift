@@ -1,6 +1,7 @@
 import "../firebase-config";
 import { getDatabase, ref, onValue, set } from "firebase/database";
 
+
 const db = getDatabase();
 console.log(db);
 let reff = ref(db, "/peers/demo");
