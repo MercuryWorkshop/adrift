@@ -4,24 +4,31 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild ./client/main.jsx --bundle --outfile=client/dist.js --sourcemap --jsx-factory=h --jsx-fragment=Fragment",
-    "watch": "esbuild ./client/main.jsx --bundle --outfile=client/dist.js --sourcemap --jsx-factory=h --jsx-fragment=Fragment --watch"
+    "dev": "vite",
+    "build": "vite build",
+    "watch": "vite build --watch"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sveltejs/vite-plugin-svelte": "^2.4.5",
     "@tomphttp/bare-client": "^2.2.0-alpha",
     "bare-client-custom": "file:bare-client-custom",
     "corium": "file:corium",
     "dotenv": "^16.3.1",
-    "esbuild": "0.19.0",
     "express": "^4.18.2",
     "express-ws": "^5.0.2",
     "firebase": "^10.1.0",
     "ipaddr.js": "^2.1.0",
-    "preact": "^10.16.0",
+    "svelte": "^4.2.0",
+    "svelte-preprocess": "^5.0.4",
     "ts-node": "^10.9.1",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.9",
+    "vite-plugin-singlefile": "^0.13.5",
+    "vite-plugin-svelte": "^3.0.1",
     "wrtc": "^0.4.7"
   },
   "devDependencies": {
