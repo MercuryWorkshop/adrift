@@ -12,7 +12,8 @@ import {
   request as httpRequest,
 } from "http";
 import { Agent as HTTPSAgent, request as httpsRequest } from "https";
-import { isValid, parse } from "ipaddr.js";
+import fuck from "ipaddr.js";
+const { isValid, parse } = fuck;
 import { Readable } from "stream";
 import * as wrtc from "wrtc";
 import {
@@ -21,7 +22,7 @@ import {
   HTTPResponsePayload,
   ProtoBareHeaders,
   S2CRequestTypes,
-} from "../protocol";
+} from "../protocol/index.js";
 
 const configuration = {
   iceServers: [

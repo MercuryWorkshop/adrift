@@ -8,11 +8,12 @@
     "build": "vite build",
     "watch": "vite build --watch"
   },
-  "type": "module",
   "keywords": [],
+  "type": "module",
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@digitak/esrun": "^3.2.24",
     "@sveltejs/vite-plugin-svelte": "^2.4.5",
     "@tomphttp/bare-client": "^2.2.0-alpha",
     "bare-client-custom": "file:bare-client-custom",
