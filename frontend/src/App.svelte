@@ -19,6 +19,10 @@
 
   let wstransport: DevWsTransport | undefined;
   let rtctransport: RTCTransport | undefined;
+
+  let email = "test@test.com";
+  let password = "123456";
+
   if (import.meta.env.VITE_ADRIFT_DEV) {
     console.log(
       "%cADRIFT RUNNING IN DEVELOPMENT MODE",
@@ -44,7 +48,11 @@
     setBareClientImplementation(bare);
   }
 
-  function createRTCTransport() {
+  function onTransportClose() {
+    console.warn("Transport closed");
+  }
+
+  async function connectFirebase() {
     rtctransport = transport = new RTCTransport(
       onTransportOpen,
       onTransportClose,
@@ -52,20 +60,8 @@
       console.log,
       console.log
     );
-  }
 
-  function onTransportClose() {
-    console.warn("Transport closed");
-  }
-
-  async function connectFirebase() {
-    createRTCTransport();
-
-    let creds = await signInWithEmailAndPassword(
-      auth,
-      "test@test.com",
-      "123456"
-    );
+    let creds = await signInWithEmailAndPassword(auth, email, password);
 
     const db = getDatabase();
     let peer = ref(db, `/peers/${creds.user.uid}`);
@@ -83,14 +79,20 @@
         if (data && data.answer && data.candidates) {
           set(peer, null);
           const { answer, candidates } = data;
-          rtctransport.answer(answer, candidates);
+          rtctransport?.answer(answer, candidates);
         }
       }
     });
   }
 
   async function connectDevHttp() {
-    createRTCTransport();
+    rtctransport = transport = new RTCTransport(
+      onTransportOpen,
+      onTransportClose,
+      console.log,
+      console.log,
+      console.log
+    );
     let offer = await rtctransport.createOffer();
     console.log("offer created", offer);
     console.log(JSON.stringify(offer));
@@ -114,13 +116,25 @@
   }
 </script>
 
-<h1>
-  {#if !import.meta.env.VITE_ADRIFT_DEV}
+{#if !import.meta.env.VITE_ADRIFT_DEV}
+  <div class="container">
+    <label for="email">email</label>
+    <input name="email" type="text" bind:value={email} />
+    <label for="password">password</label>
+    <input name="password" type="password" bind:value={password} />
     <button on:click={connectFirebase}>Connect with firebase</button>
-  {:else}
-    <button on:click={connectDevHttp}
-      >Connect with dev webrtc (http signaling server)</button
-    >
-    <button on:click={connectDevWS}>Connect with dev websocket</button>
-  {/if}
-</h1>
+  </div>
+{:else}
+  <button on:click={connectDevHttp}
+    >Connect with dev webrtc (http signaling server)</button
+  >
+  <button on:click={connectDevWS}>Connect with dev websocket</button>
+{/if}
+
+<style>
+  .container {
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+  }
+</style>
