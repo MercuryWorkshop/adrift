@@ -139,6 +139,13 @@
       );
     }
   }
+  function frameLoad() {
+    if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
+      url = __uv$config.decodeUrl(
+        proxyIframe.contentDocument?.location.href.replace(/.*\//g, "")
+      );
+    }
+  }
 </script>
 
 {#if ready}
@@ -147,7 +154,7 @@
       <input bind:value={url} type="text" />
       <button on:click={() => visitURL(url)}>Go!</button>
     </div>
-    <iframe class="h-full w-full" bind:this={proxyIframe} />
+    <iframe class="h-full w-full" bind:this={proxyIframe} on:load={frameLoad} />
   </div>
 {:else if !import.meta.env.VITE_ADRIFT_DEV}
   <div class="container">
