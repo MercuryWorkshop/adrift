@@ -1,39 +1,38 @@
-import Transport from "../protocol/Transport";
-import Connection from "./Connection";
+import { Transport } from "protocol";
 
 const rtcConf = {
   iceServers: [
     {
-      urls: "stun:stun.l.google.com:19302"
-    }
-  ]
-}
+      urls: "stun:stun.l.google.com:19302",
+    },
+  ],
+};
 
 enum RequestType {
   HttpRequest,
 }
 
-
-type Offer = { offer: any, localCandidates: any };
+type Offer = { offer: any; localCandidates: any };
 interface RTCOptions {
-
-  onconnectionstatechange?,
-  onsignalingstatechange?,
-  oniceconnectionstatechange?,
-  onicegatheringstatechange?,
-  onopen?,
-  onclose?,
-  onmessage?
+  onconnectionstatechange?: any;
+  onsignalingstatechange?: any;
+  oniceconnectionstatechange?: any;
+  onicegatheringstatechange?: any;
+  onopen?: any;
+  onclose?: any;
+  onmessage?: any;
 }
 
 export class RTCTransport extends Transport {
   peer: RTCPeerConnection;
 
   dataChannel: RTCDataChannel;
-  constructor(onopen, onclose,
+  constructor(
+    public onopen: () => void,
+    public onclose: () => void,
     public onconnectionstatechange: () => void,
     public onsignalingstatechange: () => void,
-    public onicegatheringstatechange: () => void,
+    public onicegatheringstatechange: () => void
   ) {
     super(onopen, onclose);
     this.peer = new RTCPeerConnection(rtcConf);
@@ -41,22 +40,24 @@ export class RTCTransport extends Transport {
 
     this.peer.onsignalingstatechange = onsignalingstatechange;
 
-    this.peer.oniceconnectionstatechange =
-      (event) => {
-        console.log('ICE connection state:', this.peer.iceConnectionState);
-        if (this.peer.iceConnectionState == "disconnected" || this.peer.iceConnectionState == "failed") {
-          console.log("disconnected");
-          onclose();
-        }
-      };
+    this.peer.oniceconnectionstatechange = (event) => {
+      console.log("ICE connection state:", this.peer.iceConnectionState);
+      if (
+        this.peer.iceConnectionState == "disconnected" ||
+        this.peer.iceConnectionState == "failed"
+      ) {
+        console.log("disconnected");
+        onclose();
+      }
+    };
     this.peer.onicegatheringstatechange = onicegatheringstatechange;
-    this.dataChannel = this.peer.createDataChannel('host-server');
+    this.dataChannel = this.peer.createDataChannel("host-server");
     this.dataChannel.onopen = onopen;
 
     this.dataChannel.onclose = onclose;
     this.dataChannel.onmessage = async (event) => {
       let buf = await event.data.arrayBuffer();
-      this.ondata(buf)
+      this.ondata(buf);
     };
   }
 
@@ -64,15 +65,10 @@ export class RTCTransport extends Transport {
     this.dataChannel.send(data);
   }
 
-
-
   async createOffer(): Promise<Promise<Offer>> {
-
     const localCandidates: RTCIceCandidate[] = [];
 
-
     let readyPromise: Promise<Offer> = new Promise((resolve, reject) => {
-
       this.peer.onicecandidate = async (event) => {
         if (event.candidate) {
           localCandidates.push(event.candidate);
@@ -82,8 +78,6 @@ export class RTCTransport extends Transport {
         resolve({ offer, localCandidates });
       };
     });
-
-
 
     const offer = await this.peer.createOffer();
     await this.peer.setLocalDescription(offer);

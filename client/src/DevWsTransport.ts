@@ -1,9 +1,9 @@
-import Transport from "../protocol/Transport";
+import { Transport } from "protocol";
 
 export class DevWsTransport extends Transport {
   ws: WebSocket;
 
-  constructor(onopen, onclose) {
+  constructor(onopen: () => void, onclose: () => void) {
     super(onopen, onclose);
 
     this.ws = new WebSocket("ws://localhost:3000/dev-ws");

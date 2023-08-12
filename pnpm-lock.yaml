@@ -8,6 +8,18 @@ importers:
 
   .: {}
 
+  client:
+    dependencies:
+      bare-client-custom:
+        specifier: file:../bare-client-custom
+        version: file:bare-client-custom
+      firebase:
+        specifier: ^10.1.0
+        version: 10.1.0(react-native@0.72.3)
+      protocol:
+        specifier: workspace:*
+        version: link:../protocol
+
   firebase-config:
     dependencies:
       firebase:
@@ -19,9 +31,21 @@ importers:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^2.4.5
         version: 2.4.5(svelte@4.2.0)(vite@4.4.9)
+      bare-client-custom:
+        specifier: file:../bare-client-custom
+        version: file:bare-client-custom
+      client:
+        specifier: workspace:*
+        version: link:../client
       firebase:
         specifier: ^10.1.0
         version: 10.1.0(react-native@0.72.3)
+      firebase-config:
+        specifier: workspace:*
+        version: link:../firebase-config
+      protocol:
+        specifier: workspace:*
+        version: link:../protocol
       svelte:
         specifier: ^4.2.0
         version: 4.2.0
@@ -2796,6 +2820,10 @@ packages:
 
   /@types/stack-utils@2.0.1:
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==}
+    dev: false
+
+  /@types/uuid@9.0.2:
+    resolution: {integrity: sha512-kNnC1GFBLuhImSnV7w4njQkUiJi0ZXUycu1rUaouPqiKlXkh77JKgdRnTAp1x5eBwcIwbtI+3otwzuIDEuDoxQ==}
     dev: false
 
   /@types/webrtc@0.0.36:
@@ -6407,6 +6435,11 @@ packages:
     engines: {node: '>= 0.4.0'}
     dev: false
 
+  /uuid@9.0.0:
+    resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
+    hasBin: true
+    dev: false
+
   /v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
     dev: false
@@ -6724,4 +6757,12 @@ packages:
   /yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+    dev: false
+
+  file:bare-client-custom:
+    resolution: {directory: bare-client-custom, type: directory}
+    name: '@tomphttp/bare-client'
+    dependencies:
+      '@types/uuid': 9.0.2
+      uuid: 9.0.0
     dev: false

@@ -5,10 +5,10 @@ import {
   HTTPResponsePayload,
   S2CRequestType,
   S2CRequestTypes,
-} from "../protocol";
-import Transport from "../protocol/Transport";
+  Transport,
+} from "protocol";
 
-export default class Connection {
+export class Connection {
   callbacks: Record<number, Function> = {};
 
   counter: number = 0;

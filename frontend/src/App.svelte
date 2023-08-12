@@ -1,13 +1,14 @@
 <script lang="ts">
-  import { AdriftBareClient } from "../client/AdriftClient";
-  import Connection from "../client/Connection";
-  import { DevWsTransport } from "../client/DevWsTransport";
-  import { RTCTransport } from "../client/RTCTransport";
-  // note: even though we import firebase, due to the tree shaking, it will only run if we use "auth" so if ADRIFT_DEV is set it won't import
-  import { auth } from "../firebase-config";
-  import type Transport from "../protocol/Transport";
   import {
-    BareClient,
+    AdriftBareClient,
+    Connection,
+    DevWsTransport,
+    RTCTransport,
+  } from "client";
+  // note: even though we import firebase, due to the tree shaking, it will only run if we use "auth" so if ADRIFT_DEV is set it won't import
+  import { auth } from "firebase-config";
+  import type { Transport } from "protocol";
+  import {
     registerRemoteListener,
     setBareClientImplementation,
   } from "bare-client-custom";
@@ -16,14 +17,13 @@
 
   let transport: Transport;
 
-  let wstransport: DevWsTransport | undefined;
   let rtctransport: RTCTransport | undefined;
   if (import.meta.env.VITE_ADRIFT_DEV) {
     console.log(
       "%cADRIFT RUNNING IN DEVELOPMENT MODE",
       "background: blue; color: white; font-size: x-large"
     );
-    wstransport = transport = new DevWsTransport(
+    transport = new DevWsTransport(
       () => console.log("onopen"),
       () => console.log("onclose")
     );
@@ -101,13 +101,12 @@
     const { answer, candidates } = await r.json();
     await rtctransport?.answer(answer, candidates);
   }
-  // connectDevHttp();
 </script>
 
 <h1>
   {#if !import.meta.env.VITE_ADRIFT_DEV}
     <button on:click={connectFirebase}>Connect with firebase </button>
   {:else}
-    connected to dev server
+    <button on:click={connectDevHttp}>Connect with dev HTTP</button>
   {/if}
 </h1>

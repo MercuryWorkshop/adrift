@@ -20,7 +20,11 @@
     "typescript": "^5.1.6",
     "vite": "^4.4.9",
     "vite-plugin-singlefile": "^0.13.5",
-    "vite-plugin-svelte": "^3.0.1"
+    "vite-plugin-svelte": "^3.0.1",
+    "bare-client-custom": "file:../bare-client-custom",
+    "firebase-config": "workspace:*",
+    "client": "workspace:*",
+    "protocol": "workspace:*"
   },
   "devDependencies": {}
 }

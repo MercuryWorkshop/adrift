@@ -1,6 +1,5 @@
+import { getDatabase, onValue, ref, set } from "firebase/database";
 import "../firebase-config";
-import { getDatabase, ref, onValue, set } from "firebase/database";
-
 
 const db = getDatabase();
 console.log(db);
@@ -11,15 +10,14 @@ let reff = ref(db, "/peers/demo");
 //   console.log(data);
 // });
 
+var callback: (answer: any, candidates: any[]) => void;
 
-var callback;
-export function setCallback(call) {
+export function setCallback(call: typeof callback) {
   callback = call;
 }
 export function setOffer(offer: string) {
   set(reff, offer);
 }
-
 
 onValue(reff, (snapshot) => {
   const data = snapshot.val();
@@ -31,4 +29,3 @@ onValue(reff, (snapshot) => {
     callback(answer, candidates);
   }
 });
-

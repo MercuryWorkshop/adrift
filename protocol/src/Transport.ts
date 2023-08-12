@@ -1,4 +1,4 @@
-export default abstract class Transport {
+export abstract class Transport {
   public ondata: (data: ArrayBuffer) => void = () => {};
   constructor(public onopen: () => void, public onclose: () => void) {}
 

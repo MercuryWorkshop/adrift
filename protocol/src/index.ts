@@ -30,3 +30,5 @@ export type HTTPResponsePayload = {
   statusText: string;
   headers: ProtoBareHeaders;
 };
+
+export { Transport } from "./Transport";

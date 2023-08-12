@@ -7,7 +7,7 @@ import {
   ReadyStateCallback,
   WebSocketImpl,
 } from "bare-client-custom";
-import Connection from "./Connection";
+import { Connection } from "./Connection";
 
 // export class Adrift {
 //   bareclient:AdriftBareClient,
@@ -45,7 +45,7 @@ export class AdriftBareClient extends Client {
     });
     const headers = new Headers();
     for (const [header, values] of Object.entries(payload.headers)) {
-      for (const value of values) {
+      for (const value of <string[]>values) {
         headers.append(header, value);
       }
     }
