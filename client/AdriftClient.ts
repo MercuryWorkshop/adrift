@@ -42,8 +42,6 @@ export class AdriftBareClient extends Client {
       requestHeaders,
       body,
       remote,
-      cache,
-      duplex,
     });
     const headers = new Headers();
     for (const [header, values] of Object.entries(payload.headers)) {

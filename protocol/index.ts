@@ -23,8 +23,6 @@ export type HTTPRequestPayload = {
   requestHeaders: ProtoBareHeaders;
   body: string | null;
   remote: URL;
-  cache: string | undefined;
-  duplex: string | undefined;
 };
 
 export type HTTPResponsePayload = {
