@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import expressWs from "express-ws";
 import * as wrtc from "wrtc";
+import { C2SRequestTypes } from "../protocol";
 
 const configuration = {
   iceServers: [
@@ -90,10 +91,74 @@ app.post("/connect", (req, res) => {
   }
 });
 
+class Client {
+  send: (msg: Buffer) => void;
+
+  constructor(send) {
+    this.send = send;
+  }
+
+  static parseMsgInit(
+    msg: Buffer
+  ): { cursor: number; seq: number; op: number } | undefined {
+    try {
+      let cursor = 0;
+      const seq = msg.readUint16BE(cursor);
+      cursor += 2;
+      const op = msg.readUint8(cursor);
+      cursor += 1;
+      return { cursor, seq, op };
+    } catch (e) {
+      if (e instanceof RangeError) {
+        // malformed message
+        return;
+      }
+      throw e;
+    }
+  }
+
+  static parseHttpReqPayload(payloadRaw: Buffer) {
+    let payload;
+    try {
+      payload = JSON.parse(payloadRaw.toString());
+    } catch (e) {
+      if (e instanceof SyntaxError) {
+        return;
+      }
+      throw e;
+    }
+    console.log({ payload });
+  }
+
+  onMsg(msg: Buffer) {
+    const init = Client.parseMsgInit(msg);
+    if (!init) return;
+    const { cursor, seq, op } = init;
+    switch (op) {
+      case C2SRequestTypes.HTTPRequest:
+        Client.parseHttpReqPayload(msg.subarray(cursor));
+        break;
+      default:
+        // not implemented
+        break;
+    }
+  }
+}
+
 app.ws("/dev-ws", (ws, req) => {
   console.log("ws connect");
+  const client = new Client((msg) => ws.send(msg));
+
   ws.on("message", (msg) => {
-    console.log({ msg });
+    if (typeof msg === "string") {
+      msg = Buffer.from(msg);
+    }
+
+    if (msg instanceof Buffer) {
+      client.onMsg(msg);
+      return;
+    }
+    throw new Error("Unexpected message type");
   });
 });
 
