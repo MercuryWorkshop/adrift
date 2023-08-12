@@ -6,6 +6,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "workspace": [
+    "protocol",
+    "server",
+    "frontend",
+    "client",
+    "firebase-config"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC"

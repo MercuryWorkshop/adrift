@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -6762,6 +6762,7 @@ packages:
   file:bare-client-custom:
     resolution: {directory: bare-client-custom, type: directory}
     name: '@tomphttp/bare-client'
+    version: 2.2.0-alpha
     dependencies:
       '@types/uuid': 9.0.2
       uuid: 9.0.0

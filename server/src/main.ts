@@ -163,4 +163,4 @@ async function connectFirebase() {
 }
 connectFirebase();
 
-// app.listen(3000, () => console.log("listening"));
+app.listen(3000, () => console.log("listening"));

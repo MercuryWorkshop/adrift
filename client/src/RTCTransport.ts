@@ -8,20 +8,9 @@ const rtcConf = {
   ],
 };
 
-enum RequestType {
-  HttpRequest,
-}
 
 type Offer = { offer: any; localCandidates: any };
-interface RTCOptions {
-  onconnectionstatechange?: any;
-  onsignalingstatechange?: any;
-  oniceconnectionstatechange?: any;
-  onicegatheringstatechange?: any;
-  onopen?: any;
-  onclose?: any;
-  onmessage?: any;
-}
+
 
 export class RTCTransport extends Transport {
   peer: RTCPeerConnection;
