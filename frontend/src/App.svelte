@@ -55,6 +55,7 @@
 
     let connection = new Connection(transport);
     let bare = new AdriftBareClient(connection);
+    console.log(setBareClientImplementation);
     setBareClientImplementation(bare);
     ready = true;
   }
@@ -128,9 +129,12 @@
 
   function visitURL(url: string) {
     if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
-      let path =
-        (dynamic && `/service/route?url=${url}`) ||
-        `${__uv$config.prefix}${__uv$config.encodeUrl(url)}`;
+      let path = dynamic
+        ? `/service/route?url=${url}`
+        : `${__uv$config.prefix}${__uv$config.encodeUrl(url)}`;
+      console.log(dynamic);
+      console.log(path);
+
       proxyIframe.src = path;
     } else {
       let bare = new BareClient();
@@ -152,6 +156,36 @@
   }
 
   (window as any).bare = new BareClient();
+
+  (window as any).a = (_) => {
+    let socket = bare.createWebSocket();
+
+    socket.onopen = function (e) {
+      alert("[open] Connection established");
+      alert("Sending to server");
+      socket.send("My name is John");
+    };
+
+    socket.onmessage = function (event) {
+      alert(`[message] Data received from server: ${event.data}`);
+    };
+
+    socket.onclose = function (event) {
+      if (event.wasClean) {
+        alert(
+          `[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`
+        );
+      } else {
+        // e.g. server process killed or network down
+        // event.code is usually 1006 in this case
+        alert("[close] Connection died");
+      }
+    };
+
+    socket.onerror = function (error) {
+      alert(`[error]`);
+    };
+  };
 </script>
 
 {#if ready}

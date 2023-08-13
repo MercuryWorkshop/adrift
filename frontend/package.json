@@ -15,7 +15,7 @@
   "dependencies": {
     "@rollup/browser": "^3.28.0",
     "@sveltejs/vite-plugin-svelte": "^2.4.5",
-    "bare-client-custom": "file:../bare-client-custom",
+    "bare-client-custom": "workspace:*",
     "client": "workspace:*",
     "corium": "file:../corium",
     "esbuild": "^0.19.1",

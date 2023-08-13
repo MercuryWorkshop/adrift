@@ -34,7 +34,8 @@ export const options: BareServerOptions = {
     // if the remote is an IP then it didn't go through the init.lookup hook
     // isValid determines if this is so
     if (isValid(url.hostname) && parse(url.hostname).range() !== "unicast")
-      throw new RangeError("Forbidden IP");
+      console.log("g");
+    //   throw new RangeError("Forbidden IP");
   },
   lookup: (hostname, options, callback) =>
     lookup(hostname, options, (err: any, address: any, family: any) => {
