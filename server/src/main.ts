@@ -81,6 +81,10 @@ app.use((_req, res, next) => {
   next();
 });
 
+function bufferToArrayBuffer(buf: Buffer): ArrayBuffer {
+  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+}
+
 async function answerRtc(data: any, onrespond: (answer: any) => void) {
   if (data && data.offer && data.localCandidates) {
     const { offer, localCandidates } = data;
@@ -106,7 +110,10 @@ async function answerRtc(data: any, onrespond: (answer: any) => void) {
     };
     dataChannel.onmessage = (event) => {
       console.log("messaged");
-      client.onMsg(Buffer.from(event.data));
+      if (event.data instanceof Buffer) {
+        client.onMsg(bufferToArrayBuffer(event.data));
+      }
+      throw new Error("Unexpected datachannel message type");
     };
   }
 }
@@ -128,7 +135,7 @@ app.ws("/dev-ws", (ws, _req) => {
     }
 
     if (msg instanceof Buffer) {
-      client.onMsg(msg);
+      client.onMsg(bufferToArrayBuffer(msg));
       return;
     }
     throw new Error("Unexpected message type");

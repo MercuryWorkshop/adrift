@@ -13,22 +13,24 @@ import { Readable } from "stream";
 import { BareError, bareFetch, options } from "./http";
 
 export class Client {
-  send: (msg: Buffer) => void;
+  send: (msg: ArrayBuffer) => void;
   events: EventEmitter;
 
-  constructor(send: (msg: Buffer) => void) {
+  constructor(send: (msg: ArrayBuffer) => void) {
     this.send = send;
     this.events = new EventEmitter();
   }
 
   static parseMsgInit(
-    msg: Buffer
+    msg: ArrayBuffer
   ): { cursor: number; seq: number; op: number } | undefined {
     try {
+      console.log(msg);
+      const dataView = new DataView(msg);
       let cursor = 0;
-      const seq = msg.readUint16BE(cursor);
+      const seq = dataView.getUint16(cursor);
       cursor += 2;
-      const op = msg.readUint8(cursor);
+      const op = dataView.getUint8(cursor);
       cursor += 1;
       return { cursor, seq, op };
     } catch (e) {
@@ -41,11 +43,11 @@ export class Client {
   }
 
   static parseHttpReqPayload(
-    payloadRaw: Buffer
+    payloadRaw: ArrayBuffer
   ): HTTPRequestPayload | undefined {
     let payload;
     try {
-      payload = JSON.parse(payloadRaw.toString());
+      payload = JSON.parse(new TextDecoder().decode(payloadRaw));
     } catch (e) {
       if (e instanceof SyntaxError) {
         return;
@@ -58,7 +60,7 @@ export class Client {
 
   static bareErrorToResponse(e: BareError): {
     payload: HTTPResponsePayload;
-    body: AsyncIterable<Buffer>;
+    body: AsyncIterable<ArrayBuffer>;
   } {
     return {
       payload: {
@@ -72,7 +74,7 @@ export class Client {
 
   async handleHTTPRequest(payload: HTTPRequestPayload): Promise<{
     payload: HTTPResponsePayload;
-    body: AsyncIterable<Buffer>;
+    body: AsyncIterable<ArrayBuffer>;
   }> {
     const abort = new AbortController();
     const onClose = () => {
@@ -112,34 +114,41 @@ export class Client {
   }
 
   sendHTTPResponseStart(seq: number, payload: HTTPResponsePayload) {
-    const payloadBuffer = Buffer.from(JSON.stringify(payload));
-    const buf = Buffer.alloc(2 + 1 + payloadBuffer.length);
+    const payloadBuffer = new TextEncoder().encode(JSON.stringify(payload));
+    const buf = new ArrayBuffer(2 + 1 + payloadBuffer.length);
+    const dataView = new DataView(buf);
     let cursor = 0;
-    cursor = buf.writeUInt16BE(seq, cursor);
-    cursor = buf.writeUInt8(S2CRequestTypes.HTTPResponseStart, cursor);
-    payloadBuffer.copy(buf, cursor);
+    dataView.setUint16(cursor, seq);
+    cursor += 2;
+    dataView.setUint8(cursor, S2CRequestTypes.HTTPResponseStart);
+    cursor += 1;
+    new Uint8Array(buf).set(payloadBuffer, cursor);
     this.send(buf);
   }
 
-  sendHTTPResponseChunk(seq: number, chunk: Buffer) {
-    if (!chunk.copy) return;
-    const buf = Buffer.alloc(2 + 1 + chunk.length);
+  sendHTTPResponseChunk(seq: number, chunk: Uint8Array) {
+    const buf = new ArrayBuffer(2 + 1 + chunk.byteLength);
+    const dataView = new DataView(buf);
     let cursor = 0;
-    cursor = buf.writeUInt16BE(seq, cursor);
-    cursor = buf.writeUInt8(S2CRequestTypes.HTTPResponseChunk, cursor);
-    chunk.copy(buf, cursor);
+    dataView.setUint16(cursor, seq);
+    cursor += 2;
+    dataView.setUint8(cursor, S2CRequestTypes.HTTPResponseChunk);
+    cursor += 1;
+    new Uint8Array(buf).set(chunk, cursor);
     this.send(buf);
   }
 
   sendHTTPResponseEnd(seq: number) {
-    const buf = Buffer.alloc(2 + 1);
+    const buf = new ArrayBuffer(2 + 1);
+    const dataView = new DataView(buf);
     let cursor = 0;
-    cursor = buf.writeUInt16BE(seq, cursor);
-    cursor = buf.writeUInt8(S2CRequestTypes.HTTPResponseEnd, cursor);
+    dataView.setUint16(cursor, seq);
+    cursor += 2;
+    dataView.setUint8(cursor, S2CRequestTypes.HTTPResponseEnd);
     this.send(buf);
   }
 
-  async onMsg(msg: Buffer) {
+  async onMsg(msg: ArrayBuffer) {
     const init = Client.parseMsgInit(msg);
     if (!init) return;
     const { cursor, seq, op } = init;
@@ -147,9 +156,9 @@ export class Client {
       case C2SRequestTypes.HTTPRequest:
         let resp: {
           payload: HTTPResponsePayload;
-          body: AsyncIterable<Buffer>;
+          body: AsyncIterable<ArrayBuffer>;
         };
-        const reqPayload = Client.parseHttpReqPayload(msg.subarray(cursor));
+        const reqPayload = Client.parseHttpReqPayload(msg.slice(cursor));
         if (!reqPayload) return;
         try {
           resp = await this.handleHTTPRequest(reqPayload);
@@ -181,7 +190,7 @@ export class Client {
         const { payload, body } = resp;
         this.sendHTTPResponseStart(seq, payload);
         for await (const chunk of body) {
-          this.sendHTTPResponseChunk(seq, chunk);
+          this.sendHTTPResponseChunk(seq, new Uint8Array(chunk));
         }
         this.sendHTTPResponseEnd(seq);
         break;
