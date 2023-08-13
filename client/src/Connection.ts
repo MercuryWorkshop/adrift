@@ -10,6 +10,7 @@ import {
 
 export class Connection {
   callbacks: Record<number, Function> = {};
+  openStreams: Record<number, ReadableStreamDefaultController<any>> = {};
 
   counter: number = 0;
 
@@ -29,20 +30,32 @@ export class Connection {
     console.log(requestID, requestType);
 
     switch (requestType) {
-      case S2CRequestTypes.HTTPResponse: {
-        const payloadLen = view.getUint32(cursor);
-        cursor += 4;
+      case S2CRequestTypes.HTTPResponseStart:
         const decoder = new TextDecoder();
-        const payloadRaw = decoder.decode(
-          data.slice(cursor, cursor + payloadLen)
-        );
-        console.log({ payloadLen, payloadRaw });
-        const payload = JSON.parse(payloadRaw);
-        cursor += payloadLen;
-
-        this.callbacks[requestID]({ payload, body: data.slice(cursor) });
+        const payload = JSON.parse(decoder.decode(data.slice(cursor)));
+        const stream = new ReadableStream({
+          start: (controller) => {
+            this.openStreams[requestID] = controller;
+          },
+          pull: (controller) => {
+            // not needed
+          },
+          cancel: () => {
+            // TODO
+          },
+        });
+        this.callbacks[requestID]({ payload, body: stream });
         break;
-      }
+
+      case S2CRequestTypes.HTTPResponseChunk:
+        this.openStreams[requestID]?.enqueue(
+          new Uint8Array(data.slice(cursor))
+        );
+        break;
+
+      case S2CRequestTypes.HTTPResponseEnd:
+        this.openStreams[requestID]?.close();
+        break;
     }
   }
 

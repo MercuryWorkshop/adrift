@@ -4,3 +4,4 @@ packages:
   - frontend
   - client
   - firebase-config
+  - corium

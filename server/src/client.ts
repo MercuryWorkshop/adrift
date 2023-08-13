@@ -9,6 +9,7 @@ import {
   ProtoBareHeaders,
   S2CRequestTypes,
 } from "protocol";
+import { Readable } from "stream";
 import { BareError, bareFetch, options } from "./http";
 
 export class Client {
@@ -57,7 +58,7 @@ export class Client {
 
   static bareErrorToResponse(e: BareError): {
     payload: HTTPResponsePayload;
-    body: Buffer;
+    body: AsyncIterable<Buffer>;
   } {
     return {
       payload: {
@@ -65,13 +66,13 @@ export class Client {
         statusText: STATUS_CODES[e.status] || "",
         headers: {},
       },
-      body: Buffer.from(JSON.stringify(e.body)),
+      body: Readable.from(JSON.stringify(e.body)),
     };
   }
 
   async handleHTTPRequest(payload: HTTPRequestPayload): Promise<{
     payload: HTTPResponsePayload;
-    body: Buffer;
+    body: AsyncIterable<Buffer>;
   }> {
     const abort = new AbortController();
     const onClose = () => {
@@ -97,13 +98,6 @@ export class Client {
     }
 
     this.events.off("close", onClose);
-    const buffers: any[] = [];
-
-    // node.js readable streams implement the async iterator protocol
-    for await (const data of resp) {
-      buffers.push(data);
-    }
-    const body = Buffer.concat(buffers);
 
     return {
       payload: {
@@ -113,19 +107,34 @@ export class Client {
           Object.entries(resp.headersDistinct).filter(([_k, v]) => Boolean(v))
         ) as ProtoBareHeaders,
       },
-      body,
+      body: resp,
     };
   }
 
-  sendHTTPResponse(seq: number, payload: HTTPResponsePayload, body: Buffer) {
+  sendHTTPResponseStart(seq: number, payload: HTTPResponsePayload) {
     const payloadBuffer = Buffer.from(JSON.stringify(payload));
-    const buf = Buffer.alloc(2 + 1 + 4 + payloadBuffer.length + body.length);
+    const buf = Buffer.alloc(2 + 1 + payloadBuffer.length);
     let cursor = 0;
     cursor = buf.writeUInt16BE(seq, cursor);
-    cursor = buf.writeUInt8(S2CRequestTypes.HTTPResponse, cursor);
-    cursor = buf.writeUInt32BE(payloadBuffer.length, cursor);
-    cursor += payloadBuffer.copy(buf, cursor);
-    body.copy(buf, cursor);
+    cursor = buf.writeUInt8(S2CRequestTypes.HTTPResponseStart, cursor);
+    payloadBuffer.copy(buf, cursor);
+    this.send(buf);
+  }
+
+  sendHTTPResponseChunk(seq: number, chunk: Buffer) {
+    const buf = Buffer.alloc(2 + 1 + chunk.length);
+    let cursor = 0;
+    cursor = buf.writeUInt16BE(seq, cursor);
+    cursor = buf.writeUInt8(S2CRequestTypes.HTTPResponseChunk, cursor);
+    chunk.copy(buf, cursor);
+    this.send(buf);
+  }
+
+  sendHTTPResponseEnd(seq: number) {
+    const buf = Buffer.alloc(2 + 1);
+    let cursor = 0;
+    cursor = buf.writeUInt16BE(seq, cursor);
+    cursor = buf.writeUInt8(S2CRequestTypes.HTTPResponseEnd, cursor);
     this.send(buf);
   }
 
@@ -135,7 +144,10 @@ export class Client {
     const { cursor, seq, op } = init;
     switch (op) {
       case C2SRequestTypes.HTTPRequest:
-        let resp;
+        let resp: {
+          payload: HTTPResponsePayload;
+          body: AsyncIterable<Buffer>;
+        };
         const reqPayload = Client.parseHttpReqPayload(msg.subarray(cursor));
         if (!reqPayload) return;
         try {
@@ -166,7 +178,11 @@ export class Client {
         }
 
         const { payload, body } = resp;
-        this.sendHTTPResponse(seq, payload, body);
+        this.sendHTTPResponseStart(seq, payload);
+        for await (const chunk of body) {
+          this.sendHTTPResponseChunk(seq, chunk);
+        }
+        this.sendHTTPResponseEnd(seq);
         break;
       default:
         // not implemented

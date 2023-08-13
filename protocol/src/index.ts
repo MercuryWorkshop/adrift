@@ -9,10 +9,13 @@ export const C2SRequestTypes = {
 export type C2SRequestType = ObjectValues<typeof C2SRequestTypes>;
 
 export const S2CRequestTypes = {
-  HTTPResponse: 0,
-  WSOpen: 1,
-  WSDataText: 2,
-  WSDataBinary: 3,
+  HTTPResponseStart: 0,
+  HTTPResponseChunk: 1,
+  HTTPResponseEnd: 2,
+  WSOpen: 3,
+  WSDataText: 4,
+  WSDataBinary: 5,
+  WSClose: 6,
 } as const;
 export type S2CRequestType = ObjectValues<typeof S2CRequestTypes>;
 

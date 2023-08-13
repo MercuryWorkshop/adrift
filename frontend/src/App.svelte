@@ -146,6 +146,8 @@
       );
     }
   }
+
+  (window as any).bare = new BareClient();
 </script>
 
 {#if ready}
