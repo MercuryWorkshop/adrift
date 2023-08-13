@@ -18,6 +18,8 @@
     "bare-client-custom": "file:../bare-client-custom",
     "client": "workspace:*",
     "corium": "file:../corium",
+    "esbuild": "^0.19.1",
+    "esbuild-plugin-inline-import": "^1.0.1",
     "firebase": "^10.1.0",
     "firebase-config": "workspace:*",
     "protocol": "workspace:*",
