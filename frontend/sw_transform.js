@@ -2,7 +2,7 @@ import { build } from 'esbuild';
 import inlineImportPlugin from 'esbuild-plugin-inline-import';
 import path from "path";
 import fs from "fs/promises";
-
+import _fs from "fs";
 const transform = options => {
     const { filter, namespace, transform } = Object.assign(
         {
@@ -19,6 +19,8 @@ const transform = options => {
     return {
         name: 'esbuild-sw-transformer',
         setup(build) {
+            if (_fs.existsSync("./sw.js"))
+                fs.rm("./sw.js");
             build.onResolve({ filter }, args => {
                 const realPath = args.path.replace(filter, '');
                 return {
@@ -64,8 +66,9 @@ const transform = options => {
         }
     };
 };
+
 build({
-    entryPoints: ['../sw.js'],
+    entryPoints: ['../public/sw.js'],
     bundle: true,
     outfile: 'sw.js',
     plugins: [

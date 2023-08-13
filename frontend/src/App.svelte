@@ -28,6 +28,8 @@
 
   let ready = false;
 
+  let dynamic = false;
+
   let url: string;
   let proxyIframe: HTMLIFrameElement;
 
@@ -126,7 +128,9 @@
 
   function visitURL(url: string) {
     if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
-      let path = `${__uv$config.prefix}${__uv$config.encodeUrl(url)}`;
+      let path =
+        (dynamic && `/service/route?url=${url}`) ||
+        `${__uv$config.prefix}${__uv$config.encodeUrl(url)}`;
       proxyIframe.src = path;
     } else {
       let bare = new BareClient();
@@ -152,9 +156,15 @@
 
 {#if ready}
   <div class="container h-full w-full">
-    <div class="container">
-      <input bind:value={url} type="text" />
-      <button on:click={() => visitURL(url)}>Go!</button>
+    <div class="flex">
+      <div class="container">
+        <input bind:value={url} type="text" />
+        <button on:click={() => visitURL(url)}>Go!</button>
+      </div>
+      <div class="container">
+        <label>use dynamic?</label>
+        <input type="checkbox" bind:value={dynamic} />
+      </div>
     </div>
     <iframe class="h-full w-full" bind:this={proxyIframe} on:load={frameLoad} />
   </div>
@@ -179,6 +189,9 @@
     height: 100vh;
     padding: 0;
     margin: 0;
+  }
+  .flex {
+    display: flex;
   }
   iframe {
     outline: none;

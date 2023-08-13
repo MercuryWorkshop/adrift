@@ -10,3 +10,6 @@
 [submodule "vite-plugin-singlefile"]
 	path = vite-plugin-singlefile
 	url = https://github.com/CoolElectronics/vite-plugin-singlefile
+[submodule "Dynamic"]
+	path = Dynamic
+	url = https://github.com/NebulaServices/Dynamic

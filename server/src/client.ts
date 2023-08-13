@@ -122,6 +122,7 @@ export class Client {
   }
 
   sendHTTPResponseChunk(seq: number, chunk: Buffer) {
+    if (!chunk.copy) return;
     const buf = Buffer.alloc(2 + 1 + chunk.length);
     let cursor = 0;
     cursor = buf.writeUInt16BE(seq, cursor);

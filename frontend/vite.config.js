@@ -15,5 +15,10 @@ export default defineConfig({
     target: "esnext",
     outDir: "dist",
     sourcemap: true,
+    rollupOptions: {
+      external: [
+        "./sw.js"
+      ]
+    }
   }
 })
