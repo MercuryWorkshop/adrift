@@ -21,7 +21,6 @@
 
   let transport: Transport;
 
-  let wstransport: DevWsTransport | undefined;
   let rtctransport: RTCTransport | undefined;
 
   let email = "test@test.com";
@@ -123,7 +122,7 @@
   }
 
   async function connectDevWS() {
-    wstransport = transport = new DevWsTransport(onTransportOpen, () =>
+    transport = new DevWsTransport(onTransportOpen, () =>
       console.log("onclose")
     );
   }
@@ -143,7 +142,7 @@
         new Request(url),
         "_self",
         proxyIframe.contentWindow! as unknown as Win,
-        bare,
+        bare as any,
         "replace"
       );
     }
