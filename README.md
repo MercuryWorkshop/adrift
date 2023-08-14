@@ -1,5 +1,5 @@
 # ADrift
-ADrift is a Peer to Peer proxy utilizing the WebRTC protocol.
+ADrift is a Decentralized proxy utilizing the WebRTC protocol.
 
 ### Before everything..
 install dependencies and build bare-client-custom
@@ -44,5 +44,5 @@ pnpm build
 cd ..
 cd frontend/
 pnpm install
-pnpm VITE_ADRIFT_DEV=1 VITE_ADRIFT_SINGLEFILE= pnpm dev
+VITE_ADRIFT_DEV=1 VITE_ADRIFT_SINGLEFILE= pnpm dev
 ```
