@@ -1,6 +1,7 @@
 import {
   C2SRequestType,
   C2SRequestTypes,
+  C2SWSOpenPayload,
   HTTPRequestPayload,
   HTTPResponsePayload,
   S2CRequestType,
@@ -112,11 +113,12 @@ export class Connection {
     send: (data: any) => void;
     close: (code?: number, reason?: string) => void;
   } {
-    const payload = JSON.stringify({ url });
+    const payload: C2SWSOpenPayload = { url: url.toString() };
+    const payloadJSON = JSON.stringify(payload);
     let seq = this.nextSeq();
     this.send(
       seq,
-      new TextEncoder().encode(payload),
+      new TextEncoder().encode(payloadJSON),
       C2SRequestTypes.WSOpen
     ).catch((e) => {
       console.error(e);

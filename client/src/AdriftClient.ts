@@ -5,7 +5,6 @@ import {
   GetRequestHeadersCallback,
   MetaCallback,
   ReadyStateCallback,
-  WebSocketFields,
   WebSocketImpl,
 } from "bare-client-custom";
 import { Connection } from "./Connection";
