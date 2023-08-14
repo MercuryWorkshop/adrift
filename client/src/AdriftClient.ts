@@ -72,11 +72,11 @@ export class AdriftBareClient extends Client {
     let { send, close } = this.connection.wsconnect(
       remote,
       () => {
-        onReadyState(WebSocketFields.OPEN);
+        onReadyState(WebSocket.OPEN);
         ws.dispatchEvent(new Event("open"));
       },
       () => {
-        onReadyState(WebSocketFields.CLOSED);
+        onReadyState(WebSocket.CLOSED);
         ws.dispatchEvent(new Event("close"));
       },
       (data) => {
@@ -95,9 +95,12 @@ export class AdriftBareClient extends Client {
     // i can probably fix later but this is fine for now -CE
     (ws as any).__defineSetter__("send", () => {});
 
-    (ws as any).__defineGetter__("close", (code?: number, reason?: string) => {
-      close(code, reason);
-    });
+    (ws as any).__defineGetter__(
+      "close",
+      () => (code?: number, reason?: string) => {
+        close(code, reason);
+      }
+    );
 
     return ws;
   }
