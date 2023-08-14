@@ -10,7 +10,14 @@
     DevWsTransport,
     RTCTransport,
   } from "client";
-  import { Button, Card, StyleFromScheme, TextField } from "m3-svelte";
+  import {
+    Button,
+    Card,
+    SegmentedButtonContainer,
+    SegmentedButtonItem,
+    StyleFromScheme,
+    TextField,
+  } from "m3-svelte";
   // note: even though we import firebase, due to the tree shaking, it will only run if we use "auth" so if ADRIFT_DEV is set it won't import
   import { auth } from "firebase-config";
   import { signInWithEmailAndPassword } from "firebase/auth";
@@ -28,7 +35,7 @@
 
   let ready = false;
 
-  let useDynamic = false;
+  let selectedProxy = "ultraviolet";
 
   let url: string;
   let proxyIframe: HTMLIFrameElement;
@@ -129,11 +136,10 @@
 
   function visitURL(url: string) {
     if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
-      let path = useDynamic
-        ? `/service/route?url=${url}`
-        : `${__uv$config.prefix}${__uv$config.encodeUrl(url)}`;
-      console.log(useDynamic);
-      console.log(path);
+      let path =
+        selectedProxy == "dynamic"
+          ? `/service/route?url=${url}`
+          : `${__uv$config.prefix}${__uv$config.encodeUrl(url)}`;
 
       proxyIframe.src = path;
     } else {
@@ -179,8 +185,26 @@
       </div>
       {#if !import.meta.env.VITE_ADRIFT_SINGLEFILE}
         <div>
-          <label>use dynamic?</label>
-          <input type="checkbox" bind:value={useDynamic} />
+          <SegmentedButtonContainer>
+            <input
+              type="radio"
+              name="selectedProxy"
+              bind:group={selectedProxy}
+              value="ultraviolet"
+              id="ultraviolet"
+            />
+            <SegmentedButtonItem input="ultraviolet"
+              >Ultraviolet</SegmentedButtonItem
+            >
+            <input
+              type="radio"
+              name="selectedProxy"
+              bind:group={selectedProxy}
+              value="dynamic"
+              id="dynamic"
+            />
+            <SegmentedButtonItem input="dynamic">Dynamic</SegmentedButtonItem>
+          </SegmentedButtonContainer>
         </div>
       {/if}
     </div>
@@ -338,16 +362,5 @@
   iframe {
     outline: none;
     border: none;
-  }
-  .container {
-    display: flex;
-    flex-direction: column;
-    width: max-content;
-  }
-  .h-full {
-    height: 100%;
-  }
-  .w-full {
-    width: 100%;
   }
 </style>
