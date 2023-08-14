@@ -66,7 +66,8 @@ export class AdriftBareClient extends Client {
     onReadyState: ReadyStateCallback,
     webSocketImpl: WebSocketImpl
   ): WebSocket {
-    const ws = new webSocketImpl("ws:null", protocols);
+    // IP of TEST-NET-1 (https://superuser.com/a/698392/917616)
+    const ws = new webSocketImpl("ws:192.0.2.0", protocols);
     // this will error. that's okay
     let initalCloseHappened = false;
     ws.addEventListener("close", (e) => {
