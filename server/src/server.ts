@@ -9,6 +9,7 @@ import {
   S2CRequestType,
   S2CRequestTypes,
   WSClosePayload,
+  WSErrorPayload,
 } from "protocol";
 import { Readable } from "stream";
 import { BareError, bareFetch, options } from "./http";
@@ -164,6 +165,10 @@ export class AdriftServer {
     this._sendJSONRes(seq, S2CRequestTypes.WSClose, payload);
   }
 
+  sendWSError(seq: number, payload: WSErrorPayload) {
+    this._sendJSONRes(seq, S2CRequestTypes.WSError, payload);
+  }
+
   sendWSText(seq: number, textEncoded: ArrayBuffer) {
     const buf = new ArrayBuffer(2 + 1 + textEncoded.byteLength);
     const dataView = new DataView(buf);
@@ -240,10 +245,9 @@ export class AdriftServer {
         const payload = AdriftServer.tryParseJSONPayload(msg.slice(cursor));
         const ws = (this.sockets[seq] = new WebSocket(payload.url));
         ws.binaryType = "arraybuffer";
-        // TODO v important: onerror
         ws.onerror = (e) => {
-          console.log("ws onerror", e);
-          this.sendWSClose(seq, { code: 1006, reason: "", wasClean: false });
+          // WSError implies close with code 1006, reason "" and wasClean false
+          this.sendWSError(seq, { message: e.message });
         };
         ws.onopen = () => {
           this.sendWSOpen(seq);

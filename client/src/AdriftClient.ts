@@ -93,11 +93,13 @@ export class AdriftBareClient extends Client {
             data,
           })
         );
+      },
+      (message: string) => {
+        ws.dispatchEvent(new ErrorEvent("error", { message }));
       }
     );
 
     ws.send = (data: any) => {
-      console.log("Reached AdriftClient.ts send");
       send(data);
     };
 

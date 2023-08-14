@@ -16,6 +16,7 @@ export const S2CRequestTypes = {
   WSDataText: 4,
   WSDataBinary: 5,
   WSClose: 6,
+  WSError: 7,
 } as const;
 export type S2CRequestType = ObjectValues<typeof S2CRequestTypes>;
 
@@ -42,6 +43,10 @@ export type WSClosePayload = {
   code: number;
   reason: string;
   wasClean: boolean;
+};
+
+export type WSErrorPayload = {
+  message: string;
 };
 
 export { Transport } from "./Transport";
