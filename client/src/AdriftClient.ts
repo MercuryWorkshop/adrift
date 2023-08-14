@@ -17,15 +17,6 @@ import { Connection } from "./Connection";
 //   }
 // }
 //
-const WebSocketFields = {
-  prototype: {
-    send: WebSocket.prototype.send,
-  },
-  CLOSED: WebSocket.CLOSED,
-  CLOSING: WebSocket.CLOSING,
-  CONNECTING: WebSocket.CONNECTING,
-  OPEN: WebSocket.OPEN,
-};
 
 export class AdriftBareClient extends Client {
   constructor(private connection: Connection) {

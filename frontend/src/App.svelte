@@ -10,6 +10,7 @@
     DevWsTransport,
     RTCTransport,
   } from "client";
+  import { Button, Card, StyleFromScheme, TextField } from "m3-svelte";
   // note: even though we import firebase, due to the tree shaking, it will only run if we use "auth" so if ADRIFT_DEV is set it won't import
   import { auth } from "firebase-config";
   import { signInWithEmailAndPassword } from "firebase/auth";
@@ -28,7 +29,7 @@
 
   let ready = false;
 
-  let dynamic = false;
+  let useDynamic = false;
 
   let url: string;
   let proxyIframe: HTMLIFrameElement;
@@ -129,10 +130,10 @@
 
   function visitURL(url: string) {
     if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
-      let path = dynamic
+      let path = useDynamic
         ? `/service/route?url=${url}`
         : `${__uv$config.prefix}${__uv$config.encodeUrl(url)}`;
-      console.log(dynamic);
+      console.log(useDynamic);
       console.log(path);
 
       proxyIframe.src = path;
@@ -165,37 +166,151 @@
         <input bind:value={url} type="text" />
         <button on:click={() => visitURL(url)}>Go!</button>
       </div>
-      <div class="container">
-        <label>use dynamic?</label>
-        <input type="checkbox" bind:value={dynamic} />
-      </div>
+      {#if !import.meta.env.VITE_ADRIFT_SINGLEFILE}
+        <div>
+          <label>use dynamic?</label>
+          <input type="checkbox" bind:value={useDynamic} />
+        </div>
+      {/if}
     </div>
     <iframe class="h-full w-full" bind:this={proxyIframe} on:load={frameLoad} />
   </div>
 {:else if !import.meta.env.VITE_ADRIFT_DEV}
-  <div class="container">
-    <label for="email">email</label>
-    <input name="email" type="text" bind:value={email} />
-    <label for="password">password</label>
-    <input name="password" type="password" bind:value={password} />
-    <button on:click={connectFirebase}>Connect with firebase</button>
+  <div id="loginpage">
+    <div class="bigcard">
+      <h1>Adrift</h1>
+    </div>
+
+    <div class="flex justify-evenly">
+      <Card type="filled">basically aero 2</Card>
+      <div />
+      <Card type="elevated">
+        <TextField name="email" bind:value={email} />
+        <TextField
+          name="password"
+          bind:value={password}
+          extraOptions={{ type: "password" }}
+        />
+
+        <Button type="outlined" on:click={connectFirebase}
+          >Connect with firebase</Button
+        >
+      </Card>
+    </div>
   </div>
 {:else}
-  <button on:click={connectDevHttp}
-    >Connect with dev webrtc (http signaling server)</button
+  <Button type="tonal" on:click={connectDevHttp}
+    >Connect with dev webrtc (http signaling server)</Button
   >
-  <button on:click={connectDevWS}>Connect with dev websocket</button>
+  <Button type="tonal" on:click={connectDevWS}
+    >Connect with dev websocket</Button
+  >
 {/if}
 
+<StyleFromScheme
+  lightScheme={{
+    primary: 1284831119,
+    onPrimary: 4294967295,
+    primaryContainer: 4293516799,
+    onPrimaryContainer: 4280291399,
+    inversePrimary: 4291804670,
+    secondary: 4284636017,
+    onSecondary: 4294967295,
+    secondaryContainer: 4293451512,
+    onSecondaryContainer: 4280162603,
+    tertiary: 4286468704,
+    onTertiary: 4294967295,
+    tertiaryContainer: 4294957539,
+    onTertiaryContainer: 4281405469,
+    error: 4290386458,
+    onError: 4294967295,
+    errorContainer: 4294957782,
+    onErrorContainer: 4282449922,
+    background: 4294834175,
+    onBackground: 4280097568,
+    surface: 4294834175,
+    onSurface: 4280097568,
+    surfaceVariant: 4293386475,
+    onSurfaceVariant: 4282991950,
+    inverseSurface: 4281478965,
+    inverseOnSurface: 4294307831,
+    outline: 4286215551,
+    outlineVariant: 4291478735,
+    shadow: 4278190080,
+    scrim: 4278190080,
+    surfaceDim: 4292794592,
+    surfaceBright: 4294834175,
+    surfaceContainerLowest: 4294967295,
+    surfaceContainerLow: 4294505210,
+    surfaceContainer: 4294110452,
+    surfaceContainerHigh: 4293715694,
+    surfaceContainerHighest: 4293320937,
+    surfaceTint: 4284831119,
+  }}
+  darkScheme={{
+    primary: 1291804670,
+    onPrimary: 4281739101,
+    primaryContainer: 4283252085,
+    onPrimaryContainer: 4293516799,
+    inversePrimary: 4284831119,
+    secondary: 4291543771,
+    onSecondary: 4281544001,
+    secondaryContainer: 4283057240,
+    onSecondaryContainer: 4293451512,
+    tertiary: 4293900488,
+    onTertiary: 4283049266,
+    tertiaryContainer: 4284693320,
+    onTertiaryContainer: 4294957539,
+    error: 4294948011,
+    onError: 4285071365,
+    errorContainer: 4287823882,
+    onErrorContainer: 4294957782,
+    background: 4279505432,
+    onBackground: 4293320937,
+    surface: 4279505432,
+    onSurface: 4293320937,
+    surfaceVariant: 4282991950,
+    onSurfaceVariant: 4291478735,
+    inverseSurface: 4293320937,
+    inverseOnSurface: 4281478965,
+    outline: 4287926169,
+    outlineVariant: 4282991950,
+    shadow: 4278190080,
+    scrim: 4278190080,
+    surfaceDim: 4279505432,
+    surfaceBright: 4282071102,
+    surfaceContainerLowest: 4279176467,
+    surfaceContainerLow: 4280097568,
+    surfaceContainer: 4280360740,
+    surfaceContainerHigh: 4281018671,
+    surfaceContainerHighest: 4281742394,
+    surfaceTint: 4291804670,
+  }}
+/>
+
 <style>
+  #loginpage {
+    padding: 2.5em;
+  }
+  .bigcard {
+    background-color: rgb(var(--m3-scheme-primary-container));
+    color: rgb(var(--m3-scheme-on-primary-container));
+    border-radius: 2rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    text-align: center;
+    padding: 8rem 0 6rem 0;
+    margin-bottom: 2rem;
+  }
   :global(body, html, #app) {
     width: 100vw;
     height: 100vh;
     padding: 0;
     margin: 0;
-  }
-  .flex {
-    display: flex;
+    background-color: rgb(var(--m3-scheme-background));
+    color: rgb(var(--m3-scheme-on-background));
   }
   iframe {
     outline: none;
