@@ -19,8 +19,8 @@ const transform = options => {
     return {
         name: 'esbuild-sw-transformer',
         setup(build) {
-            if (_fs.existsSync("./sw.js"))
-                fs.rm("./sw.js");
+            if (_fs.existsSync("./filemap.js"))
+                fs.rm("./filemap.js");
             build.onResolve({ filter }, args => {
                 const realPath = args.path.replace(filter, '');
                 return {
@@ -68,9 +68,9 @@ const transform = options => {
 };
 
 build({
-    entryPoints: ['../public/sw.js'],
+    entryPoints: ['../filemap.js'],
     bundle: true,
-    outfile: 'sw.js',
+    outfile: 'filemap.js',
     plugins: [
         // Always include this plugin before others
         transform()

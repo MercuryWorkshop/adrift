@@ -6,10 +6,8 @@
  * However, if a user changes the location of uv.bundle.js/uv.config.js or sw.js is not relative to them, they will need to modify this script locally.
  */
 
-// import index from "sw-filemap"
-
-// let filemap = JSON.parse(index);
-let filemap = {};
+self.filemap = {};
+importScripts("filemap.js");
 
 importScripts('uv/uv.bundle.js');
 importScripts('uv.config.js');
