@@ -213,7 +213,7 @@ export class Connection {
         const payloadJSON = JSON.stringify(payload);
         this.send(
           seq,
-          new TextEncoder().encode(payload),
+          new TextEncoder().encode(payloadJSON),
           C2SRequestTypes.WSClose
         ).catch((e) => {
           // At this point there is nothing left to clean up
