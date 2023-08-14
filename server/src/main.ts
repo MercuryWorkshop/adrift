@@ -111,8 +111,12 @@ async function answerRtc(data: any, onrespond: (answer: any) => void) {
     };
     dataChannel.onmessage = (event) => {
       console.log("messaged");
+      if (event.data instanceof ArrayBuffer) {
+        server.onMsg(event.data);
+      }
       if (event.data instanceof Buffer) {
         server.onMsg(bufferToArrayBuffer(event.data));
+        return;
       }
       throw new Error("Unexpected datachannel message type");
     };
