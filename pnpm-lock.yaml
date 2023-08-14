@@ -379,6 +379,9 @@ importers:
       '@types/webrtc':
         specifier: ^0.0.36
         version: 0.0.36
+      '@types/ws':
+        specifier: ^8.5.5
+        version: 8.5.5
       nodemon:
         specifier: ^3.0.1
         version: 3.0.1
