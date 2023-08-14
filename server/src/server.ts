@@ -12,7 +12,21 @@ import {
 import { Readable } from "stream";
 import { BareError, bareFetch, options } from "./http";
 
-export class Client {
+function bareErrorToResponse(e: BareError): {
+  payload: HTTPResponsePayload;
+  body: AsyncIterable<ArrayBuffer>;
+} {
+  return {
+    payload: {
+      status: e.status,
+      statusText: STATUS_CODES[e.status] || "",
+      headers: {},
+    },
+    body: Readable.from(JSON.stringify(e.body)),
+  };
+}
+
+export class AdriftServer {
   send: (msg: ArrayBuffer) => void;
   events: EventEmitter;
 
@@ -58,20 +72,6 @@ export class Client {
     return payload;
   }
 
-  static bareErrorToResponse(e: BareError): {
-    payload: HTTPResponsePayload;
-    body: AsyncIterable<ArrayBuffer>;
-  } {
-    return {
-      payload: {
-        status: e.status,
-        statusText: STATUS_CODES[e.status] || "",
-        headers: {},
-      },
-      body: Readable.from(JSON.stringify(e.body)),
-    };
-  }
-
   async handleHTTPRequest(payload: HTTPRequestPayload): Promise<{
     payload: HTTPResponsePayload;
     body: AsyncIterable<ArrayBuffer>;
@@ -93,7 +93,7 @@ export class Client {
       );
     } catch (e) {
       if (e instanceof BareError) {
-        return Client.bareErrorToResponse(e);
+        return bareErrorToResponse(e);
       }
       this.events.off("close", onClose);
       throw e;
@@ -149,7 +149,7 @@ export class Client {
   }
 
   async onMsg(msg: ArrayBuffer) {
-    const init = Client.parseMsgInit(msg);
+    const init = AdriftServer.parseMsgInit(msg);
     if (!init) return;
     const { cursor, seq, op } = init;
     switch (op) {
@@ -158,7 +158,7 @@ export class Client {
           payload: HTTPResponsePayload;
           body: AsyncIterable<ArrayBuffer>;
         };
-        const reqPayload = Client.parseHttpReqPayload(msg.slice(cursor));
+        const reqPayload = AdriftServer.parseHttpReqPayload(msg.slice(cursor));
         if (!reqPayload) return;
         try {
           resp = await this.handleHTTPRequest(reqPayload);
@@ -184,7 +184,7 @@ export class Client {
             });
           }
 
-          resp = Client.bareErrorToResponse(bareError);
+          resp = bareErrorToResponse(bareError);
         }
 
         const { payload, body } = resp;

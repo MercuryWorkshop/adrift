@@ -5,8 +5,8 @@ import {
   GetRequestHeadersCallback,
   MetaCallback,
   ReadyStateCallback,
+  WebSocketFields,
   WebSocketImpl,
-  WebSocketFields
 } from "bare-client-custom";
 import { Connection } from "./Connection";
 
@@ -67,6 +67,7 @@ export class AdriftBareClient extends Client {
       headers,
     }) as BareResponse;
   }
+
   connect(
     remote: URL,
     protocols: string[],
@@ -75,33 +76,35 @@ export class AdriftBareClient extends Client {
     onReadyState: ReadyStateCallback,
     webSocketImpl: WebSocketImpl
   ): WebSocket {
-    const ws = new WebSocket("ws:null");
+    const ws = new webSocketImpl("ws:null", protocols);
     // this will error. that's okay
 
+    let send = this.connection.wsconnect(
+      remote,
+      () => {
+        onReadyState(WebSocketFields.OPEN);
+        ws.dispatchEvent(new Event("open"));
+      },
+      () => {
+        onReadyState(WebSocketFields.CLOSED);
+        ws.dispatchEvent(new Event("close"));
 
-    let send = this.connection.wsconnect(remote, () => {
-      onReadyState(WebSocketFields.OPEN);
-      ws.dispatchEvent(new Event('open'));
+        // what do i do for WebSocketFields.closing?
+      },
+      (data) => {
+        ws.dispatchEvent(
+          new MessageEvent("message", {
+            data,
+          })
+        );
+      }
+    );
 
-    }, () => {
-      onReadyState(WebSocketFields.CLOSED);
-      ws.dispatchEvent(new Event('close'));
-
-      // what do i do for WebSocketFields.closing?
-    }, (data) => {
-      ws.dispatchEvent(new MessageEvent("message", {
-        data,
-        // might be other shit here idk
-      }));
-    });
 
     (ws as any).__defineGetter__("send", () => (data: any) => {
       send(data);
     });
     (ws as any).__defineSetter__("send", () => { });
-
-
-
 
     return ws;
   }

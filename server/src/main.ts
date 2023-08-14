@@ -4,10 +4,10 @@ import expressWs from "express-ws";
 
 import { signInWithEmailAndPassword } from "firebase/auth";
 import wrtc from "wrtc";
-import { Client } from "./client";
 
 import { auth } from "firebase-config";
 import { getDatabase, onValue, ref, set } from "firebase/database";
+import { AdriftServer } from "./server";
 
 const configuration = {
   iceServers: [
@@ -98,20 +98,20 @@ async function answerRtc(data: any, onrespond: (answer: any) => void) {
       }
     });
 
-    let client: Client;
+    let server: AdriftServer;
 
     dataChannel.onopen = () => {
       console.log("opened");
-      client = new Client((msg) => dataChannel.send(msg));
+      server = new AdriftServer((msg) => dataChannel.send(msg));
     };
     dataChannel.onclose = () => {
       console.log("closed");
-      client.onClose();
+      server.onClose();
     };
     dataChannel.onmessage = (event) => {
       console.log("messaged");
       if (event.data instanceof Buffer) {
-        client.onMsg(bufferToArrayBuffer(event.data));
+        server.onMsg(bufferToArrayBuffer(event.data));
       }
       throw new Error("Unexpected datachannel message type");
     };
@@ -127,7 +127,7 @@ app.post("/connect", (req, res) => {
 
 app.ws("/dev-ws", (ws, _req) => {
   console.log("ws connect");
-  const client = new Client((msg) => ws.send(msg));
+  const client = new AdriftServer((msg) => ws.send(msg));
 
   ws.on("message", (msg) => {
     if (typeof msg === "string") {
