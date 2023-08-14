@@ -97,6 +97,7 @@ async function answerRtc(data: any, onrespond: (answer: any) => void) {
         // res.json(answer);
       }
     });
+    dataChannel.binaryType = "arraybuffer";
 
     let server: AdriftServer;
 
