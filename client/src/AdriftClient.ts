@@ -71,6 +71,7 @@ export class AdriftBareClient extends Client {
     let initalCloseHappened = false;
     ws.addEventListener("close", (e) => {
       if (!initalCloseHappened) {
+        onReadyState(WebSocket.CONNECTING);
         e.stopImmediatePropagation();
         initalCloseHappened = true;
       }
@@ -98,11 +99,10 @@ export class AdriftBareClient extends Client {
       send(data);
     };
 
-    ws.close =
-      (code?: number, reason?: string) => {
-        close(code, reason);
-        onReadyState(WebSocket.CLOSING);
-      };
+    ws.close = (code?: number, reason?: string) => {
+      close(code, reason);
+      onReadyState(WebSocket.CLOSING);
+    };
 
     return ws;
   }
