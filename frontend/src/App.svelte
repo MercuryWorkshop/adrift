@@ -210,15 +210,21 @@
     </div>
   </div>
 {:else}
-  <h1>Adrift dev menu</h1>
-  <Button type="tonal" on:click={connectDevHttp}
-    >Connect with WebRTC transport over localhost HTTP signaling</Button
-  >
-  <br />
-  <br />
-  <Button type="tonal" on:click={connectDevWS}
-    >Connect with localhost websocket transport</Button
-  >
+  <div class="flex items-center justify-center h-full">
+    <Card type="elevated">
+      <div class="flex flex-col h-full">
+        <h2 class="m3-font-headline-large m-3">Adrift DEV</h2>
+        <div class="flex space-evenly pad-children">
+          <Button type="filled" on:click={connectDevHttp}
+            >Connect with WebRTC transport over localhost HTTP signaling</Button
+          >
+          <Button type="filled" on:click={connectDevWS}
+            >Connect with localhost websocket transport</Button
+          >
+        </div>
+      </div>
+    </Card>
+  </div>
 {/if}
 
 <StyleFromScheme
@@ -303,6 +309,9 @@
 />
 
 <style>
+  :global(.pad-children > *) {
+    margin: 2rem;
+  }
   #loginpage {
     padding: 2.5em;
   }
