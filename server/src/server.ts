@@ -8,7 +8,7 @@ import {
   ProtoBareHeaders,
   S2CRequestType,
   S2CRequestTypes,
-  S2CWSClosePayload,
+  WSClosePayload,
 } from "protocol";
 import { Readable } from "stream";
 import { BareError, bareFetch, options } from "./http";
@@ -160,7 +160,7 @@ export class AdriftServer {
     this._sendSimpleRes(seq, S2CRequestTypes.WSOpen);
   }
 
-  sendWSClose(seq: number, payload: S2CWSClosePayload) {
+  sendWSClose(seq: number, payload: WSClosePayload) {
     this._sendJSONRes(seq, S2CRequestTypes.WSClose, payload);
   }
 
@@ -241,6 +241,10 @@ export class AdriftServer {
         const ws = (this.sockets[seq] = new WebSocket(payload.url));
         ws.binaryType = "arraybuffer";
         // TODO v important: onerror
+        ws.onerror = (e) => {
+          console.log("ws onerror", e);
+          this.sendWSClose(seq, { code: 1006, reason: "", wasClean: false });
+        };
         ws.onopen = () => {
           this.sendWSOpen(seq);
         };
@@ -250,6 +254,7 @@ export class AdriftServer {
             reason: e.reason,
             wasClean: e.wasClean,
           });
+          delete this.sockets[seq];
         };
         (ws as any).onmessage = (
           dataOrEvent: ArrayBuffer | MessageEvent<any>,
@@ -300,7 +305,10 @@ export class AdriftServer {
       case C2SRequestTypes.WSClose: {
         const socket = this.sockets[seq];
         if (!socket) return;
-        socket.close();
+        const payload: WSClosePayload | undefined =
+          AdriftServer.tryParseJSONPayload(msg.slice(cursor));
+        if (!payload) return;
+        socket.close(payload.code || 1005, payload.reason || "");
         break;
       }
 

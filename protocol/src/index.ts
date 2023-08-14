@@ -38,7 +38,7 @@ export type C2SWSOpenPayload = {
   url: string;
 };
 
-export type S2CWSClosePayload = {
+export type WSClosePayload = {
   code: number;
   reason: string;
   wasClean: boolean;

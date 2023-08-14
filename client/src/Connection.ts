@@ -175,7 +175,6 @@ export class Connection {
 
     return {
       send: (data) => {
-        console.log("Reached Connection.ts send!");
         if (!this.openSockets[seq]) {
           throw new Error("send on closed socket");
         }
@@ -210,7 +209,8 @@ export class Connection {
         throw new Error("Unexpected type passed to send");
       },
       close: (code?: number, reason?: string) => {
-        const payload = JSON.stringify({ code, reason });
+        const payload = { code, reason };
+        const payloadJSON = JSON.stringify(payload);
         this.send(
           seq,
           new TextEncoder().encode(payload),
