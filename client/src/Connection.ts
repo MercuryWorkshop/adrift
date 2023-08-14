@@ -6,8 +6,8 @@ import {
   HTTPResponsePayload,
   S2CRequestType,
   S2CRequestTypes,
-  S2CWSClosePayload,
   Transport,
+  WSClosePayload,
 } from "protocol";
 
 type OpenWSMeta = {
@@ -96,7 +96,7 @@ export class Connection {
       case S2CRequestTypes.WSClose: {
         const socketMeta = this.openSockets[requestID];
         if (!socketMeta) return;
-        const payload: S2CWSClosePayload = JSON.parse(
+        const payload: WSClosePayload = JSON.parse(
           new TextDecoder().decode(data.slice(cursor))
         );
         socketMeta.onclose(
