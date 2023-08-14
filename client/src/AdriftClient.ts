@@ -94,20 +94,15 @@ export class AdriftBareClient extends Client {
       }
     );
 
-    (ws as any).__defineGetter__("send", () => (data: any) => {
+    ws.send = (data: any) => {
       send(data);
-    });
-    // uv wraps it and we don't want that
-    // i can probably fix later but this is fine for now -CE
-    (ws as any).__defineSetter__("send", () => {});
+    };
 
-    (ws as any).__defineGetter__(
-      "close",
-      () => (code?: number, reason?: string) => {
+    ws.close =
+      (code?: number, reason?: string) => {
         close(code, reason);
         onReadyState(WebSocket.CLOSING);
-      }
-    );
+      };
 
     return ws;
   }
