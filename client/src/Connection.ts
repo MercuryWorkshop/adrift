@@ -6,10 +6,14 @@ import {
   HTTPResponsePayload,
   S2CRequestType,
   S2CRequestTypes,
+  S2CWSClosePayload,
   Transport,
 } from "protocol";
 
-type OpenWSMeta = { onclose: () => void; onmessage: (data: any) => void };
+type OpenWSMeta = {
+  onclose: (code: number, reason: string, wasClean: boolean) => void;
+  onmessage: (data: any) => void;
+};
 
 export class Connection {
   requestCallbacks: Record<number, Function> = {};
@@ -89,6 +93,21 @@ export class Connection {
         break;
       }
 
+      case S2CRequestTypes.WSClose: {
+        const socketMeta = this.openSockets[requestID];
+        if (!socketMeta) return;
+        const payload: S2CWSClosePayload = JSON.parse(
+          new TextDecoder().decode(data.slice(cursor))
+        );
+        socketMeta.onclose(
+          payload.code || 1005,
+          payload.reason || "",
+          "wasClean" in payload ? Boolean(payload.wasClean) : false
+        );
+        delete this.openSockets[requestID];
+        break;
+      }
+
       default:
         break;
     }
@@ -130,7 +149,7 @@ export class Connection {
   wsconnect(
     url: URL,
     onopen: () => void,
-    onclose: () => void,
+    onclose: (code: number, reason: string, wasClean: boolean) => void,
     onmessage: (data: any) => void
   ): {
     send: (data: any) => void;
@@ -139,13 +158,16 @@ export class Connection {
     const payload: C2SWSOpenPayload = { url: url.toString() };
     const payloadJSON = JSON.stringify(payload);
     let seq = this.nextSeq();
+    // todo: onerror
+    const closeWithError = () => onclose(1006, "", false);
+
     this.send(
       seq,
       new TextEncoder().encode(payloadJSON),
       C2SRequestTypes.WSOpen
     ).catch((e) => {
       console.error(e);
-      onclose();
+      closeWithError();
     });
 
     // this can't be async, just call onopen when opened
@@ -153,6 +175,7 @@ export class Connection {
 
     return {
       send: (data) => {
+        console.log("Reached Connection.ts send!");
         if (!this.openSockets[seq]) {
           throw new Error("send on closed socket");
         }

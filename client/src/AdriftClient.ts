@@ -83,8 +83,9 @@ export class AdriftBareClient extends Client {
         onReadyState(WebSocket.OPEN);
         ws.dispatchEvent(new Event("open"));
       },
-      () => {
+      (code: number, reason: string, wasClean: boolean) => {
         onReadyState(WebSocket.CLOSED);
+        ws.dispatchEvent(new CloseEvent("close", { code, reason, wasClean }));
       },
       (data) => {
         ws.dispatchEvent(
@@ -96,6 +97,7 @@ export class AdriftBareClient extends Client {
     );
 
     ws.send = (data: any) => {
+      console.log("Reached AdriftClient.ts send");
       send(data);
     };
 
