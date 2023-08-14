@@ -164,6 +164,30 @@ export class AdriftServer {
     this._sendJSONRes(seq, S2CRequestTypes.WSClose, payload);
   }
 
+  sendWSText(seq: number, textEncoded: ArrayBuffer) {
+    const buf = new ArrayBuffer(2 + 1 + textEncoded.byteLength);
+    const dataView = new DataView(buf);
+    let cursor = 0;
+    dataView.setUint16(cursor, seq);
+    cursor += 2;
+    dataView.setUint8(cursor, S2CRequestTypes.WSDataText);
+    cursor += 1;
+    new Uint8Array(buf).set(new Uint8Array(textEncoded), cursor);
+    this.send(buf);
+  }
+
+  sendWSBinary(seq: number, msg: ArrayBuffer) {
+    const buf = new ArrayBuffer(2 + 1 + msg.byteLength);
+    const dataView = new DataView(buf);
+    let cursor = 0;
+    dataView.setUint16(cursor, seq);
+    cursor += 2;
+    dataView.setUint8(cursor, S2CRequestTypes.WSDataBinary);
+    cursor += 1;
+    new Uint8Array(buf).set(new Uint8Array(msg), cursor);
+    this.send(buf);
+  }
+
   async onMsg(msg: ArrayBuffer) {
     const init = AdriftServer.parseMsgInit(msg);
     if (!init) return;
@@ -215,6 +239,7 @@ export class AdriftServer {
       case C2SRequestTypes.WSOpen: {
         const payload = AdriftServer.tryParseJSONPayload(msg.slice(cursor));
         const ws = (this.sockets[seq] = new WebSocket(payload.url));
+        ws.binaryType = "arraybuffer";
         ws.onopen = () => {
           this.sendWSOpen(seq);
         };
@@ -225,7 +250,35 @@ export class AdriftServer {
             wasClean: e.wasClean,
           });
         };
-        ws.onmessage = (e) => {};
+        (ws as any).onmessage = (
+          dataOrEvent: ArrayBuffer | MessageEvent<any>,
+          isBinary?: boolean
+        ) => {
+          // we have to carefully handle two websocket libraries here
+          // node ws: first arg is Buffer|ArrayBuffer|Buffer[] depending on binaryType,
+          //  2nd arg is isBinary
+          // web ws: first arg is an event, event.data is string if text or
+          //  arraybuffer|blob depending on binaryType.
+          if (dataOrEvent instanceof ArrayBuffer) {
+            if (isBinary) {
+              this.sendWSBinary(seq, dataOrEvent);
+              return;
+            }
+            this.sendWSText(seq, dataOrEvent);
+            return;
+          }
+          // unless we set binaryType incorrectly, we should be on the web here.
+          if (typeof dataOrEvent.data === "string") {
+            this.sendWSText(seq, new TextEncoder().encode(dataOrEvent.data));
+            return;
+          }
+          if (dataOrEvent.data instanceof ArrayBuffer) {
+            this.sendWSBinary(seq, dataOrEvent.data);
+            return;
+          }
+          console.error({ dataOrEvent, isBinary });
+          throw new Error("Unexpected message type received");
+        };
         break;
       }
 
