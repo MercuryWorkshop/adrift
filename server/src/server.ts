@@ -29,7 +29,7 @@ function bareErrorToResponse(e: BareError): {
 
 export class AdriftServer {
   send: (msg: ArrayBuffer) => void;
-  sockets: Record<number, WebSocket>;
+  sockets: Record<number, WebSocket> = {};
   events: EventEmitter;
 
   constructor(send: (msg: ArrayBuffer) => void) {
@@ -240,6 +240,7 @@ export class AdriftServer {
         const payload = AdriftServer.tryParseJSONPayload(msg.slice(cursor));
         const ws = (this.sockets[seq] = new WebSocket(payload.url));
         ws.binaryType = "arraybuffer";
+        // TODO v important: onerror
         ws.onopen = () => {
           this.sendWSOpen(seq);
         };
@@ -279,6 +280,27 @@ export class AdriftServer {
           console.error({ dataOrEvent, isBinary });
           throw new Error("Unexpected message type received");
         };
+        break;
+      }
+
+      case C2SRequestTypes.WSSendText: {
+        const socket = this.sockets[seq];
+        if (!socket) return;
+        socket.send(new TextDecoder().decode(msg.slice(cursor)));
+        break;
+      }
+
+      case C2SRequestTypes.WSSendBinary: {
+        const socket = this.sockets[seq];
+        if (!socket) return;
+        socket.send(msg.slice(cursor));
+        break;
+      }
+
+      case C2SRequestTypes.WSClose: {
+        const socket = this.sockets[seq];
+        if (!socket) return;
+        socket.close();
         break;
       }
 

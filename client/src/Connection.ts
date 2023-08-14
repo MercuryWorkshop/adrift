@@ -9,14 +9,13 @@ import {
   Transport,
 } from "protocol";
 
+type OpenWSMeta = { onclose: () => void; onmessage: (data: any) => void };
+
 export class Connection {
   requestCallbacks: Record<number, Function> = {};
   openRequestStreams: Record<number, ReadableStreamDefaultController<any>> = {};
-  openingSockets: Record<number, () => void>;
-  openSockets: Record<
-    number,
-    { onclose: () => void; onmessage: (data: any) => void }
-  >;
+  openingSockets: Record<number, { onopen: () => void; rest: OpenWSMeta }> = {};
+  openSockets: Record<number, OpenWSMeta> = {};
 
   counter: number = 0;
 
@@ -67,6 +66,16 @@ export class Connection {
       case S2CRequestTypes.HTTPResponseEnd:
         this.openRequestStreams[requestID]?.close();
         delete this.openRequestStreams[requestID];
+        break;
+
+      case S2CRequestTypes.WSOpen:
+        const { onopen, rest } = this.openingSockets[requestID];
+        delete this.openingSockets[requestID];
+        this.openSockets[requestID] = rest;
+        onopen();
+        break;
+
+      default:
         break;
     }
   }
@@ -126,7 +135,7 @@ export class Connection {
     });
 
     // this can't be async, just call onopen when opened
-    this.openingSockets[seq] = onopen;
+    this.openingSockets[seq] = { onopen, rest: { onmessage, onclose } };
 
     return {
       send: (data) => {

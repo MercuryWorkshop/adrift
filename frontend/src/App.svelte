@@ -157,6 +157,16 @@
   }
 
   (window as any).bare = new BareClient();
+  (window as any).myWsTest = () => {
+    const ws = ((window as any).ws = (
+      (window as any).bare as BareClient
+    ).createWebSocket("wss://ws.postman-echo.com/raw", [], {}));
+    ws.onopen = () => console.log("onopen");
+    ws.addEventListener("open", () => console.log("open listener"));
+    ws.onclose = () => console.error(new Error("onclose"));
+    ws.addEventListener("close", () => console.log("close listener"));
+    ws.onmessage = console.log;
+  };
 </script>
 
 {#if ready}

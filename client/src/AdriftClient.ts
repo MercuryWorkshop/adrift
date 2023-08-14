@@ -67,6 +67,7 @@ export class AdriftBareClient extends Client {
     webSocketImpl: WebSocketImpl
   ): WebSocket {
     const ws = new webSocketImpl("ws:null", protocols);
+    const closeEmitter = new EventTarget();
     // this will error. that's okay
 
     let { send, close } = this.connection.wsconnect(
@@ -77,7 +78,7 @@ export class AdriftBareClient extends Client {
       },
       () => {
         onReadyState(WebSocket.CLOSED);
-        ws.dispatchEvent(new Event("close"));
+        closeEmitter.dispatchEvent(new Event("close"));
       },
       (data) => {
         ws.dispatchEvent(
@@ -101,6 +102,30 @@ export class AdriftBareClient extends Client {
         close(code, reason);
       }
     );
+    let onClose = ws.onclose;
+    (ws as any).__defineGetter__("onclose", () => onClose);
+    (ws as any).__defineSetter__("onclose", (newOnClose: any) => {
+      onClose = newOnClose;
+    });
+    closeEmitter.addEventListener("close", () => {
+      if (onClose) onClose.call(ws, new Event("close"));
+    });
+    const _addEventListener = ws.addEventListener.bind(ws);
+    (ws as any).addEventListener = (evt: string, cb: any, options: any) => {
+      if (evt == "close") {
+        closeEmitter.addEventListener("close", cb, options);
+        return;
+      }
+      _addEventListener(evt, cb, options);
+    };
+    const _removeEventListener = ws.removeEventListener.bind(ws);
+    (ws as any).removeEventListener = (evt: string, cb: any, options: any) => {
+      if (evt == "close") {
+        closeEmitter.removeEventListener("close", cb, options);
+        return;
+      }
+      _removeEventListener(evt, cb, options);
+    };
 
     return ws;
   }
