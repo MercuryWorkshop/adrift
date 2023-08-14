@@ -113,6 +113,7 @@ async function answerRtc(data: any, onrespond: (answer: any) => void) {
       console.log("messaged");
       if (event.data instanceof ArrayBuffer) {
         server.onMsg(event.data);
+        return;
       }
       if (event.data instanceof Buffer) {
         server.onMsg(bufferToArrayBuffer(event.data));
