@@ -210,11 +210,14 @@
     </div>
   </div>
 {:else}
+  <h1>Adrift dev menu</h1>
   <Button type="tonal" on:click={connectDevHttp}
-    >Connect with dev webrtc (http signaling server)</Button
+    >Connect with WebRTC transport over localhost HTTP signaling</Button
   >
+  <br />
+  <br />
   <Button type="tonal" on:click={connectDevWS}
-    >Connect with dev websocket</Button
+    >Connect with localhost websocket transport</Button
   >
 {/if}
 
