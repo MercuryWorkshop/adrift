@@ -97,6 +97,7 @@ export class AdriftBareClient extends Client {
     );
 
     ws.send = (data: any) => {
+      console.log("Reached AdriftClient.ts send");
       send(data);
     };
 
