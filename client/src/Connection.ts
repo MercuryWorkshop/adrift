@@ -75,6 +75,20 @@ export class Connection {
         onopen();
         break;
 
+      case S2CRequestTypes.WSDataText: {
+        const socketMeta = this.openSockets[requestID];
+        if (!socketMeta) return;
+        socketMeta.onmessage(new TextDecoder().decode(data.slice(cursor)));
+        break;
+      }
+
+      case S2CRequestTypes.WSDataBinary: {
+        const socketMeta = this.openSockets[requestID];
+        if (!socketMeta) return;
+        socketMeta.onmessage(data.slice(cursor));
+        break;
+      }
+
       default:
         break;
     }
