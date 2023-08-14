@@ -76,7 +76,7 @@ export class AdriftBareClient extends Client {
     onReadyState: ReadyStateCallback,
     webSocketImpl: WebSocketImpl
   ): WebSocket {
-    const ws = new webSocketImpl("ws:null");
+    const ws = new webSocketImpl("ws:null", protocols);
     // this will error. that's okay
 
     let send = this.connection.wsconnect(
