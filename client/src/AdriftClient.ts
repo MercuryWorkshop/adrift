@@ -79,7 +79,7 @@ export class AdriftBareClient extends Client {
     const ws = new webSocketImpl("ws:null", protocols);
     // this will error. that's okay
 
-    let send = this.connection.wsconnect(
+    let { send, close } = this.connection.wsconnect(
       remote,
       () => {
         onReadyState(WebSocketFields.OPEN);
@@ -88,8 +88,6 @@ export class AdriftBareClient extends Client {
       () => {
         onReadyState(WebSocketFields.CLOSED);
         ws.dispatchEvent(new Event("close"));
-
-        // what do i do for WebSocketFields.closing?
       },
       (data) => {
         ws.dispatchEvent(
@@ -100,11 +98,16 @@ export class AdriftBareClient extends Client {
       }
     );
 
-
     (ws as any).__defineGetter__("send", () => (data: any) => {
       send(data);
     });
-    (ws as any).__defineSetter__("send", () => { });
+    // uv wraps it and we don't want that
+    // i can probably fix later but this is fine for now -CE
+    (ws as any).__defineSetter__("send", () => {});
+
+    (ws as any).__defineGetter__("close", (code?: number, reason?: string) => {
+      close(code, reason);
+    });
 
     return ws;
   }
