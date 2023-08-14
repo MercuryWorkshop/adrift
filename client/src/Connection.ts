@@ -91,4 +91,18 @@ export class Connection {
       await this.send(id, new Blob([json]), C2SRequestTypes.HTTPRequest);
     });
   }
+  // idk the type of data, figure it out ig
+  wsconnect(url: URL, onopen: () => void, onclose: () => void, onmessage: (data: any) => void): (data: any) => void {
+
+    // do the connection shit here
+
+    onopen();
+    // this can't be async, just call onopen when opened
+
+    return (data) => {
+
+      // send "data" to the server
+    };
+
+  }
 }
