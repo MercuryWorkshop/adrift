@@ -1,6 +1,7 @@
 import {
   C2SRequestType,
   C2SRequestTypes,
+  C2SWSOpenPayload,
   HTTPRequestPayload,
   HTTPResponsePayload,
   S2CRequestType,
@@ -9,13 +10,22 @@ import {
 } from "protocol";
 
 export class Connection {
-  callbacks: Record<number, Function> = {};
-  openStreams: Record<number, ReadableStreamDefaultController<any>> = {};
+  requestCallbacks: Record<number, Function> = {};
+  openRequestStreams: Record<number, ReadableStreamDefaultController<any>> = {};
+  openingSockets: Record<number, () => void>;
+  openSockets: Record<
+    number,
+    { onclose: () => void; onmessage: (data: any) => void }
+  >;
 
   counter: number = 0;
 
   constructor(public transport: Transport) {
     transport.ondata = this.ondata.bind(this);
+  }
+
+  nextSeq() {
+    return ++this.counter;
   }
 
   ondata(data: ArrayBuffer) {
@@ -35,7 +45,7 @@ export class Connection {
         const payload = JSON.parse(decoder.decode(data.slice(cursor)));
         const stream = new ReadableStream({
           start: (controller) => {
-            this.openStreams[requestID] = controller;
+            this.openRequestStreams[requestID] = controller;
           },
           pull: (controller) => {
             // not needed
@@ -44,17 +54,19 @@ export class Connection {
             // TODO
           },
         });
-        this.callbacks[requestID]({ payload, body: stream });
+        this.requestCallbacks[requestID]({ payload, body: stream });
+        delete this.requestCallbacks[requestID];
         break;
 
       case S2CRequestTypes.HTTPResponseChunk:
-        this.openStreams[requestID]?.enqueue(
+        this.openRequestStreams[requestID]?.enqueue(
           new Uint8Array(data.slice(cursor))
         );
         break;
 
       case S2CRequestTypes.HTTPResponseEnd:
-        this.openStreams[requestID]?.close();
+        this.openRequestStreams[requestID]?.close();
+        delete this.openRequestStreams[requestID];
         break;
     }
   }
@@ -86,23 +98,83 @@ export class Connection {
     let json = JSON.stringify(data);
 
     return new Promise(async (resolve) => {
-      let id = ++this.counter;
-      this.callbacks[id] = resolve;
-      await this.send(id, new Blob([json]), C2SRequestTypes.HTTPRequest);
+      let seq = this.nextSeq();
+      this.requestCallbacks[seq] = resolve;
+      await this.send(seq, new Blob([json]), C2SRequestTypes.HTTPRequest);
     });
   }
-  // idk the type of data, figure it out ig
-  wsconnect(url: URL, onopen: () => void, onclose: () => void, onmessage: (data: any) => void): (data: any) => void {
 
-    // do the connection shit here
+  wsconnect(
+    url: URL,
+    onopen: () => void,
+    onclose: () => void,
+    onmessage: (data: any) => void
+  ): {
+    send: (data: any) => void;
+    close: (code?: number, reason?: string) => void;
+  } {
+    const payload: C2SWSOpenPayload = { url: url.toString() };
+    const payloadJSON = JSON.stringify(payload);
+    let seq = this.nextSeq();
+    this.send(
+      seq,
+      new TextEncoder().encode(payloadJSON),
+      C2SRequestTypes.WSOpen
+    ).catch((e) => {
+      console.error(e);
+      onclose();
+    });
 
-    onopen();
     // this can't be async, just call onopen when opened
+    this.openingSockets[seq] = onopen;
 
-    return (data) => {
-
-      // send "data" to the server
+    return {
+      send: (data) => {
+        if (!this.openSockets[seq]) {
+          throw new Error("send on closed socket");
+        }
+        const cleanup = (e: any) => {
+          console.error(e);
+          delete this.openSockets[seq];
+        };
+        if (typeof data === "string") {
+          this.send(
+            seq,
+            new TextEncoder().encode(data),
+            C2SRequestTypes.WSSendText
+          ).catch(cleanup);
+          return;
+        }
+        if (data instanceof ArrayBuffer) {
+          this.send(seq, data, C2SRequestTypes.WSSendBinary).catch(cleanup);
+          return;
+        }
+        if (ArrayBuffer.isView(data)) {
+          this.send(
+            seq,
+            data.buffer.slice(
+              data.byteOffset,
+              data.byteOffset + data.byteLength
+            ),
+            C2SRequestTypes.WSSendBinary
+          ).catch(cleanup);
+          return;
+        }
+        console.error({ data });
+        throw new Error("Unexpected type passed to send");
+      },
+      close: (code?: number, reason?: string) => {
+        const payload = JSON.stringify({ code, reason });
+        this.send(
+          seq,
+          new TextEncoder().encode(payload),
+          C2SRequestTypes.WSClose
+        ).catch((e) => {
+          // At this point there is nothing left to clean up
+          console.error(e);
+        });
+        delete this.openSockets[seq];
+      },
     };
-
   }
 }

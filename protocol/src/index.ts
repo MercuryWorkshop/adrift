@@ -34,4 +34,14 @@ export type HTTPResponsePayload = {
   headers: ProtoBareHeaders;
 };
 
+export type C2SWSOpenPayload = {
+  url: string;
+};
+
+export type S2CWSClosePayload = {
+  code: number;
+  reason: string;
+  wasClean: boolean;
+};
+
 export { Transport } from "./Transport";
