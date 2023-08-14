@@ -5,6 +5,7 @@ import {
   C2SRequestTypes,
   HTTPRequestPayload,
   HTTPResponsePayload,
+  MAX_CHUNK_SIZE,
   ProtoBareHeaders,
   S2CRequestType,
   S2CRequestTypes,
@@ -235,7 +236,13 @@ export class AdriftServer {
         const { payload, body } = resp;
         this.sendHTTPResponseStart(seq, payload);
         for await (const chunk of body) {
-          this.sendHTTPResponseChunk(seq, new Uint8Array(chunk));
+          let chunkPart = null;
+          let chunkRest = chunk;
+          do {
+            chunkPart = chunkRest.slice(0, MAX_CHUNK_SIZE);
+            chunkRest = chunkRest.slice(MAX_CHUNK_SIZE);
+            this.sendHTTPResponseChunk(seq, new Uint8Array(chunkPart));
+          } while (chunkRest.byteLength > 0);
         }
         this.sendHTTPResponseEnd(seq);
         break;
