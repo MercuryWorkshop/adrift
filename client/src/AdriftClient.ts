@@ -9,13 +9,8 @@ import {
 } from "bare-client-custom";
 import { Connection } from "./Connection";
 
-// export class Adrift {
-//   bareclient:AdriftBareClient,
-//   constructor(connection:Connection){
-//
-//   }
-// }
-//
+// https://fetch.spec.whatwg.org/#statuses
+const NULL_BODY_STATUSES = [101, 103, 204, 205, 304];
 
 export class AdriftBareClient extends Client {
   constructor(private connection: Connection) {
@@ -38,7 +33,7 @@ export class AdriftBareClient extends Client {
       console.log({ body });
       throw new Error("bare-client-custom passed an unexpected body type");
     }
-    let { payload, body: respBody } = await this.connection.httprequest({
+    let { payload, body: respRawBody } = await this.connection.httprequest({
       method,
       requestHeaders,
       body,
@@ -51,6 +46,18 @@ export class AdriftBareClient extends Client {
       }
     }
 
+    let respBody: ArrayBuffer | null = respRawBody;
+    if (
+      respBody.byteLength == 0 ||
+      NULL_BODY_STATUSES.includes(payload.status)
+    ) {
+      respBody = null;
+    }
+
+    console.log("constructing Response", {
+      status: payload.status,
+      body: respBody?.byteLength,
+    });
     return new Response(respBody, {
       status: payload.status,
       statusText: payload.statusText,

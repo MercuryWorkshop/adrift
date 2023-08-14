@@ -43,12 +43,9 @@ export class Connection {
     let requestType = view.getUint8(cursor) as S2CRequestType;
     cursor += 1;
 
-    console.log(requestID, requestType);
-
     const msgText = () => new TextDecoder().decode(data.slice(cursor));
     const msgJSON = () => JSON.parse(msgText());
 
-    console.log({ requestType });
     switch (requestType) {
       case S2CRequestTypes.HTTPResponseStart:
         const payload = msgJSON();
