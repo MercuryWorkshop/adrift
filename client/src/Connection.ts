@@ -12,6 +12,7 @@ import {
 } from "protocol";
 
 type OpenWSMeta = {
+  onopen: () => void;
   onclose: (code: number, reason: string, wasClean: boolean) => void;
   onmessage: (data: any) => void;
   onerror: (message: string) => void;
@@ -20,7 +21,7 @@ type OpenWSMeta = {
 export class Connection {
   requestCallbacks: Record<number, Function> = {};
   openRequestStreams: Record<number, ReadableStreamDefaultController<any>> = {};
-  openingSockets: Record<number, { onopen: () => void; rest: OpenWSMeta }> = {};
+  openingSockets: Record<number, OpenWSMeta> = {};
   openSockets: Record<number, OpenWSMeta> = {};
 
   counter: number = 0;
@@ -47,6 +48,7 @@ export class Connection {
     const msgText = () => new TextDecoder().decode(data.slice(cursor));
     const msgJSON = () => JSON.parse(msgText());
 
+    console.log({ requestType });
     switch (requestType) {
       case S2CRequestTypes.HTTPResponseStart:
         const payload = msgJSON();
@@ -77,10 +79,10 @@ export class Connection {
         break;
 
       case S2CRequestTypes.WSOpen:
-        const { onopen, rest } = this.openingSockets[requestID];
+        const socketMeta = this.openingSockets[requestID];
         delete this.openingSockets[requestID];
-        this.openSockets[requestID] = rest;
-        onopen();
+        this.openSockets[requestID] = socketMeta;
+        setTimeout(() => socketMeta.onopen());
         break;
 
       case S2CRequestTypes.WSDataText: {
@@ -98,7 +100,8 @@ export class Connection {
       }
 
       case S2CRequestTypes.WSClose: {
-        const socketMeta = this.openSockets[requestID];
+        const socketMeta =
+          this.openingSockets[requestID] || this.openSockets[requestID];
         if (!socketMeta) return;
         const payload: WSClosePayload = msgJSON();
         setTimeout(() =>
@@ -108,16 +111,18 @@ export class Connection {
             "wasClean" in payload ? Boolean(payload.wasClean) : false
           )
         );
+        delete this.openingSockets[requestID];
         delete this.openSockets[requestID];
         break;
       }
 
       case S2CRequestTypes.WSError: {
-        const socketMeta = this.openSockets[requestID];
+        const socketMeta =
+          this.openingSockets[requestID] || this.openSockets[requestID];
         if (!socketMeta) return;
         const payload: WSErrorPayload = msgJSON();
         setTimeout(() => socketMeta.onerror(payload.message));
-        setTimeout(() => socketMeta.onclose(1006, "", false));
+        // don't delete socket entries because server will send close after this
         break;
       }
 
@@ -187,7 +192,9 @@ export class Connection {
     // this can't be async, just call onopen when opened
     this.openingSockets[seq] = {
       onopen,
-      rest: { onmessage, onclose, onerror },
+      onmessage,
+      onclose,
+      onerror,
     };
 
     return {

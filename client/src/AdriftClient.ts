@@ -71,9 +71,19 @@ export class AdriftBareClient extends Client {
     let initalCloseHappened = false;
     ws.addEventListener("close", (e) => {
       if (!initalCloseHappened) {
+        // we can freely mess with the fake readyState here because there is no
+        //  readyStateChange listener for WebSockets
         onReadyState(WebSocket.CONNECTING);
         e.stopImmediatePropagation();
         initalCloseHappened = true;
+      }
+    });
+    let initialErrorHappened = false;
+    ws.addEventListener("error", (e) => {
+      if (!initialErrorHappened) {
+        onReadyState(WebSocket.CONNECTING);
+        e.stopImmediatePropagation();
+        initialErrorHappened = true;
       }
     });
 
@@ -95,6 +105,7 @@ export class AdriftBareClient extends Client {
         );
       },
       (message: string) => {
+        console.log({ message });
         ws.dispatchEvent(new ErrorEvent("error", { message }));
       }
     );

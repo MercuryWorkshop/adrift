@@ -246,8 +246,8 @@ export class AdriftServer {
         const ws = (this.sockets[seq] = new WebSocket(payload.url));
         ws.binaryType = "arraybuffer";
         ws.onerror = (e) => {
-          // WSError implies close with code 1006, reason "" and wasClean false
           this.sendWSError(seq, { message: e.message });
+          // onclose will be called after this with code 1006, reason "" and wasClean false
         };
         ws.onopen = () => {
           this.sendWSOpen(seq);
