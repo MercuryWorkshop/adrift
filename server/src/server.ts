@@ -13,7 +13,7 @@ import {
   WSErrorPayload,
 } from "protocol";
 import { Readable, Writable } from "stream";
-import { BareError, bareFetch, options } from "./http";
+import { BareError, bareInitialFetch, fetchResponse, options } from "./http";
 
 function bareErrorToResponse(e: BareError): {
   payload: HTTPResponsePayload;
@@ -32,7 +32,7 @@ function bareErrorToResponse(e: BareError): {
 
 export class AdriftServer {
   send: (msg: ArrayBuffer) => void;
-  requestStreams: Record<number, Writable> = {};
+  requestStreams: Record<number, Promise<Writable>> = {};
   sockets: Record<number, WebSocket> = {};
   events: EventEmitter;
 
@@ -77,8 +77,8 @@ export class AdriftServer {
   }
 
   async handleHTTPRequest(
-    payload: HTTPRequestPayload,
-    pipeOutgoing: (s: Writable) => void
+    seq: number,
+    payload: HTTPRequestPayload
   ): Promise<{
     payload: HTTPResponsePayload;
     body: AsyncIterable<ArrayBuffer>;
@@ -92,13 +92,13 @@ export class AdriftServer {
 
     let resp: IncomingMessage;
     try {
-      resp = await bareFetch(
+      const outgoing = await (this.requestStreams[seq] = bareInitialFetch(
         payload,
-        pipeOutgoing,
         abort.signal,
         new URL(payload.remote),
         options
-      );
+      ));
+      resp = await fetchResponse(outgoing);
     } catch (e) {
       if (e instanceof BareError) {
         return bareErrorToResponse(e);
@@ -214,10 +214,10 @@ export class AdriftServer {
         if (!reqPayload) return;
 
         try {
-          resp = await this.handleHTTPRequest(reqPayload, (outgoingStream) => {
-            this.requestStreams[seq] = outgoingStream;
-          });
+          resp = await this.handleHTTPRequest(seq, reqPayload);
         } catch (e) {
+          // drop the upload if we are sending an error document
+          console.log("error drop");
           delete this.requestStreams[seq];
           if (options.logErrors) console.error(e);
 
@@ -243,7 +243,6 @@ export class AdriftServer {
           resp = bareErrorToResponse(bareError);
         }
 
-        delete this.requestStreams[seq];
         const { payload, body } = resp;
         this.sendHTTPResponseStart(seq, payload);
 
@@ -257,20 +256,26 @@ export class AdriftServer {
           } while (chunkRest.byteLength > 0);
         }
         this.sendHTTPResponseEnd(seq);
+        // if the body upload *still* isn't done by the time the response is done
+        //  downloading, kill it.
+        console.log("final drop");
+        delete this.requestStreams[seq];
         break;
       }
 
       case C2SRequestTypes.HTTPRequestChunk: {
         const stream = this.requestStreams[seq];
         if (!stream) return;
-        stream.write(new Uint8Array(msg.slice(cursor)));
+        (await stream).write(new Uint8Array(msg.slice(cursor)));
         break;
       }
 
       case C2SRequestTypes.HTTPRequestEnd: {
+        console.log("req end");
         const stream = this.requestStreams[seq];
         if (!stream) return;
-        stream.end();
+        console.log("req end drop");
+        (await stream).end();
         delete this.requestStreams[seq];
         break;
       }
