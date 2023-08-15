@@ -7,7 +7,6 @@ import {
   ReadyStateCallback,
   WebSocketImpl,
 } from "bare-client-custom";
-import { ReadableStream, TransformStream } from "node:stream/web";
 import { MAX_CHUNK_SIZE } from "protocol";
 import { Connection } from "./Connection";
 
@@ -22,6 +21,17 @@ function createBodyStream(
   body: BodyInit | null
 ): ReadableStream<ArrayBuffer | Uint8Array> | null {
   if (body === null) return null;
+
+  if (typeof body === "string") {
+    body = new TextEncoder().encode(body);
+  }
+
+  if (ArrayBuffer.isView(body)) {
+    body = body.buffer.slice(
+      body.byteOffset,
+      body.byteOffset + body.byteLength
+    );
+  }
 
   const transformer = () =>
     new TransformStream({
@@ -82,7 +92,6 @@ function createBodyStream(
   }
 
   if (body instanceof Blob) {
-    // @ts-expect-error
     return body.stream().pipeThrough(transformer());
   }
 

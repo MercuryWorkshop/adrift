@@ -12,7 +12,7 @@ import {
   WSClosePayload,
   WSErrorPayload,
 } from "protocol";
-import { Readable } from "stream";
+import { Readable, Writable } from "stream";
 import { BareError, bareFetch, options } from "./http";
 
 function bareErrorToResponse(e: BareError): {
@@ -25,12 +25,14 @@ function bareErrorToResponse(e: BareError): {
       statusText: STATUS_CODES[e.status] || "",
       headers: {},
     },
+    // TODO: this is node specific. for web we might have to go through Blob here
     body: Readable.from(JSON.stringify(e.body)),
   };
 }
 
 export class AdriftServer {
   send: (msg: ArrayBuffer) => void;
+  requestStreams: Record<number, Writable> = {};
   sockets: Record<number, WebSocket> = {};
   events: EventEmitter;
 
@@ -74,7 +76,10 @@ export class AdriftServer {
     return payload;
   }
 
-  async handleHTTPRequest(payload: HTTPRequestPayload): Promise<{
+  async handleHTTPRequest(
+    payload: HTTPRequestPayload,
+    pipeOutgoing: (s: Writable) => void
+  ): Promise<{
     payload: HTTPResponsePayload;
     body: AsyncIterable<ArrayBuffer>;
   }> {
@@ -89,6 +94,7 @@ export class AdriftServer {
     try {
       resp = await bareFetch(
         payload,
+        pipeOutgoing,
         abort.signal,
         new URL(payload.remote),
         options
@@ -199,16 +205,20 @@ export class AdriftServer {
     if (!init) return;
     const { cursor, seq, op } = init;
     switch (op) {
-      case C2SRequestTypes.HTTPRequest: {
+      case C2SRequestTypes.HTTPRequestStart: {
         let resp: {
           payload: HTTPResponsePayload;
           body: AsyncIterable<ArrayBuffer>;
         };
         const reqPayload = AdriftServer.tryParseJSONPayload(msg.slice(cursor));
         if (!reqPayload) return;
+
         try {
-          resp = await this.handleHTTPRequest(reqPayload);
+          resp = await this.handleHTTPRequest(reqPayload, (outgoingStream) => {
+            this.requestStreams[seq] = outgoingStream;
+          });
         } catch (e) {
+          delete this.requestStreams[seq];
           if (options.logErrors) console.error(e);
 
           let bareError;
@@ -233,8 +243,10 @@ export class AdriftServer {
           resp = bareErrorToResponse(bareError);
         }
 
+        delete this.requestStreams[seq];
         const { payload, body } = resp;
         this.sendHTTPResponseStart(seq, payload);
+
         for await (const chunk of body) {
           let chunkPart = null;
           let chunkRest = chunk;
@@ -245,6 +257,21 @@ export class AdriftServer {
           } while (chunkRest.byteLength > 0);
         }
         this.sendHTTPResponseEnd(seq);
+        break;
+      }
+
+      case C2SRequestTypes.HTTPRequestChunk: {
+        const stream = this.requestStreams[seq];
+        if (!stream) return;
+        stream.write(new Uint8Array(msg.slice(cursor)));
+        break;
+      }
+
+      case C2SRequestTypes.HTTPRequestEnd: {
+        const stream = this.requestStreams[seq];
+        if (!stream) return;
+        stream.end();
+        delete this.requestStreams[seq];
         break;
       }
 

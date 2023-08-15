@@ -1,4 +1,3 @@
-import { ReadableStream } from "node:stream/web";
 import {
   C2SRequestType,
   C2SRequestTypes,
@@ -164,11 +163,11 @@ export class Connection {
       await this.send(seq, C2SRequestTypes.HTTPRequestStart, new Blob([json]));
 
       if (body) {
-        for await (const chunk of body) {
+        for await (const chunk of body as unknown as NodeJS.ReadableStream) {
           await this.send(
             seq,
             C2SRequestTypes.HTTPRequestChunk,
-            new Uint8Array(chunk)
+            new Uint8Array(chunk as Uint8Array | ArrayBuffer)
           );
         }
       }

@@ -9,7 +9,7 @@ import {
 import { Agent as HTTPSAgent, request as httpsRequest } from "https";
 import fuck from "ipaddr.js";
 import { HTTPRequestPayload } from "protocol";
-import { Readable } from "stream";
+import { Writable } from "stream";
 const { isValid, parse } = fuck;
 
 export interface BareErrorBody {
@@ -139,6 +139,7 @@ function outgoingError<T>(error: T): T | BareError {
 
 export async function bareFetch(
   request: HTTPRequestPayload,
+  pipeOutgoing: (s: Writable) => void,
   signal: AbortSignal,
   remote: URL,
   options: BareServerOptions
@@ -172,8 +173,7 @@ export async function bareFetch(
     });
   else throw new RangeError(`Unsupported protocol: '${remote.protocol}'`);
 
-  if (request.body) Readable.from([request.body]).pipe(outgoing);
-  else outgoing.end();
+  pipeOutgoing(outgoing);
 
   return await new Promise((resolve, reject) => {
     outgoing.on("response", (response: IncomingMessage) => {
