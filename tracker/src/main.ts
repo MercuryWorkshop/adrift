@@ -49,9 +49,15 @@ reff.on("value", snapshot => {
     if (members.length < 1) {
       db.ref(`/swarm/${key}`).set(JSON.stringify({ error: "no swarm members found" }));
       console.error("no swarm members!");
+      return;
     }
 
     let selectedmember = members[Math.floor(Math.random() * members.length)];
+
+    selectedmember.once("message", (answer) => {
+      db.ref(`/swarm/${key}`).set(answer);
+    });
+    selectedmember.send(offer);
 
   }
 
@@ -63,9 +69,6 @@ app.ws("/join", (ws, _req) => {
 
   console.log("ws connect");
   members.push(ws);
-  ws.on("message", (msg) => {
-
-  });
 
   ws.onclose = () => {
     members.filter(member => member != ws);

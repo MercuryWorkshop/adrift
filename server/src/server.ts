@@ -199,7 +199,7 @@ export class AdriftServer {
     if (!init) return;
     const { cursor, seq, op } = init;
     switch (op) {
-      case C2SRequestTypes.HTTPRequest: {
+      case C2SRequestTypes.HTTPRequestChunk: {
         let resp: {
           payload: HTTPResponsePayload;
           body: AsyncIterable<ArrayBuffer>;

@@ -9,6 +9,9 @@ import { auth } from "firebase-config";
 import { getDatabase, onValue, ref, set } from "firebase/database";
 import { AdriftServer } from "./server";
 
+import { WebSocket } from "isomorphic-ws";
+
+
 const configuration = {
   iceServers: [
     {
@@ -161,11 +164,7 @@ async function connectFirebase() {
 
     if (str) {
       let data = JSON.parse(str);
-      console.log(data);
-      console.log(data.offer);
-      console.log(data.localCandidates);
       if (data && data.offer && data.localCandidates) {
-        console.log("answerng");
         answerRtc(data, (answer) => {
           console.log("answering");
           set(peer, JSON.stringify(answer));
@@ -175,5 +174,19 @@ async function connectFirebase() {
   });
 }
 connectFirebase();
+
+let tracker = new WebSocket("ws://localhost:17776/join");
+tracker.on("message", (str: string) => {
+  if (!str) return;
+  let data = JSON.parse(str);
+  if (!(data && data.offer && data.localCandidates)) return;
+  console.log("got offer");
+
+  answerRtc(data, (answer) => {
+    console.log("have an answer");
+    tracker.send(JSON.stringify(answer));
+  })
+
+});
 
 app.listen(3000, () => console.log("listening"));
