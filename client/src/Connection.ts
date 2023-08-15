@@ -1,3 +1,4 @@
+import { ReadableStream } from "node:stream/web";
 import {
   C2SRequestType,
   C2SRequestTypes,
@@ -130,8 +131,8 @@ export class Connection {
 
   async send(
     requestID: number,
-    data: ArrayBuffer | Blob,
-    type: C2SRequestType
+    type: C2SRequestType,
+    data?: ArrayBuffer | Blob
   ): Promise<void> {
     let header = new ArrayBuffer(2 + 1);
     let view = new DataView(header);
@@ -143,21 +144,35 @@ export class Connection {
     view.setUint8(cursor, type);
     cursor += 1;
 
-    let buf = await new Blob([header, data]).arrayBuffer();
+    let buf = header;
+    if (data) {
+      buf = await new Blob([header, data]).arrayBuffer();
+    }
 
     this.transport.send(buf);
-    console.log(buf);
   }
 
   httprequest(
-    data: HTTPRequestPayload
+    data: HTTPRequestPayload,
+    body: ReadableStream<ArrayBuffer | Uint8Array> | null
   ): Promise<{ payload: HTTPResponsePayload; body: ArrayBuffer }> {
     let json = JSON.stringify(data);
 
     return new Promise(async (resolve) => {
       let seq = this.nextSeq();
       this.requestCallbacks[seq] = resolve;
-      await this.send(seq, new Blob([json]), C2SRequestTypes.HTTPRequest);
+      await this.send(seq, C2SRequestTypes.HTTPRequestStart, new Blob([json]));
+
+      if (body) {
+        for await (const chunk of body) {
+          await this.send(
+            seq,
+            C2SRequestTypes.HTTPRequestChunk,
+            new Uint8Array(chunk)
+          );
+        }
+      }
+      await this.send(seq, C2SRequestTypes.HTTPRequestEnd);
     });
   }
 
@@ -179,8 +194,8 @@ export class Connection {
 
     this.send(
       seq,
-      new TextEncoder().encode(payloadJSON),
-      C2SRequestTypes.WSOpen
+      C2SRequestTypes.WSOpen,
+      new TextEncoder().encode(payloadJSON)
     ).catch((e) => {
       console.error(e);
       closeWithError();
@@ -206,23 +221,23 @@ export class Connection {
         if (typeof data === "string") {
           this.send(
             seq,
-            new TextEncoder().encode(data),
-            C2SRequestTypes.WSSendText
+            C2SRequestTypes.WSSendText,
+            new TextEncoder().encode(data)
           ).catch(cleanup);
           return;
         }
         if (data instanceof ArrayBuffer) {
-          this.send(seq, data, C2SRequestTypes.WSSendBinary).catch(cleanup);
+          this.send(seq, C2SRequestTypes.WSSendBinary, data).catch(cleanup);
           return;
         }
         if (ArrayBuffer.isView(data)) {
           this.send(
             seq,
+            C2SRequestTypes.WSSendBinary,
             data.buffer.slice(
               data.byteOffset,
               data.byteOffset + data.byteLength
-            ),
-            C2SRequestTypes.WSSendBinary
+            )
           ).catch(cleanup);
           return;
         }
@@ -234,8 +249,8 @@ export class Connection {
         const payloadJSON = JSON.stringify(payload);
         this.send(
           seq,
-          new TextEncoder().encode(payloadJSON),
-          C2SRequestTypes.WSClose
+          C2SRequestTypes.WSClose,
+          new TextEncoder().encode(payloadJSON)
         ).catch((e) => {
           // At this point there is nothing left to clean up
           console.error(e);
