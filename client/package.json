@@ -14,6 +14,7 @@
     "bare-client-custom": "file:../bare-client-custom",
     "firebase": "^10.1.0",
     "protocol": "workspace:*",
+    "uuid": "^9.0.0",
     "web-streams-polyfill": "^3.2.1"
   },
   "devDependencies": {

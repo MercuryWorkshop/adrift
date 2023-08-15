@@ -23,6 +23,6 @@ self.__dynamic$config = {
     }
   },
   block: [
-  
+
   ]
 };

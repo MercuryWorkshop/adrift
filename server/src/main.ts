@@ -9,6 +9,7 @@ import { auth } from "firebase-config";
 import { getDatabase, onValue, ref, set } from "firebase/database";
 import { AdriftServer } from "./server";
 
+import WebSocket from "isomorphic-ws";
 const configuration = {
   iceServers: [
     {
@@ -172,7 +173,7 @@ async function connectFirebase() {
 }
 connectFirebase();
 
-/*let tracker = new WebSocket("ws://localhost:17776/join");
+let tracker = new WebSocket("ws://localhost:17776/join");
 tracker.on("message", (str: string) => {
   if (!str) return;
   let data = JSON.parse(str);
@@ -184,6 +185,6 @@ tracker.on("message", (str: string) => {
     tracker.send(JSON.stringify(answer));
   })
 
-});*/
+});
 
 app.listen(3000, () => console.log("listening"));
