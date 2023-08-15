@@ -28,6 +28,7 @@ export type HTTPRequestPayload = {
   method: string;
   requestHeaders: ProtoBareHeaders;
   remote: URL;
+  hasBody: boolean;
 };
 
 export type HTTPResponsePayload = {

@@ -33,6 +33,28 @@ function createBodyStream(
     );
   }
 
+  if (body instanceof ArrayBuffer) {
+    if (body.byteLength == 0) {
+      return null;
+    }
+    let remaining = body;
+    return new ReadableStream({
+      type: "bytes",
+      pull: (controller) => {
+        if (remaining.byteLength <= 0) {
+          return controller.close();
+        }
+        const current = remaining.slice(0, MAX_CHUNK_SIZE);
+        remaining = remaining.slice(MAX_CHUNK_SIZE);
+        controller.enqueue(new Uint8Array(current));
+      },
+    });
+  }
+
+  if (body instanceof FormData) {
+    throw new Error("formdata todo");
+  }
+
   const transformer = () =>
     new TransformStream({
       transform: async (
@@ -73,30 +95,8 @@ function createBodyStream(
     return body.pipeThrough(transformer());
   }
 
-  if (body instanceof ArrayBuffer) {
-    if (body.byteLength == 0) {
-      return null;
-    }
-    let remaining = body;
-    return new ReadableStream({
-      type: "bytes",
-      pull: (controller) => {
-        if (remaining.byteLength <= 0) {
-          return controller.close();
-        }
-        const current = remaining.slice(0, MAX_CHUNK_SIZE);
-        remaining = remaining.slice(MAX_CHUNK_SIZE);
-        controller.enqueue(new Uint8Array(current));
-      },
-    });
-  }
-
   if (body instanceof Blob) {
     return body.stream().pipeThrough(transformer());
-  }
-
-  if (body instanceof FormData) {
-    throw new Error("formdata todo");
   }
 
   throw new Error("Unexpected body type: " + body);
@@ -139,10 +139,6 @@ export class AdriftBareClient extends Client {
       respBody = null;
     }
 
-    console.log("constructing Response", {
-      status: payload.status,
-      body: respBody?.byteLength,
-    });
     return new Response(respBody, {
       status: payload.status,
       statusText: payload.statusText,

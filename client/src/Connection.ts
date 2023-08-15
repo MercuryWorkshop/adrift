@@ -4,6 +4,7 @@ import {
   C2SWSOpenPayload,
   HTTPRequestPayload,
   HTTPResponsePayload,
+  ProtoBareHeaders,
   S2CRequestType,
   S2CRequestTypes,
   Transport,
@@ -152,17 +153,22 @@ export class Connection {
   }
 
   httprequest(
-    data: HTTPRequestPayload,
+    data: {
+      method: string;
+      requestHeaders: ProtoBareHeaders;
+      remote: URL;
+    },
     body: ReadableStream<ArrayBuffer | Uint8Array> | null
   ): Promise<{ payload: HTTPResponsePayload; body: ArrayBuffer }> {
-    let json = JSON.stringify(data);
+    const payload: HTTPRequestPayload = { ...data, hasBody: Boolean(body) };
+    let json = JSON.stringify(payload);
 
     return new Promise(async (resolve) => {
       let seq = this.nextSeq();
       this.requestCallbacks[seq] = resolve;
       await this.send(seq, C2SRequestTypes.HTTPRequestStart, new Blob([json]));
 
-      if (body) {
+      if (payload.hasBody) {
         for await (const chunk of body as unknown as NodeJS.ReadableStream) {
           await this.send(
             seq,
@@ -170,8 +176,8 @@ export class Connection {
             new Uint8Array(chunk as Uint8Array | ArrayBuffer)
           );
         }
+        await this.send(seq, C2SRequestTypes.HTTPRequestEnd);
       }
-      await this.send(seq, C2SRequestTypes.HTTPRequestEnd);
     });
   }
 

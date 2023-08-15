@@ -92,13 +92,20 @@ export class AdriftServer {
 
     let resp: IncomingMessage;
     try {
-      const outgoing = await (this.requestStreams[seq] = bareInitialFetch(
+      const outgoingPromise = bareInitialFetch(
         payload,
         abort.signal,
         new URL(payload.remote),
         options
-      ));
-      resp = await fetchResponse(outgoing);
+      );
+      if (payload.hasBody) {
+        this.requestStreams[seq] = outgoingPromise;
+      }
+      const outgoingStream = await outgoingPromise;
+      if (!payload.hasBody) {
+        outgoingStream.end();
+      }
+      resp = await fetchResponse(await outgoingPromise);
     } catch (e) {
       if (e instanceof BareError) {
         return bareErrorToResponse(e);
@@ -243,10 +250,10 @@ export class AdriftServer {
           resp = bareErrorToResponse(bareError);
         }
 
-        const { payload, body } = resp;
+        const { payload, body: responseBody } = resp;
         this.sendHTTPResponseStart(seq, payload);
 
-        for await (const chunk of body) {
+        for await (const chunk of responseBody) {
           let chunkPart = null;
           let chunkRest = chunk;
           do {
