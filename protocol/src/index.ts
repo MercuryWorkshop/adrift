@@ -1,10 +1,12 @@
 export type ObjectValues<T> = T[keyof T];
 export const C2SRequestTypes = {
-  HTTPRequest: 0,
-  WSOpen: 1,
-  WSClose: 2,
-  WSSendText: 3,
-  WSSendBinary: 4,
+  HTTPRequestStart: 0,
+  HTTPRequestChunk: 1,
+  HTTPRequestEnd: 2,
+  WSOpen: 3,
+  WSClose: 4,
+  WSSendText: 5,
+  WSSendBinary: 6,
 } as const;
 export type C2SRequestType = ObjectValues<typeof C2SRequestTypes>;
 
@@ -13,9 +15,9 @@ export const S2CRequestTypes = {
   HTTPResponseChunk: 1,
   HTTPResponseEnd: 2,
   WSOpen: 3,
-  WSDataText: 4,
-  WSDataBinary: 5,
-  WSClose: 6,
+  WSClose: 4,
+  WSDataText: 5,
+  WSDataBinary: 6,
   WSError: 7,
 } as const;
 export type S2CRequestType = ObjectValues<typeof S2CRequestTypes>;
@@ -25,7 +27,6 @@ export type ProtoBareHeaders = Record<string, string | string[]>;
 export type HTTPRequestPayload = {
   method: string;
   requestHeaders: ProtoBareHeaders;
-  body: string | null;
   remote: URL;
 };
 
