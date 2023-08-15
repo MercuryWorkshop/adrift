@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -85,10 +85,14 @@ importers:
         version: 4.9.4
 
   Ultraviolet:
+    dependencies:
+      bare-client-custom:
+        specifier: workspace:2.2.0-alpha
+        version: link:../bare-client-custom
     devDependencies:
       '@tomphttp/bare-client':
-        specifier: ^2.2.0-alpha
-        version: 2.2.0-alpha
+        specifier: file:../bare-client-custom/
+        version: file:bare-client-custom
       css-tree:
         specifier: ^2.3.1
         version: 2.3.1
@@ -185,7 +189,7 @@ importers:
   corium:
     dependencies:
       '@rollup/browser':
-        specifier: ^3.17.2
+        specifier: ^3.28.0
         version: 3.28.0
       '@swc/helpers':
         specifier: ^0.4.14
@@ -3730,6 +3734,7 @@ packages:
 
   /@tomphttp/bare-client@2.2.0-alpha:
     resolution: {integrity: sha512-xhcflOpwr92tkpp8SoDhB3nK3LHMBIjx+vgow37XobQew2k0/mXSxmaU7BsDFpOIa1CcLCEsR8gWn0v7Cy9+7Q==}
+    dev: false
 
   /@tomphttp/bare-server-node@2.0.1:
     resolution: {integrity: sha512-L42TC/AldYRFBRZSxhkI0FC5TL8EC/NAsepNC/cWYTTiHQJ7mGg/vdTqNz8ShTYHr6LTHYkuD3/81nhX55SYtA==}
@@ -3971,7 +3976,6 @@ packages:
 
   /@types/uuid@9.0.2:
     resolution: {integrity: sha512-kNnC1GFBLuhImSnV7w4njQkUiJi0ZXUycu1rUaouPqiKlXkh77JKgdRnTAp1x5eBwcIwbtI+3otwzuIDEuDoxQ==}
-    dev: false
 
   /@types/webrtc@0.0.36:
     resolution: {integrity: sha512-tYFarc92EluXU7XyRmWbkQXSbZIOHTdDOudFPal9u/TNTQuouWpIHV/2o9bNAdqvTJFjLJh/zflCOLWbL30tEQ==}
@@ -10906,7 +10910,6 @@ packages:
   /uuid@9.0.0:
     resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
     hasBin: true
-    dev: false
 
   /v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
@@ -11377,14 +11380,15 @@ packages:
   file:bare-client-custom:
     resolution: {directory: bare-client-custom, type: directory}
     name: bare-client-custom
+    version: 2.2.0-alpha
     dependencies:
       '@types/uuid': 9.0.2
       uuid: 9.0.0
-    dev: false
 
   file:corium:
     resolution: {directory: corium, type: directory}
     name: corium
+    version: 1.0.0-alpha.2
     dependencies:
       '@rollup/browser': 3.28.0
       '@swc/helpers': 0.4.14

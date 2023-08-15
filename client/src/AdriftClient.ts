@@ -18,7 +18,8 @@ const NULL_BODY_STATUSES = [101, 103, 204, 205, 304];
  * below MAX_CHUNK_SIZE.
  */
 function createBodyStream(
-  body: BodyInit | null
+  body: BodyInit | null,
+  arrayBufferImpl: ArrayBufferConstructor
 ): ReadableStream<ArrayBuffer | Uint8Array> | null {
   if (body === null || typeof body === "undefined") return null;
 
@@ -113,9 +114,10 @@ export class AdriftBareClient extends Client {
     remote: URL,
     cache: string | undefined,
     duplex: string | undefined,
-    signal: AbortSignal | undefined
+    signal: AbortSignal | undefined,
+    arrayBufferImpl: ArrayBufferConstructor,
   ): Promise<BareResponse> {
-    const bodyStream = createBodyStream(body);
+    const bodyStream = createBodyStream(body, arrayBufferImpl);
     let { payload, body: respRawBody } = await this.connection.httprequest(
       {
         method,
@@ -152,7 +154,8 @@ export class AdriftBareClient extends Client {
     getRequestHeaders: GetRequestHeadersCallback,
     onMeta: MetaCallback,
     onReadyState: ReadyStateCallback,
-    webSocketImpl: WebSocketImpl
+    webSocketImpl: WebSocketImpl,
+    arrayBufferImpl: ArrayBufferConstructor,
   ): WebSocket {
     const ws = new webSocketImpl("ws:null", protocols);
     // this will error. that's okay
@@ -188,6 +191,10 @@ export class AdriftBareClient extends Client {
       },
       (data) => {
         console.log({ data, binaryType: ws.binaryType });
+        if (data instanceof ArrayBuffer) {
+          (data as any).__proto__ = arrayBufferImpl.prototype;
+        }
+
         ws.dispatchEvent(
           new MessageEvent("message", {
             data,
@@ -197,7 +204,8 @@ export class AdriftBareClient extends Client {
       (message: string) => {
         console.log({ message });
         ws.dispatchEvent(new ErrorEvent("error", { message }));
-      }
+      },
+      arrayBufferImpl
     );
 
     ws.send = (data: any) => {

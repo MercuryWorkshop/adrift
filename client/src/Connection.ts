@@ -106,7 +106,8 @@ export class Connection {
       case S2CRequestTypes.WSDataBinary: {
         const socketMeta = this.openSockets[requestID];
         if (!socketMeta) return;
-        setTimeout(() => socketMeta.onmessage(data.slice(cursor)));
+        let slice = data.slice(cursor);
+        setTimeout(() => socketMeta.onmessage(slice));
         break;
       }
 
@@ -200,7 +201,8 @@ export class Connection {
     onopen: () => void,
     onclose: (code: number, reason: string, wasClean: boolean) => void,
     onmessage: (data: any) => void,
-    onerror: (message: string) => void
+    onerror: (message: string) => void,
+    arrayBufferImpl: ArrayBufferConstructor,
   ): {
     send: (data: any) => void;
     close: (code?: number, reason?: string) => void;
@@ -245,11 +247,11 @@ export class Connection {
           ).catch(cleanup);
           return;
         }
-        if (data instanceof window.ArrayBuffer) {
+        if (data instanceof arrayBufferImpl) {
           this.send(seq, C2SRequestTypes.WSSendBinary, data).catch(cleanup);
           return;
         }
-        if (window.ArrayBuffer.isView(data)) {
+        if (arrayBufferImpl.isView(data)) {
           this.send(
             seq,
             C2SRequestTypes.WSSendBinary,
