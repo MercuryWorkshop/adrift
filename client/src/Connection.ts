@@ -19,6 +19,19 @@ type OpenWSMeta = {
   onerror: (message: string) => void;
 };
 
+(ReadableStream as any).prototype[Symbol.asyncIterator] = async function* () {
+  const reader = this.getReader();
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) return;
+      yield value;
+    }
+  } finally {
+    reader.releaseLock();
+  }
+};
+
 export class Connection {
   requestCallbacks: Record<number, Function> = {};
   openRequestStreams: Record<number, ReadableStreamDefaultController<any>> = {};
