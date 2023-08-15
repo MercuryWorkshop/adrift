@@ -20,7 +20,7 @@ const NULL_BODY_STATUSES = [101, 103, 204, 205, 304];
 function createBodyStream(
   body: BodyInit | null
 ): ReadableStream<ArrayBuffer | Uint8Array> | null {
-  if (body === null) return null;
+  if (body === null || typeof body === "undefined") return null;
 
   if (typeof body === "string") {
     body = new TextEncoder().encode(body);
