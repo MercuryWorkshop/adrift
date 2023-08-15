@@ -8,3 +8,4 @@ packages:
   - Ultraviolet
   - Dynamic
   - bare-client-custom
+  - tracker
