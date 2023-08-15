@@ -45,7 +45,6 @@ export class AdriftServer {
     msg: ArrayBuffer
   ): { cursor: number; seq: number; op: number } | undefined {
     try {
-      console.log(msg);
       const dataView = new DataView(msg);
       let cursor = 0;
       const seq = dataView.getUint16(cursor);
@@ -72,7 +71,6 @@ export class AdriftServer {
       }
       throw e;
     }
-    console.log({ payload });
     return payload;
   }
 
@@ -224,7 +222,6 @@ export class AdriftServer {
           resp = await this.handleHTTPRequest(seq, reqPayload);
         } catch (e) {
           // drop the upload if we are sending an error document
-          console.log("error drop");
           delete this.requestStreams[seq];
           if (options.logErrors) console.error(e);
 
@@ -265,7 +262,6 @@ export class AdriftServer {
         this.sendHTTPResponseEnd(seq);
         // if the body upload *still* isn't done by the time the response is done
         //  downloading, kill it.
-        console.log("final drop");
         delete this.requestStreams[seq];
         break;
       }
@@ -278,10 +274,8 @@ export class AdriftServer {
       }
 
       case C2SRequestTypes.HTTPRequestEnd: {
-        console.log("req end");
         const stream = this.requestStreams[seq];
         if (!stream) return;
-        console.log("req end drop");
         (await stream).end();
         delete this.requestStreams[seq];
         break;
