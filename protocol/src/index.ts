@@ -39,6 +39,7 @@ export type HTTPResponsePayload = {
 
 export type C2SWSOpenPayload = {
   url: string;
+  protocols: string | string[];
 };
 
 export type WSClosePayload = {

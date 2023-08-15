@@ -283,7 +283,10 @@ export class AdriftServer {
 
       case C2SRequestTypes.WSOpen: {
         const payload = AdriftServer.tryParseJSONPayload(msg.slice(cursor));
-        const ws = (this.sockets[seq] = new WebSocket(payload.url));
+        const ws = (this.sockets[seq] = new WebSocket(
+          payload.url,
+          payload.protocols
+        ));
         ws.binaryType = "arraybuffer";
         ws.onerror = (e) => {
           this.sendWSError(seq, { message: e.message });

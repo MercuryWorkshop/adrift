@@ -183,6 +183,7 @@ export class Connection {
 
   wsconnect(
     url: URL,
+    protocols: string | string[],
     onopen: () => void,
     onclose: (code: number, reason: string, wasClean: boolean) => void,
     onmessage: (data: any) => void,
@@ -191,7 +192,7 @@ export class Connection {
     send: (data: any) => void;
     close: (code?: number, reason?: string) => void;
   } {
-    const payload: C2SWSOpenPayload = { url: url.toString() };
+    const payload: C2SWSOpenPayload = { url: url.toString(), protocols };
     const payloadJSON = JSON.stringify(payload);
     let seq = this.nextSeq();
     // todo: onerror

@@ -148,7 +148,7 @@ export class AdriftBareClient extends Client {
 
   connect(
     remote: URL,
-    protocols: string[],
+    protocols: string | string[],
     getRequestHeaders: GetRequestHeadersCallback,
     onMeta: MetaCallback,
     onReadyState: ReadyStateCallback,
@@ -177,6 +177,7 @@ export class AdriftBareClient extends Client {
 
     let { send, close } = this.connection.wsconnect(
       remote,
+      protocols,
       () => {
         onReadyState(WebSocket.OPEN);
         ws.dispatchEvent(new Event("open"));

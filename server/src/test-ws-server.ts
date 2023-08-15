@@ -3,7 +3,7 @@ import { WebSocketServer } from "ws";
 const wss = new WebSocketServer({ host: "127.0.0.1", port: 3002 });
 
 wss.on("connection", (ws) => {
-  console.log("new connection");
+  console.log("new connection", { protocol: ws.protocol });
   ws.binaryType = "nodebuffer";
 
   ws.on("message", (data: Buffer, isBinary: boolean) => {

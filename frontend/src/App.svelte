@@ -187,7 +187,7 @@
     const url = "ws://127.0.0.1:3002/";
     const ws = ((window as any).ws = (
       (window as any).bare as BareClient
-    ).createWebSocket(url, [], {}));
+    ).createWebSocket(url, ["a", "b"], {}));
     ws.onopen = () => console.log("onopen");
     ws.addEventListener("open", () => console.log("open listener"));
     ws.onclose = () => console.error(new Error("onclose"));
