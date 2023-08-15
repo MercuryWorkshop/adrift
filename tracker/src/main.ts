@@ -6,8 +6,11 @@ import expressWs from "express-ws";
 import serviceAccount from "./admin-creds.json";
 
 import admin, { ServiceAccount } from "firebase-admin";
+import { WebSocket } from "ws";
 
 dotenv.config();
+
+let members: WebSocket[] = [];
 
 
 const app = express() as unknown as expressWs.Application;
@@ -20,9 +23,54 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as ServiceAccount),
   databaseURL: "https://adrift-6c1f6-default-rtdb.firebaseio.com"
 });
+let db = admin.database();
+let reff = db.ref("/swarm");
 
-app.ws("/join", (ws: any, _req: any) => {
-  console.log(ws, _req);
+reff.set({
+  dummy: 1,
+});
+
+let ids: string[] = ["dummy"];
+
+reff.on("value", snapshot => {
+  let val = snapshot.val();
+  if (!val) return;
+
+  if (Object.keys(val) == ids) {
+    return;
+  }
+
+  let newkeys = Object.keys(val).filter(id => id != "dummy" && !ids.includes(id));
+
+  for (let key of newkeys) {
+    let offer = val[key];
+    console.log("new offer:" + offer);
+
+    if (members.length < 1) {
+      db.ref(`/swarm/${key}`).set(JSON.stringify({ error: "no swarm members found" }));
+      console.error("no swarm members!");
+    }
+
+    let selectedmember = members[Math.floor(Math.random() * members.length)];
+
+  }
+
+  ids = ids.concat(newkeys);
+});
+
+
+app.ws("/join", (ws, _req) => {
+
+  console.log("ws connect");
+  members.push(ws);
+  ws.on("message", (msg) => {
+
+  });
+
+  ws.onclose = () => {
+    members.filter(member => member != ws);
+  };
+
 });
 
 app.listen(17776, () => console.log("listening"));

@@ -1,5 +1,5 @@
 import { getDatabase, onValue, ref, set, remove } from "firebase/database";
-import "../firebase-config";
+// import "firebase-config";
 
 import { v4 as uuid } from "uuid";
 import { Offer } from "./RTCTransport";
@@ -26,8 +26,8 @@ export async function signalSwarm(offer: string): Promise<Offer> {
         return;
       let data = JSON.parse(text);
 
-      if (data.err) {
-        reject(new Error(data.err));
+      if (data.error) {
+        reject(new Error(data.error));
         return;
       }
       if (!(data && data.answer && data.candidates)) return;

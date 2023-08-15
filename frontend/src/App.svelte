@@ -9,6 +9,7 @@
     Connection,
     DevWsTransport,
     RTCTransport,
+    SignalFirebase,
   } from "client";
   import {
     Button,
@@ -39,6 +40,8 @@
 
   let url: string;
   let proxyIframe: HTMLIFrameElement;
+
+  let rtcState = "";
 
   if (import.meta.env.VITE_ADRIFT_DEV) {
     console.log(
@@ -71,14 +74,25 @@
     console.warn("Transport closed");
   }
 
-  async function connectFirebase() {
-    rtctransport = transport = new RTCTransport(
+  function createRTCTransport() {
+    let transport = new RTCTransport(
       onTransportOpen,
       onTransportClose,
-      console.log,
-      console.log,
-      console.log
+      () => {
+        rtcState = `Connection ${transport.peer.connectionState}`;
+      },
+      () => {
+        rtcState = `Signaling ${transport.peer.connectionState}`;
+      },
+      () => {
+        rtcState = `Gathering ${transport.peer.connectionState}`;
+      }
     );
+    return transport;
+  }
+
+  async function connectFirebase() {
+    rtctransport = transport = createRTCTransport();
 
     let creds = await signInWithEmailAndPassword(auth, email, password);
 
@@ -104,14 +118,15 @@
     });
   }
 
+  async function connectSwarm() {
+    rtctransport = transport = createRTCTransport();
+
+    // let offer = await rtctransport.createOffer();
+    await SignalFirebase.signalSwarm("test");
+  }
+
   async function connectDevHttp() {
-    rtctransport = transport = new RTCTransport(
-      onTransportOpen,
-      onTransportClose,
-      console.log,
-      console.log,
-      console.log
-    );
+    rtctransport = transport = createRTCTransport();
     let offer = await rtctransport.createOffer();
     console.log("offer created", offer);
     console.log(JSON.stringify(offer));
@@ -232,6 +247,10 @@
         >
       </Card>
     </div>
+
+    <h2>
+      {rtcState}
+    </h2>
   </div>
 {:else}
   <div class="flex items-center justify-center h-full">
@@ -245,7 +264,15 @@
           <Button type="filled" on:click={connectDevWS}
             >Connect with localhost websocket transport</Button
           >
+
+          <Button type="filled" on:click={connectSwarm}
+            >Connect with the swarm (webrtc, insecure)
+          </Button>
         </div>
+
+        <h2>
+          {rtcState}
+        </h2>
       </div>
     </Card>
   </div>
