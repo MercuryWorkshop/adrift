@@ -147,7 +147,7 @@ export class Connection {
     type: C2SRequestType,
     data?: ArrayBuffer | Blob
   ): Promise<void> {
-    let header = new ArrayBuffer(2 + 1);
+    let header = new window.ArrayBuffer(2 + 1);
     let view = new DataView(header);
 
     let cursor = 0;
@@ -245,11 +245,11 @@ export class Connection {
           ).catch(cleanup);
           return;
         }
-        if (data instanceof ArrayBuffer) {
+        if (data instanceof window.ArrayBuffer) {
           this.send(seq, C2SRequestTypes.WSSendBinary, data).catch(cleanup);
           return;
         }
-        if (ArrayBuffer.isView(data)) {
+        if (window.ArrayBuffer.isView(data)) {
           this.send(
             seq,
             C2SRequestTypes.WSSendBinary,

@@ -14,7 +14,7 @@ export class DevWsTransport extends Transport {
   }
 
   onmessage(msg: MessageEvent<any>) {
-    if (msg.data instanceof ArrayBuffer) {
+    if (msg.data instanceof window.ArrayBuffer) {
       this.ondata(msg.data);
       return;
     }

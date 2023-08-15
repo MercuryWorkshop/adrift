@@ -13,7 +13,8 @@
     "@types/uuid": "^9.0.2",
     "bare-client-custom": "file:../bare-client-custom",
     "firebase": "^10.1.0",
-    "protocol": "workspace:*"
+    "protocol": "workspace:*",
+    "web-streams-polyfill": "^3.2.1"
   },
   "devDependencies": {
     "@types/node": "^20.4.10"

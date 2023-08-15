@@ -26,14 +26,14 @@ function createBodyStream(
     body = new TextEncoder().encode(body);
   }
 
-  if (ArrayBuffer.isView(body)) {
+  if (window.ArrayBuffer.isView(body)) {
     body = body.buffer.slice(
       body.byteOffset,
       body.byteOffset + body.byteLength
     );
   }
 
-  if (body instanceof ArrayBuffer) {
+  if (body instanceof window.ArrayBuffer) {
     if (body.byteLength == 0) {
       return null;
     }
@@ -68,7 +68,7 @@ function createBodyStream(
         if (chunk instanceof Blob) {
           chunk = await chunk.arrayBuffer();
         }
-        if (ArrayBuffer.isView(chunk)) {
+        if (window.ArrayBuffer.isView(chunk)) {
           chunk = chunk.buffer.slice(
             chunk.byteOffset,
             chunk.byteOffset + chunk.byteLength
@@ -76,7 +76,7 @@ function createBodyStream(
         }
 
         // if none of those worked, give up.
-        if (!(chunk instanceof ArrayBuffer)) {
+        if (!(chunk instanceof window.ArrayBuffer)) {
           console.error({ chunk });
           throw new Error("Invalid type read from body stream: " + chunk);
         }
@@ -187,6 +187,7 @@ export class AdriftBareClient extends Client {
         ws.dispatchEvent(new CloseEvent("close", { code, reason, wasClean }));
       },
       (data) => {
+        console.log({ data, binaryType: ws.binaryType });
         ws.dispatchEvent(
           new MessageEvent("message", {
             data,
