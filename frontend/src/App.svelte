@@ -38,7 +38,7 @@
 
   let selectedProxy = "ultraviolet";
 
-  let url: string;
+  let url: string = "http://google.com";
   let proxyIframe: HTMLIFrameElement;
 
   let rtcState = "";
@@ -172,9 +172,12 @@
   }
   function frameLoad() {
     if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
-      url = __uv$config.decodeUrl(
-        proxyIframe.contentDocument?.location.href.replace(/.*\//g, "")
-      );
+      const location = proxyIframe.contentDocument?.location.href;
+      if (location && location != "about:blank") {
+        url = __uv$config.decodeUrl(
+          proxyIframe.contentDocument?.location.href.replace(/.*\//g, "")
+        );
+      }
     }
   }
 
