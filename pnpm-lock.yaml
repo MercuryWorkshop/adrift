@@ -85,10 +85,6 @@ importers:
         version: 4.9.4
 
   Ultraviolet:
-    dependencies:
-      bare-client-custom:
-        specifier: workspace:2.2.0-alpha
-        version: link:../bare-client-custom
     devDependencies:
       '@tomphttp/bare-client':
         specifier: ^2.2.0-alpha
@@ -178,6 +174,10 @@ importers:
       protocol:
         specifier: workspace:*
         version: link:../protocol
+    devDependencies:
+      '@types/node':
+        specifier: ^20.4.10
+        version: 20.4.10
 
   corium:
     dependencies:
@@ -3774,10 +3774,6 @@ packages:
     resolution: {integrity: sha512-cdeYyv4KWoEgpBISTxWvqYsVy444DOqehiF3fM3ne10AmJ62RSyNkUnxMJXHQWRQQX2eR94m5y1IZyDwBjV9FQ==}
     dependencies:
       '@types/node': 20.4.10
-
-  /@types/crypto-js@4.1.1:
-    resolution: {integrity: sha512-BG7fQKZ689HIoc5h+6D2Dgq1fABRa0RbBWKBd9SP/MVRVXROflpm5fhwyATX5duFmbStzyzyycPB8qUYKDH3NA==}
-    dev: true
 
   /@types/crypto-js@4.1.1:
     resolution: {integrity: sha512-BG7fQKZ689HIoc5h+6D2Dgq1fABRa0RbBWKBd9SP/MVRVXROflpm5fhwyATX5duFmbStzyzyycPB8qUYKDH3NA==}
