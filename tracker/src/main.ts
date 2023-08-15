@@ -55,6 +55,7 @@ reff.on("value", snapshot => {
     let selectedmember = members[Math.floor(Math.random() * members.length)];
 
     selectedmember.once("message", (answer) => {
+      console.log("setting answer" + answer);
       db.ref(`/swarm/${key}`).set(answer);
     });
     selectedmember.send(offer);

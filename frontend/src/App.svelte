@@ -121,8 +121,10 @@
   async function connectSwarm() {
     rtctransport = transport = createRTCTransport();
 
-    // let offer = await rtctransport.createOffer();
-    await SignalFirebase.signalSwarm("test");
+    let offer = await rtctransport.createOffer();
+    let answer = await SignalFirebase.signalSwarm(JSON.stringify(offer));
+
+    rtctransport.answer(answer.answer, answer.candidates);
   }
 
   async function connectDevHttp() {

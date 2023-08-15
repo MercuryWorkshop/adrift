@@ -2,10 +2,10 @@ import { getDatabase, onValue, ref, set, remove } from "firebase/database";
 // import "firebase-config";
 
 import { v4 as uuid } from "uuid";
-import { Offer } from "./RTCTransport";
+import { Answer } from "./RTCTransport";
 
 
-export async function signalSwarm(offer: string): Promise<Offer> {
+export async function signalSwarm(offer: string): Promise<Answer> {
   let id = uuid();
   const db = getDatabase();
   let reff = ref(db, `/swarm/${id}`);
@@ -25,6 +25,7 @@ export async function signalSwarm(offer: string): Promise<Offer> {
       if (!text)
         return;
       let data = JSON.parse(text);
+      console.log(data);
 
       if (data.error) {
         reject(new Error(data.error));

@@ -10,6 +10,7 @@ const rtcConf = {
 
 
 export type Offer = { offer: any; localCandidates: any };
+export type Answer = { answer: any; candidates: any };
 
 
 export class RTCTransport extends Transport {
