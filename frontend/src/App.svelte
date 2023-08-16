@@ -60,13 +60,17 @@
       onTransportOpen,
       onTransportClose,
       () => {
-        connectionState = `Connection ${transport.peer.connectionState}`;
+        connectionState = `Connection ${transport.peer.connectionState}...`;
       },
       () => {
-        connectionState = `Signaling ${transport.peer.connectionState}`;
+        connectionState = `Signaling ${transport.peer.connectionState}...`;
       },
       () => {
-        connectionState = `Gathering ${transport.peer.connectionState}`;
+        if (transport.peer.connectionState == "new") {
+          connectionState = `Creating an offer...`;
+        } else {
+          connectionState = `Gathering ${transport.peer.connectionState}...`;
+        }
       }
     );
     return transport;
@@ -181,10 +185,23 @@
 {#if state == ReadyState.Connected}
   <Proxy />
 {:else if state == ReadyState.Connecting}
-  <CircularProgressIndeterminate />
-  <h2>
-    {connectionState}
-  </h2>
+  <div class="h-full w-full flex justify-center items-center">
+    <Card type="outlined">
+      <div class="flex items-center p-2">
+        <CircularProgressIndeterminate />
+        <div class="p-5" />
+        <h2 class="text-xl">
+          {connectionState}
+        </h2>
+      </div>
+      <br />
+      <p class="text-sm opacity-70">
+        Adrift is routing you to a server available to take your requests.<br
+        />The initial connection may take several minutes depending on server
+        load
+      </p>
+    </Card>
+  </div>
 {:else if !import.meta.env.VITE_ADRIFT_DEV}
   <div id="loginpage">
     <div class="bigcard">
