@@ -11,9 +11,17 @@
     Button,
     Card,
     CircularProgressIndeterminate,
+    Dialog,
+    SegmentedButtonContainer,
+    SegmentedButtonItem,
     StyleFromScheme,
     TextField,
   } from "m3-svelte";
+
+  import iconDiscord from "@iconify-icons/ic/outline-discord";
+  import iconGithub from "@iconify-icons/bi/github";
+  import iconArrow from "@iconify-icons/maki/arrow";
+  import Icon from "@iconify/svelte";
 
   import type { Transport } from "protocol";
 
@@ -37,6 +45,10 @@
   let password = "123456";
 
   let connectionState = "";
+
+  let showSwarmWarning = false;
+  let showLogin = false;
+  let chosenTracker: keyof typeof TrackerList | undefined;
 
   function onTransportOpen() {
     console.log("Transport opened");
@@ -74,7 +86,8 @@
   }
 
   async function initFirebase() {
-    let tracker = TrackerList["us-central-1"];
+    if (!chosenTracker) return;
+    let tracker = TrackerList[chosenTracker];
     initializeApp(tracker.firebase);
   }
 
@@ -162,29 +175,92 @@
     </Card>
   </div>
 {:else if !import.meta.env.VITE_ADRIFT_DEV}
-  <div id="loginpage">
-    <div class="bigcard">
-      <h1>Adrift</h1>
+  <div id="topbar" class="flex justify-between items-center p-4">
+    <div id="logo">
+      <Card type="">
+        <h3 class="text-xl">Adrift</h3>
+      </Card>
     </div>
-
-    <div class="flex justify-evenly">
-      <Card type="filled">basically aero 2</Card>
-      <div />
+    <div id="nav">
+      <!-- <Card type="outlined">
+        <div id="quickmenu">
+          <a href="httsp" class="text-med m-2">About</a>
+          <a
+            href="https://github.com/MercuryWorkshop/adrift"
+            class="text-med m-2">Source</a
+          >
+        </div>
+      </Card> -->
+    </div>
+    <div id="links">
       <Card type="elevated">
-        <TextField name="email" bind:value={email} />
-        <TextField
-          name="password"
-          bind:value={password}
-          extraOptions={{ type: "password" }}
-        />
+        <div class="flex">
+          <a href="https://discord.gg/bAgNyGpXSx">
+            <Icon icon={iconDiscord} class="icon" />
+          </a>
+          <spacer />
+          <a href="https://github.com/MercuryWorkshop/adrift">
+            <Icon icon={iconGithub} class="icon" />
+          </a>
+        </div>
+      </Card>
+    </div>
+  </div>
+  <div id="loginpage">
+    <div class="flex justify-evenly">
+      <Card type="filled">
+        <SegmentedButtonContainer>
+          {#each Object.keys(TrackerList) as tracker}
+            <input
+              type="radio"
+              id={tracker}
+              name="tabs"
+              value={tracker}
+              bind:group={chosenTracker}
+            />
+            <SegmentedButtonItem input={tracker}>{tracker}</SegmentedButtonItem>
+          {/each}
+        </SegmentedButtonContainer>
 
-        <Button type="outlined" on:click={connectAccount}
-          >Connect with firebase</Button
-        >
+        {#if chosenTracker}
+          <Button type="elevated" on:click={() => (showSwarmWarning = true)}
+            >Connect to the swarm</Button
+          >
+          <Button type="filled" on:click={() => (showLogin = true)}
+            >Connect with login</Button
+          >
+        {/if}
 
-        <Button type="filled" on:click={connectSwarm}
-          >Connect with the swarm (firebase, webrtc, insecure)
-        </Button>
+        <Dialog headline="WARNING" open={showSwarmWarning}>
+          <h2 class="text-2xl">
+            TLS has not currently been implemented for the Adrift Swarm. Your
+            data will not be private, and you should not sign into any accounts
+            that you care much about
+          </h2>
+          <br />
+          <Button type="filled" on:click={() => (showLogin = false)}
+            >Cancel</Button
+          >
+          <Button type="outlined" on:click={connectSwarm}
+            >I understand, Connect</Button
+          >
+        </Dialog>
+
+        <Dialog headline="Log in to Connect" open={showLogin}>
+          <TextField name="email" bind:value={email} />
+          <TextField
+            name="password"
+            bind:value={password}
+            extraOptions={{ type: "password" }}
+          />
+
+          <div class="flex">
+            <Button type="outlined" on:click={() => (showLogin = false)}
+              >Cancel</Button
+            >
+            <Button type="filled" on:click={connectAccount}>Connect</Button>
+          </div>
+        </Dialog>
       </Card>
     </div>
   </div>
@@ -288,8 +364,17 @@
 />
 
 <style>
+  :global(.icon) {
+    font-size: 2em;
+  }
   :global(.pad-children > *) {
     margin: 2rem;
+  }
+  :global(#nav > *) {
+    padding: 0.5em;
+  }
+  spacer {
+    margin: 1em;
   }
   #loginpage {
     padding: 2.5em;

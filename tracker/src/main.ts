@@ -34,6 +34,7 @@ let ids: string[] = ["dummy"];
 
 reff.on("value", snapshot => {
   let val = snapshot.val();
+  console.log(val);
   if (!val) return;
 
   if (Object.keys(val) == ids) {

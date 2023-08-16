@@ -288,6 +288,18 @@ importers:
 
   frontend:
     dependencies:
+      '@iconify-icons/bi':
+        specifier: ^1.2.17
+        version: 1.2.17
+      '@iconify-icons/ic':
+        specifier: ^1.2.13
+        version: 1.2.13
+      '@iconify-icons/maki':
+        specifier: ^1.2.18
+        version: 1.2.18
+      '@iconify/svelte':
+        specifier: ^3.1.4
+        version: 3.1.4(svelte@4.2.0)
       '@rollup/browser':
         specifier: ^3.28.0
         version: 3.28.0
@@ -3048,8 +3060,20 @@ packages:
       - supports-color
     dev: true
 
+  /@iconify-icons/bi@1.2.17:
+    resolution: {integrity: sha512-HWNkGtigLf8nYRZjqB0L3cDXik5urLl5Fsipesc/QcnjfozaHcZBH4VjGsZHiPzfEH+EtjGWi9WBUA2SLsiKjQ==}
+    dependencies:
+      '@iconify/types': 2.0.0
+    dev: false
+
   /@iconify-icons/ic@1.2.13:
     resolution: {integrity: sha512-9Y3DLark8PYGtsHuWqbYxo2xAquL9vFQBZKRkpHuntyQJxBDLsfm3OO8mRbj2EmaAQR65pecH77DqQaLnN7yJQ==}
+    dependencies:
+      '@iconify/types': 2.0.0
+    dev: false
+
+  /@iconify-icons/maki@1.2.18:
+    resolution: {integrity: sha512-H/BJ0FLzoGB2KyYtfs88zLY5L7Ns/CXOvzbE7Ge9AKdCTsDJG5CnN5Kj71Zp3OYAH4ikpqZDkE4K34A/EjkVPA==}
     dependencies:
       '@iconify/types': 2.0.0
     dev: false
