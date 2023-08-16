@@ -4,3 +4,4 @@ dist.js.map
 dist.html
 dist/
 admin-creds.json
+server/config.json
