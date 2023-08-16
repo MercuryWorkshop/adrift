@@ -15,7 +15,7 @@
     "express-ws": "^5.0.2",
     "firebase": "^10.1.0",
     "firebase-admin": "^11.10.1",
-    "firebase-config": "workspace:*",
+    "tracker-list": "workspace:*",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
   },

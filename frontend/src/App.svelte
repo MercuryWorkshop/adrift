@@ -20,7 +20,7 @@
     TextField,
   } from "m3-svelte";
   // note: even though we import firebase, due to the tree shaking, it will only run if we use "auth" so if ADRIFT_DEV is set it won't import
-  import { auth } from "firebase-config";
+  // import { auth } from "firebase-config";
   import { signInWithEmailAndPassword } from "firebase/auth";
   import { getDatabase, onValue, ref, set } from "firebase/database";
   import type { Transport } from "protocol";

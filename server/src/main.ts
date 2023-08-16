@@ -5,7 +5,7 @@ import expressWs from "express-ws";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import wrtc from "wrtc";
 
-import { auth } from "firebase-config";
+
 import { getDatabase, onValue, ref, set } from "firebase/database";
 import { AdriftServer } from "./server";
 

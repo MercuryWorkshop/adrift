@@ -1,5 +1,5 @@
 {
-  "name": "firebase-config",
+  "name": "tracker-list",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.ts",
@@ -9,7 +9,5 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "firebase": "^10.1.0"
-  }
+  "dependencies": {}
 }
