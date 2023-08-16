@@ -1,3 +1,4 @@
+import { registerRemoteListener } from "bare-client-custom";
 import App from "./App.svelte";
 import "./index.css";
 if (import.meta.env.VITE_ADRIFT_DEV) {
@@ -18,5 +19,7 @@ const app = new App({
 
 if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
   navigator.serviceWorker.register("/sw.js");
+  console.log("registering bare-client-custom");
+  registerRemoteListener();
 }
 export default app;

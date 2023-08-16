@@ -1,9 +1,5 @@
 <script lang="ts">
-  import {
-    BareClient,
-    registerRemoteListener,
-    setBareClientImplementation,
-  } from "bare-client-custom";
+  import { setBareClientImplementation } from "bare-client-custom";
   import {
     AdriftBareClient,
     Connection,
@@ -19,14 +15,20 @@
     TextField,
   } from "m3-svelte";
 
-  import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-  import { getDatabase, onValue, ref, set } from "firebase/database";
   import type { Transport } from "protocol";
 
   import Proxy from "./Proxy.svelte";
   import { initializeApp } from "firebase/app";
 
   import TrackerList from "tracker-list";
+
+  enum ReadyState {
+    Idle,
+    Connecting,
+    Connected,
+  }
+  let state = ReadyState.Idle;
+
   let transport: Transport;
 
   let rtctransport: RTCTransport | undefined;
@@ -35,11 +37,6 @@
   let password = "123456";
 
   let connectionState = "";
-
-  if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
-    console.log("registering bare-client-custom");
-    registerRemoteListener();
-  }
 
   function onTransportOpen() {
     console.log("Transport opened");
@@ -85,36 +82,19 @@
     await initFirebase();
     rtctransport = transport = createRTCTransport();
 
-    let auth = getAuth();
-    let creds = await signInWithEmailAndPassword(auth, email, password);
     state = ReadyState.Connecting;
-
-    const db = getDatabase();
-    let peer = ref(db, `/peers/${creds.user.uid}`);
-
     let offer = await rtctransport.createOffer();
-
     connectionState = "Finding your node...";
-
-    set(peer, JSON.stringify(offer));
-
-    onValue(peer, async (snapshot) => {
-      const str = snapshot.val();
-      if (str) {
-        console.log(str);
-        let data = JSON.parse(str);
-        console.log(data);
-        if (data && data.answer && data.candidates) {
-          set(peer, null);
-          const { answer, candidates } = data;
-          connectionState = "Linking to node...";
-          await new Promise((r) => {
-            setTimeout(r, 1000);
-          });
-          rtctransport?.answer(answer, candidates);
-        }
-      }
+    let answer = await SignalFirebase.signalAccount(
+      JSON.stringify(offer),
+      email,
+      password
+    );
+    connectionState = "Linking to node...";
+    await new Promise((r) => {
+      setTimeout(r, 1000);
     });
+    rtctransport.answer(answer.answer, answer.candidates);
   }
 
   async function connectSwarm() {
@@ -159,27 +139,6 @@
       console.log("onclose")
     );
   }
-
-  (window as any).bare = new BareClient();
-  (window as any).myWsTest = () => {
-    // const url = "wss://ws.postman-echo.com/raw";
-    const url = "ws://127.0.0.1:3002/";
-    const ws = ((window as any).ws = (
-      (window as any).bare as BareClient
-    ).createWebSocket(url, ["a", "b"], {}));
-    ws.onopen = () => console.log("onopen");
-    ws.addEventListener("open", () => console.log("open listener"));
-    ws.onclose = () => console.error(new Error("onclose"));
-    ws.addEventListener("close", (e) => console.log("close listener", e));
-    ws.onmessage = (e) => console.log("message", e);
-  };
-
-  enum ReadyState {
-    Idle,
-    Connecting,
-    Connected,
-  }
-  let state = ReadyState.Idle;
 </script>
 
 {#if state == ReadyState.Connected}
