@@ -11,13 +11,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/uuid": "^9.0.2",
     "dotenv": "^16.3.1",
     "express-ws": "^5.0.2",
     "firebase": "^10.1.0",
     "firebase-admin": "^11.10.1",
     "tracker-list": "workspace:*",
     "ts-node": "^10.9.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.17",

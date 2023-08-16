@@ -119,14 +119,19 @@
 
     let offer = await rtctransport.createOffer();
     connectionState = "Routing you to an available node...";
+    try {
+      let answer = await SignalFirebase.signalSwarm(JSON.stringify(offer));
 
-    let answer = await SignalFirebase.signalSwarm(JSON.stringify(offer));
-    connectionState = "Linking to node...";
-    await new Promise((r) => {
-      setTimeout(r, 500);
-    });
+      connectionState = "Linking to node...";
+      await new Promise((r) => {
+        setTimeout(r, 500);
+      });
 
-    rtctransport.answer(answer.answer, answer.candidates);
+      rtctransport.answer(answer.answer, answer.candidates);
+    } catch (e) {
+      console.error(e);
+      connectionState = e;
+    }
   }
 
   async function connectDevHttp() {
