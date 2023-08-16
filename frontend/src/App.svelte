@@ -105,7 +105,7 @@
           const { answer, candidates } = data;
           connectionState = "Linking to node...";
           await new Promise((r) => {
-            setTimeout(r, 500);
+            setTimeout(r, 1000);
           });
           rtctransport?.answer(answer, candidates);
         }

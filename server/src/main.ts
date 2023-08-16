@@ -1,61 +1,43 @@
-import dotenv from "dotenv";
-import express from "express";
-import expressWs from "express-ws";
 
-import { AdriftServer, connectTracker } from "./server";
-
-import WebSocket from "isomorphic-ws";
-import { answerRtc, bufferToArrayBuffer, connect } from "./rtc";
-
-dotenv.config();
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { initializeApp } from "firebase/app";
 
 
-const app = express() as unknown as expressWs.Application;
-expressWs(app);
+import { getDatabase, onValue, ref, set } from "firebase/database";
+import { answerRtc } from "./rtc";
 
-app.use(express.json());
-app.use((_req, res, next) => {
-  res.header("x-robots-tag", "noindex");
-  res.header("access-control-allow-headers", "*");
-  res.header("access-control-allow-origin", "*");
-  res.header("access-control-allow-methods", "*");
-  res.header("access-control-expose-headers", "*");
-  next();
-});
+import { WebSocket } from "isomorphic-ws";
 
+import TrackerList from "tracker-list";
+import { connectTracker } from "./server";
 
+async function connectFirebase() {
+    let creds = await signInWithEmailAndPassword(getAuth(), "test@test.com", "123456");
 
+    const db = getDatabase();
+    let peer = ref(db, `/peers/${creds.user.uid}`);
 
-app.post("/connect", (req, res) => {
-  const data = req.body;
-  answerRtc(data, (d) => {
-    res.json(d);
-  });
-});
+    set(peer, "");
 
-app.ws("/dev-ws", (ws, _req) => {
-  console.log("ws connect");
-  const client = new AdriftServer((msg) => ws.send(msg));
+    onValue(peer, (snapshot) => {
+        const str = snapshot.val();
 
-  ws.on("message", (msg) => {
-    if (typeof msg === "string") {
-      msg = Buffer.from(msg);
-    }
-
-    if (msg instanceof Buffer) {
-      client.onMsg(bufferToArrayBuffer(msg));
-      return;
-    }
-    throw new Error("Unexpected message type");
-  });
-});
-
-try {
-
-  let tracker = new WebSocket("ws://localhost:17776/join");
-  connectTracker(tracker);
-} catch (_) {
-
+        if (str) {
+            let data = JSON.parse(str);
+            if (data && data.offer && data.localCandidates) {
+                answerRtc(data, (answer) => {
+                    console.log("answering");
+                    set(peer, JSON.stringify(answer));
+                });
+            }
+        }
+    });
 }
 
-app.listen(3000, () => console.log("listening"));
+let tracker = TrackerList["us-central-1"];
+initializeApp(tracker.firebase);
+
+let trackerws = new WebSocket(tracker.tracker + "/join");
+connectTracker(trackerws);
+connectFirebase();
+console.log("main server, use dev server for dev server things");
