@@ -286,12 +286,6 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(webpack@5.75.0)
 
-  firebase-config:
-    dependencies:
-      firebase:
-        specifier: ^10.1.0
-        version: 10.1.0(react-native@0.72.3)
-
   frontend:
     dependencies:
       '@rollup/browser':
@@ -321,9 +315,6 @@ importers:
       firebase:
         specifier: ^10.1.0
         version: 10.1.0(react-native@0.72.3)
-      firebase-config:
-        specifier: workspace:*
-        version: link:../firebase-config
       m3-svelte:
         specifier: ^2.0.3
         version: 2.0.3
@@ -345,6 +336,9 @@ importers:
       tailwindcss:
         specifier: ^3.3.3
         version: 3.3.3
+      tracker-list:
+        specifier: workspace:*
+        version: link:../tracker-list
       typescript:
         specifier: ^5.1.6
         version: 5.1.6
@@ -377,9 +371,6 @@ importers:
       firebase:
         specifier: ^10.1.0
         version: 10.1.0(react-native@0.72.3)
-      firebase-config:
-        specifier: workspace:*
-        version: link:../firebase-config
       ipaddr.js:
         specifier: ^2.1.0
         version: 2.1.0
@@ -389,6 +380,9 @@ importers:
       protocol:
         specifier: workspace:*
         version: link:../protocol
+      tracker-list:
+        specifier: workspace:*
+        version: link:../tracker-list
       ts-node:
         specifier: ^10.9.1
         version: 10.9.1(@types/node@20.4.10)(typescript@5.1.6)
@@ -435,9 +429,9 @@ importers:
       firebase-admin:
         specifier: ^11.10.1
         version: 11.10.1
-      firebase-config:
+      tracker-list:
         specifier: workspace:*
-        version: link:../firebase-config
+        version: link:../tracker-list
       ts-node:
         specifier: ^10.9.1
         version: 10.9.1(@types/node@20.4.10)(typescript@5.1.6)
@@ -463,6 +457,8 @@ importers:
       nodemon:
         specifier: ^3.0.1
         version: 3.0.1
+
+  tracker-list: {}
 
 packages:
 

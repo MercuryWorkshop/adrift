@@ -14,6 +14,8 @@ import {
 } from "protocol";
 import { Readable, Writable } from "stream";
 import { BareError, bareInitialFetch, fetchResponse, options } from "./http";
+import { answerRtc } from "./rtc";
+
 
 function bareErrorToResponse(e: BareError): {
   payload: HTTPResponsePayload;
@@ -368,4 +370,18 @@ export class AdriftServer {
   onClose() {
     this.events.emit("close");
   }
+}
+
+export function connectTracker(tracker: WebSocket) {
+  tracker.on("message", (str: string) => {
+    if (!str) return;
+    let data = JSON.parse(str);
+    if (!(data && data.offer && data.localCandidates)) return;
+    console.log("got offer");
+
+    answerRtc(data, (answer) => {
+      console.log("have an answer");
+      tracker.send(JSON.stringify(answer));
+    })
+  });
 }

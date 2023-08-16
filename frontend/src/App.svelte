@@ -14,19 +14,19 @@
   import {
     Button,
     Card,
-    SegmentedButtonContainer,
-    SegmentedButtonItem,
+    CircularProgressIndeterminate,
     StyleFromScheme,
     TextField,
   } from "m3-svelte";
-  // note: even though we import firebase, due to the tree shaking, it will only run if we use "auth" so if ADRIFT_DEV is set it won't import
-  // import { auth } from "firebase-config";
-  import { signInWithEmailAndPassword } from "firebase/auth";
+
+  import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
   import { getDatabase, onValue, ref, set } from "firebase/database";
   import type { Transport } from "protocol";
 
-  import { Win, openWindow } from "../../corium";
+  import Proxy from "./Proxy.svelte";
+  import { initializeApp } from "firebase/app";
 
+  import TrackerList from "tracker-list";
   let transport: Transport;
 
   let rtctransport: RTCTransport | undefined;
@@ -34,26 +34,7 @@
   let email = "test@test.com";
   let password = "123456";
 
-  let ready = false;
-
-  let selectedProxy = "ultraviolet";
-
-  let url: string = "http://google.com";
-  let proxyIframe: HTMLIFrameElement;
-
-  let rtcState = "";
-
-  if (import.meta.env.VITE_ADRIFT_DEV) {
-    console.log(
-      "%cADRIFT RUNNING IN DEVELOPMENT MODE",
-      "background: blue; color: white; font-size: x-large"
-    );
-  } else {
-    console.log(
-      "%cADRIFT RUNNING IN PRODUCTION MODE",
-      "background: blue; color: white; font-size: x-large"
-    );
-  }
+  let connectionState = "";
 
   if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
     console.log("registering bare-client-custom");
@@ -67,7 +48,7 @@
     let bare = new AdriftBareClient(connection);
     console.log(setBareClientImplementation);
     setBareClientImplementation(bare);
-    ready = true;
+    state = ReadyState.Connected;
   }
 
   function onTransportClose() {
@@ -79,31 +60,41 @@
       onTransportOpen,
       onTransportClose,
       () => {
-        rtcState = `Connection ${transport.peer.connectionState}`;
+        connectionState = `Connection ${transport.peer.connectionState}`;
       },
       () => {
-        rtcState = `Signaling ${transport.peer.connectionState}`;
+        connectionState = `Signaling ${transport.peer.connectionState}`;
       },
       () => {
-        rtcState = `Gathering ${transport.peer.connectionState}`;
+        connectionState = `Gathering ${transport.peer.connectionState}`;
       }
     );
     return transport;
   }
 
-  async function connectFirebase() {
+  async function initFirebase() {
+    let tracker = TrackerList["us-central-1"];
+    initializeApp(tracker.firebase);
+  }
+
+  async function connectAccount() {
+    await initFirebase();
     rtctransport = transport = createRTCTransport();
 
+    let auth = getAuth();
     let creds = await signInWithEmailAndPassword(auth, email, password);
+    state = ReadyState.Connecting;
 
     const db = getDatabase();
     let peer = ref(db, `/peers/${creds.user.uid}`);
 
     let offer = await rtctransport.createOffer();
 
+    connectionState = "Finding your node...";
+
     set(peer, JSON.stringify(offer));
 
-    onValue(peer, (snapshot) => {
+    onValue(peer, async (snapshot) => {
       const str = snapshot.val();
       if (str) {
         console.log(str);
@@ -112,6 +103,10 @@
         if (data && data.answer && data.candidates) {
           set(peer, null);
           const { answer, candidates } = data;
+          connectionState = "Linking to node...";
+          await new Promise((r) => {
+            setTimeout(r, 500);
+          });
           rtctransport?.answer(answer, candidates);
         }
       }
@@ -119,10 +114,20 @@
   }
 
   async function connectSwarm() {
+    await initFirebase();
+
+    state = ReadyState.Connecting;
+
     rtctransport = transport = createRTCTransport();
 
     let offer = await rtctransport.createOffer();
+    connectionState = "Routing you to an available node...";
+
     let answer = await SignalFirebase.signalSwarm(JSON.stringify(offer));
+    connectionState = "Linking to node...";
+    await new Promise((r) => {
+      setTimeout(r, 500);
+    });
 
     rtctransport.answer(answer.answer, answer.candidates);
   }
@@ -151,36 +156,6 @@
     );
   }
 
-  function visitURL(url: string) {
-    if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
-      let path =
-        selectedProxy == "dynamic"
-          ? `/service/route?url=${url}`
-          : `${__uv$config.prefix}${__uv$config.encodeUrl(url)}`;
-
-      proxyIframe.src = path;
-    } else {
-      let bare = new BareClient();
-      openWindow(
-        new Request(url),
-        "_self",
-        proxyIframe.contentWindow! as unknown as Win,
-        bare as any,
-        "replace"
-      );
-    }
-  }
-  function frameLoad() {
-    if (!import.meta.env.VITE_ADRIFT_SINGLEFILE) {
-      const location = proxyIframe.contentDocument?.location.href;
-      if (location && location != "about:blank") {
-        url = __uv$config.decodeUrl(
-          proxyIframe.contentDocument?.location.href.replace(/.*\//g, "")
-        );
-      }
-    }
-  }
-
   (window as any).bare = new BareClient();
   (window as any).myWsTest = () => {
     // const url = "wss://ws.postman-echo.com/raw";
@@ -194,42 +169,22 @@
     ws.addEventListener("close", (e) => console.log("close listener", e));
     ws.onmessage = (e) => console.log("message", e);
   };
+
+  enum ReadyState {
+    Idle,
+    Connecting,
+    Connected,
+  }
+  let state = ReadyState.Idle;
 </script>
 
-{#if ready}
-  <div class="container h-full w-full">
-    <div class="flex">
-      <div class="container">
-        <input bind:value={url} type="text" />
-        <button on:click={() => visitURL(url)}>Go!</button>
-      </div>
-      {#if !import.meta.env.VITE_ADRIFT_SINGLEFILE}
-        <div>
-          <SegmentedButtonContainer>
-            <input
-              type="radio"
-              name="selectedProxy"
-              bind:group={selectedProxy}
-              value="ultraviolet"
-              id="ultraviolet"
-            />
-            <SegmentedButtonItem input="ultraviolet"
-              >Ultraviolet</SegmentedButtonItem
-            >
-            <input
-              type="radio"
-              name="selectedProxy"
-              bind:group={selectedProxy}
-              value="dynamic"
-              id="dynamic"
-            />
-            <SegmentedButtonItem input="dynamic">Dynamic</SegmentedButtonItem>
-          </SegmentedButtonContainer>
-        </div>
-      {/if}
-    </div>
-    <iframe class="h-full w-full" bind:this={proxyIframe} on:load={frameLoad} />
-  </div>
+{#if state == ReadyState.Connected}
+  <Proxy />
+{:else if state == ReadyState.Connecting}
+  <CircularProgressIndeterminate />
+  <h2>
+    {connectionState}
+  </h2>
 {:else if !import.meta.env.VITE_ADRIFT_DEV}
   <div id="loginpage">
     <div class="bigcard">
@@ -247,15 +202,15 @@
           extraOptions={{ type: "password" }}
         />
 
-        <Button type="outlined" on:click={connectFirebase}
+        <Button type="outlined" on:click={connectAccount}
           >Connect with firebase</Button
         >
+
+        <Button type="filled" on:click={connectSwarm}
+          >Connect with the swarm (firebase, webrtc, insecure)
+        </Button>
       </Card>
     </div>
-
-    <h2>
-      {rtcState}
-    </h2>
   </div>
 {:else}
   <div class="flex items-center justify-center h-full">
@@ -269,15 +224,7 @@
           <Button type="filled" on:click={connectDevWS}
             >Connect with localhost websocket transport</Button
           >
-
-          <Button type="filled" on:click={connectSwarm}
-            >Connect with the swarm (webrtc, insecure)
-          </Button>
         </div>
-
-        <h2>
-          {rtcState}
-        </h2>
       </div>
     </Card>
   </div>
