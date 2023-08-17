@@ -20,7 +20,7 @@
 
   import iconDiscord from "@iconify-icons/ic/outline-discord";
   import iconGithub from "@iconify-icons/bi/github";
-  import iconArrow from "@iconify-icons/maki/arrow";
+
   import Icon from "@iconify/svelte";
 
   import type { Transport } from "protocol";
@@ -49,6 +49,8 @@
   let showSwarmWarning = false;
   let showLogin = false;
   let chosenTracker: keyof typeof TrackerList | undefined;
+
+  let showTrackerList = false;
 
   function onTransportOpen() {
     console.log("Transport opened");
@@ -180,14 +182,15 @@
     </Card>
   </div>
 {:else if !import.meta.env.VITE_ADRIFT_DEV}
-  <div id="topbar" class="flex justify-between items-center p-4">
-    <div id="logo">
-      <Card type="">
-        <h3 class="text-xl">Adrift</h3>
-      </Card>
-    </div>
-    <div id="nav">
-      <!-- <Card type="outlined">
+  <div class="flex flex-col h-full">
+    <div id="topbar" class="flex justify-between items-center p-4">
+      <div id="logo">
+        <Card type="">
+          <h3 class="text-xl">(logo goes here)</h3>
+        </Card>
+      </div>
+      <div id="nav">
+        <!-- <Card type="outlined">
         <div id="quickmenu">
           <a href="httsp" class="text-med m-2">About</a>
           <a
@@ -196,77 +199,133 @@
           >
         </div>
       </Card> -->
-    </div>
-    <div id="links">
-      <Card type="elevated">
-        <div class="flex">
-          <a href="https://discord.gg/bAgNyGpXSx">
-            <Icon icon={iconDiscord} class="icon" />
-          </a>
-          <spacer />
-          <a href="https://github.com/MercuryWorkshop/adrift">
-            <Icon icon={iconGithub} class="icon" />
-          </a>
-        </div>
-      </Card>
-    </div>
-  </div>
-  <div id="loginpage">
-    <div class="flex justify-evenly">
-      <Card type="filled">
-        <SegmentedButtonContainer>
-          {#each Object.keys(TrackerList) as tracker}
-            <input
-              type="radio"
-              id={tracker}
-              name="tabs"
-              value={tracker}
-              bind:group={chosenTracker}
-            />
-            <SegmentedButtonItem input={tracker}>{tracker}</SegmentedButtonItem>
-          {/each}
-        </SegmentedButtonContainer>
-
-        {#if chosenTracker}
-          <Button type="elevated" on:click={() => (showSwarmWarning = true)}
-            >Connect to the swarm</Button
-          >
-          <Button type="filled" on:click={() => (showLogin = true)}
-            >Connect with login</Button
-          >
-        {/if}
-
-        <Dialog headline="WARNING" open={showSwarmWarning}>
-          <h2 class="text-2xl">
-            TLS has not currently been implemented for the Adrift Swarm. Your
-            data will not be private, and you should not sign into any accounts
-            that you care much about
-          </h2>
-          <br />
-          <Button type="filled" on:click={() => (showLogin = false)}
-            >Cancel</Button
-          >
-          <Button type="outlined" on:click={connectSwarm}
-            >I understand, Connect</Button
-          >
-        </Dialog>
-
-        <Dialog headline="Log in to Connect" open={showLogin}>
-          <TextField name="email" bind:value={email} />
-          <TextField
-            name="password"
-            bind:value={password}
-            extraOptions={{ type: "password" }}
-          />
-
+      </div>
+      <div id="links">
+        <Card type="elevated">
           <div class="flex">
-            <Button type="outlined" on:click={() => (showLogin = false)}
+            <a href="https://discord.gg/bAgNyGpXSx">
+              <Icon icon={iconDiscord} class="icon" />
+            </a>
+            <spacer />
+            <a href="https://github.com/MercuryWorkshop/adrift">
+              <Icon icon={iconGithub} class="icon" />
+            </a>
+          </div>
+        </Card>
+      </div>
+    </div>
+    <div class="flex flex-col flex-1">
+      <div class="flex m-4">
+        <Card
+          type="elevated"
+          extraOptions={{ class: "m3-container type-elevated w-9/12" }}
+        >
+          <div class="w-full">
+            <h2 class="text-6xl">Surf the web, Adrift</h2>
+            <h2 class="text-2xl">
+              A fast and modern decentralized proxy network
+            </h2>
+          </div>
+          <div class="mt-5">
+            <Button type="filled" on:click={() => (showTrackerList = true)}
+              >Start Browsing</Button
+            >
+          </div>
+        </Card>
+      </div>
+      <div
+        class="flex h-full justify-end m-4 transition-all"
+        class:opacity-0={!showTrackerList}
+      >
+        <Card
+          type="elevated"
+          extraOptions={{
+            class: "m3-container type-elevated w-9/12 flex flex-col",
+          }}
+        >
+          <h2 class="text-4xl">Select a Tracker</h2>
+          <h2 class="text-1xl">Trackers allow you to connect to Adrift</h2>
+          <div class="mt-5">
+            <SegmentedButtonContainer>
+              {#each Object.keys(TrackerList) as tracker}
+                <input
+                  type="radio"
+                  id={tracker}
+                  name="tabs"
+                  value={tracker}
+                  bind:group={chosenTracker}
+                />
+                <SegmentedButtonItem input={tracker}
+                  >{tracker}</SegmentedButtonItem
+                >
+              {/each}
+            </SegmentedButtonContainer>
+          </div>
+          <div class="flex-1" />
+          <div class="mt-5 flex">
+            {#if chosenTracker}
+              <Button type="elevated" on:click={() => (showSwarmWarning = true)}
+                >Connect to the swarm</Button
+              >
+              <Button type="filled" on:click={() => (showLogin = true)}
+                >Connect with login</Button
+              >
+            {/if}
+          </div>
+
+          <Dialog headline="WARNING" open={showSwarmWarning}>
+            <h2 class="text-2xl">
+              TLS has not currently been implemented for the Adrift Swarm. Your
+              data will not be private, and you should not sign into any
+              accounts that you care much about
+            </h2>
+            <br />
+            <Button type="filled" on:click={() => (showLogin = false)}
               >Cancel</Button
             >
-            <Button type="filled" on:click={connectAccount}>Connect</Button>
+            <Button type="outlined" on:click={connectSwarm}
+              >I understand, Connect</Button
+            >
+          </Dialog>
+
+          <Dialog headline="Log in to Connect" open={showLogin}>
+            <TextField name="email" bind:value={email} />
+            <TextField
+              name="password"
+              bind:value={password}
+              extraOptions={{ type: "password" }}
+            />
+
+            <div class="flex">
+              <Button type="outlined" on:click={() => (showLogin = false)}
+                >Cancel</Button
+              >
+              <Button type="filled" on:click={connectAccount}>Connect</Button>
+            </div>
+          </Dialog>
+        </Card>
+      </div>
+      <div class="flex m-4">
+        <Card
+          type="elevated"
+          extraOptions={{ class: "m3-container type-elevated w-full" }}
+        >
+          <div class="flex space-x-10">
+            <a class="text-1xl" href="https://mercurywork.shop"
+              >© 2023 Mercury Workshop</a
+            >
+
+            <div class="space-x-3">
+              <a class="text-1xl" href="https://discord.gg/bAgNyGpXSx"
+                >discord</a
+              >
+              <a class="text-1xl" href="https://discord.gg/bAgNyGpXSx">github</a
+              >
+            </div>
+            <div />
           </div>
-        </Dialog>
-      </Card>
+        </Card>
+      </div>
     </div>
   </div>
 {:else}

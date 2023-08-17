@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fontsource/cabin": "^5.0.8",
     "@iconify-icons/bi": "^1.2.17",
     "@iconify-icons/ic": "^1.2.13",
     "@iconify-icons/maki": "^1.2.18",
