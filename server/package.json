@@ -27,6 +27,7 @@
     "ipaddr.js": "^2.1.0",
     "isomorphic-ws": "^5.0.0",
     "nexe": "4.0.0-rc.2",
+    "pkg": "^5.8.1",
     "protocol": "workspace:*",
     "tracker-list": "workspace:*",
     "ts-node": "^10.9.1",

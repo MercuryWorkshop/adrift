@@ -79,8 +79,12 @@ app.ws("/join", (ws, _req) => {
   members[id] = ws;
 
   ws.onclose = () => {
+    console.log(`${_req.ip} disconnected`);
     delete members[id];
   };
+  setInterval(() => {
+    ws.ping()
+  }, 10000);
 
 });
 setInterval(() => {
