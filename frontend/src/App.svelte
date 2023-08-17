@@ -273,7 +273,7 @@
             {/if}
           </div>
 
-          <Dialog headline="WARNING" open={showSwarmWarning}>
+          <Dialog headline="WARNING" bind:open={showSwarmWarning}>
             <h2 class="text-2xl">
               TLS has not currently been implemented for the Adrift Swarm. Your
               data will not be private, and you should not sign into any
@@ -288,7 +288,7 @@
             >
           </Dialog>
 
-          <Dialog headline="Log in to Connect" open={showLogin}>
+          <Dialog headline="Log in to Connect" bind:open={showLogin}>
             <TextField name="email" bind:value={email} />
             <TextField
               name="password"
@@ -439,21 +439,6 @@
   }
   spacer {
     margin: 1em;
-  }
-  #loginpage {
-    padding: 2.5em;
-  }
-  .bigcard {
-    background-color: rgb(var(--m3-scheme-primary-container));
-    color: rgb(var(--m3-scheme-on-primary-container));
-    border-radius: 2rem;
-
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    text-align: center;
-    padding: 8rem 0 6rem 0;
-    margin-bottom: 2rem;
   }
   :global(body, html, #app) {
     width: 100vw;

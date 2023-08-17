@@ -75,7 +75,10 @@ export async function answerRtc(data: any, onrespond: (answer: any) => void) {
 
         dataChannel.onopen = () => {
             console.log("opened");
-            server = new AdriftServer((msg) => dataChannel.send(msg));
+            server = new AdriftServer((msg) => {
+                if (dataChannel.readyState === "open")
+                    dataChannel.send(msg)
+            });
         };
         dataChannel.onclose = () => {
             console.log("closed");
