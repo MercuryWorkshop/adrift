@@ -1,11 +1,19 @@
 <script lang="ts">
   import { BareClient } from "bare-client-custom";
-  import { SegmentedButtonContainer, SegmentedButtonItem } from "m3-svelte";
+  import {
+    Card,
+    SegmentedButtonContainer,
+    SegmentedButtonItem,
+  } from "m3-svelte";
   import { Win, openWindow } from "../../corium";
+  import Icon from "@iconify/svelte";
 
   let selectedProxy = "ultraviolet";
 
   let url: string = "http://google.com";
+
+  import iconBack from "@iconify-icons/ic/outline-arrowback";
+  import { onMount } from "svelte";
 
   let proxyIframe: HTMLIFrameElement;
 
@@ -39,15 +47,52 @@
       );
     }
   }
+  onMount(() => {
+    visitURL(url);
+  });
 </script>
 
-<div class="container h-full w-full">
-  <div class="flex">
-    <div class="container">
-      <input bind:value={url} type="text" />
-      <button on:click={() => visitURL(url)}>Go!</button>
+<div class="h-full w-full flex flex-col">
+  <div class="flex p-2">
+    <div class="flex text-xl items-center w-full">
+      <button>
+        <Icon icon="fluent-mdl2:back" />
+      </button>
+      <div class="p-2" />
+      <button>
+        <Icon icon="fluent-mdl2:forward" />
+      </button>
+      <button
+        class="text-2xl px-4"
+        on:click={() => {
+          console.log("a");
+          visitURL(url);
+        }}
+      >
+        <Icon icon="tabler:reload" />
+      </button>
+      <div id="urlbar" class="flex items-center flex-1">
+        <div class="text-2xl px-2">
+          <Icon icon="ic:round-search" />
+        </div>
+        <input
+          bind:value={url}
+          type="text"
+          class="flex-1"
+          on:keydown={(e) => {
+            console.log(e);
+            if (e.key === "Enter") {
+              visitURL(url);
+            }
+          }}
+        />
+      </div>
+
+      <button class="text-2xl pl-3">
+        <Icon icon="ic:round-settings" />
+      </button>
     </div>
-    {#if !import.meta.env.VITE_ADRIFT_SINGLEFILE}
+    <!-- {#if !import.meta.env.VITE_ADRIFT_SINGLEFILE}
       <div>
         <SegmentedButtonContainer>
           <input
@@ -70,7 +115,24 @@
           <SegmentedButtonItem input="dynamic">Dynamic</SegmentedButtonItem>
         </SegmentedButtonContainer>
       </div>
-    {/if}
+    {/if} -->
   </div>
-  <iframe class="h-full w-full" bind:this={proxyIframe} on:load={frameLoad} />
+  <iframe class="flex-1" bind:this={proxyIframe} on:load={frameLoad} />
 </div>
+
+<style>
+  #urlbar {
+    border: solid 0.0625rem rgb(var(--m3-scheme-outline));
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+  }
+  input {
+    background-color: transparent;
+    outline: none;
+    border: none;
+  }
+  iframe {
+    outline: none;
+    border: none;
+  }
+</style>

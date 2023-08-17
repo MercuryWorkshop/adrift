@@ -404,8 +404,4 @@
     background-color: rgb(var(--m3-scheme-background));
     color: rgb(var(--m3-scheme-on-background));
   }
-  iframe {
-    outline: none;
-    border: none;
-  }
 </style>

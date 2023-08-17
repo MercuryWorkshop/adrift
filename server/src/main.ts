@@ -88,8 +88,20 @@ async function login(credentials: any) {
 
     console.log(chalk.blue("Starting server!"));
     if (conf.type == "swarm") {
-        let trackerws = new WebSocket(tracker.tracker + "/join");
-        connectTracker(trackerws);
+        let connect = () => {
+            let trackerws = new WebSocket(tracker.tracker + "/join");
+            trackerws.onclose = () => {
+                console.log(`Disconnected from tracker. Retrying...`)
+                setTimeout(() => {
+                    connect();
+                }, 10000);
+            };
+            trackerws.onopen = () => {
+                console.log(`Connected to tracker ${tracker.tracker}`)
+            }
+            connectTracker(trackerws);
+        };
+        connect();
     } else {
         initializeApp(tracker.firebase);
 
