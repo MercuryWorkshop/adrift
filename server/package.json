@@ -5,7 +5,8 @@
   "main": "src/main.ts",
   "scripts": {
     "start": "tsx src/main.ts",
-    "dev": "tsx src/dev.ts"
+    "dev": "tsx src/dev.ts",
+    "prod": "node esbuild.bundle.js && pkg src/main.js"
   },
   "keywords": [],
   "author": "",
