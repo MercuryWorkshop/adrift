@@ -5,7 +5,7 @@
   "main": "src/main.ts",
   "scripts": {
     "start": "tsx src/main.ts",
-    "dev": "tsx src/dev.ts",
+    "dev": "nodemon -x tsx src/dev.ts",
     "prod": "node esbuild.bundle.js && pkg src/main.js"
   },
   "keywords": [],
@@ -30,7 +30,7 @@
     "pkg": "^5.8.1",
     "protocol": "workspace:*",
     "tracker-list": "workspace:*",
-    "ts-node": "^10.9.1",
+    "tsx": "^3.12.7",
     "typescript": "^5.1.6",
     "wrtc": "^0.4.7",
     "ws": "^8.13.0"
