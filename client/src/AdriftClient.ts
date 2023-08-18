@@ -107,6 +107,7 @@ export class AdriftBareClient extends Client {
   constructor(private connection: Connection) {
     super();
   }
+
   async request(
     method: string,
     requestHeaders: BareHeaders,
@@ -115,7 +116,7 @@ export class AdriftBareClient extends Client {
     cache: string | undefined,
     duplex: string | undefined,
     signal: AbortSignal | undefined,
-    arrayBufferImpl: ArrayBufferConstructor,
+    arrayBufferImpl: ArrayBufferConstructor
   ): Promise<BareResponse> {
     const bodyStream = createBodyStream(body, arrayBufferImpl);
     let { payload, body: respRawBody } = await this.connection.httprequest(
@@ -155,7 +156,7 @@ export class AdriftBareClient extends Client {
     onMeta: MetaCallback,
     onReadyState: ReadyStateCallback,
     webSocketImpl: WebSocketImpl,
-    arrayBufferImpl: ArrayBufferConstructor,
+    arrayBufferImpl: ArrayBufferConstructor
   ): WebSocket {
     const ws = new webSocketImpl("ws:null", protocols);
     // this will error. that's okay
