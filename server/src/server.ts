@@ -16,7 +16,6 @@ import { Readable, Writable } from "stream";
 import { BareError, bareInitialFetch, fetchResponse, options } from "./http";
 import { answerRtc } from "./rtc";
 
-
 function bareErrorToResponse(e: BareError): {
   payload: HTTPResponsePayload;
   body: AsyncIterable<ArrayBuffer>;
@@ -382,6 +381,6 @@ export function connectTracker(tracker: WebSocket) {
     answerRtc(data, (answer) => {
       console.log("have an answer");
       tracker.send(JSON.stringify(answer));
-    })
+    });
   });
 }

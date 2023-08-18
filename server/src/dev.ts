@@ -5,10 +5,9 @@ import expressWs from "express-ws";
 import { AdriftServer, connectTracker } from "./server";
 
 import WebSocket from "isomorphic-ws";
-import { answerRtc, bufferToArrayBuffer, connect } from "./rtc";
+import { answerRtc, bufferToArrayBuffer } from "./rtc";
 
 dotenv.config();
-
 
 const app = express() as unknown as expressWs.Application;
 expressWs(app);
@@ -22,9 +21,6 @@ app.use((_req, res, next) => {
   res.header("access-control-expose-headers", "*");
   next();
 });
-
-
-
 
 app.post("/connect", (req, res) => {
   const data = req.body;
@@ -51,12 +47,9 @@ app.ws("/dev-ws", (ws, _req) => {
 });
 
 try {
-
   let tracker = new WebSocket("ws://localhost:17776/join");
   tracker.onerror = console.error;
   connectTracker(tracker);
-} catch (_) {
-
-}
+} catch (_) {}
 
 app.listen(3000, () => console.log("listening"));
