@@ -22,7 +22,7 @@ let trackers = {
       appId: "1:994948039014:web:f96970aa4f626e969dc8a7",
       measurementId: "G-PD96ZKX31D"
     },
-    tracker: "wss://rafftracker.mercurywork.shop/"
+    tracker: "wss://rafftracker.mercurywork.shop"
   }
 };
 export default trackers;
