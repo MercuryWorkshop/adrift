@@ -2,11 +2,15 @@ import {
   C2SRequestType,
   C2SRequestTypes,
   C2SWSOpenPayload,
+  C2S_HELLO,
   HTTPRequestPayload,
   HTTPResponsePayload,
+  PROTOCOL_VERSION,
   ProtoBareHeaders,
   S2CRequestType,
   S2CRequestTypes,
+  S2C_HELLO_ERR,
+  S2C_HELLO_OK,
   Transport,
   WSClosePayload,
   WSErrorPayload,
@@ -33,6 +37,7 @@ type OpenWSMeta = {
 };
 
 export class Connection {
+  initialized = false;
   requestCallbacks: Record<number, Function> = {};
   openRequestStreams: Record<number, ReadableStreamDefaultController<any>> = {};
   openingSockets: Record<number, OpenWSMeta> = {};
@@ -40,8 +45,37 @@ export class Connection {
 
   counter: number = 0;
 
+  static uninitializedError() {
+    throw new Error("Connection not initialized");
+  }
+
   constructor(public transport: Transport) {
-    transport.ondata = this.ondata.bind(this);
+    transport.ondata = Connection.uninitializedError;
+  }
+
+  async initialize(): Promise<void> {
+    const onDataPromise = (): Promise<ArrayBuffer> => {
+      return new Promise((res) => {
+        this.transport.ondata = res;
+      });
+    };
+    // maybe some sort of timeout here?
+    // this code is not the best tbh
+    this.transport.send(new TextEncoder().encode(C2S_HELLO + PROTOCOL_VERSION));
+    const msg = await onDataPromise();
+    const msgText = new TextDecoder().decode(msg);
+    if (msgText === S2C_HELLO_OK) {
+      this.transport.ondata = this.ondata.bind(this);
+      this.initialized = true;
+    } else if (msgText.startsWith(S2C_HELLO_ERR)) {
+      const expectedVersion = msgText.slice(S2C_HELLO_ERR.length);
+      throw new Error(
+        `We are running protocol version ${PROTOCOL_VERSION}, ` +
+          `but server expected ${expectedVersion}`
+      );
+    } else {
+      throw new Error("Unexpected server hello response");
+    }
   }
 
   nextSeq() {
@@ -49,6 +83,8 @@ export class Connection {
   }
 
   ondata(data: ArrayBuffer) {
+    if (!this.initialized) return;
+
     let cursor = 0;
     const view = new DataView(data);
 
@@ -148,6 +184,10 @@ export class Connection {
     type: C2SRequestType,
     data?: ArrayBuffer | Blob
   ): Promise<void> {
+    if (!this.initialized) {
+      Connection.uninitializedError();
+    }
+
     let header = new window.ArrayBuffer(2 + 1);
     let view = new DataView(header);
 
@@ -174,6 +214,10 @@ export class Connection {
     },
     body: ReadableStream<ArrayBuffer | Uint8Array> | null
   ): Promise<{ payload: HTTPResponsePayload; body: ArrayBuffer }> {
+    if (!this.initialized) {
+      Connection.uninitializedError();
+    }
+
     const payload: HTTPRequestPayload = { ...data, hasBody: Boolean(body) };
     let json = JSON.stringify(payload);
 
@@ -202,11 +246,15 @@ export class Connection {
     onclose: (code: number, reason: string, wasClean: boolean) => void,
     onmessage: (data: any) => void,
     onerror: (message: string) => void,
-    arrayBufferImpl: ArrayBufferConstructor,
+    arrayBufferImpl: ArrayBufferConstructor
   ): {
     send: (data: any) => void;
     close: (code?: number, reason?: string) => void;
   } {
+    if (!this.initialized) {
+      Connection.uninitializedError();
+    }
+
     const payload: C2SWSOpenPayload = { url: url.toString(), protocols };
     const payloadJSON = JSON.stringify(payload);
     let seq = this.nextSeq();

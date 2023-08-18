@@ -3,4 +3,5 @@ export abstract class Transport {
   constructor(public onopen: () => void, public onclose: () => void) {}
 
   abstract send(data: ArrayBuffer): void;
+  abstract close(): void;
 }

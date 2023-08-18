@@ -31,7 +31,10 @@ app.post("/connect", (req, res) => {
 
 app.ws("/dev-ws", (ws, _req) => {
   console.log("ws connect");
-  const client = new AdriftServer((msg) => ws.send(msg));
+  const client = new AdriftServer(
+    (msg) => ws.send(msg),
+    () => ws.close()
+  );
 
   ws.on("message", (msg) => {
     if (typeof msg === "string") {

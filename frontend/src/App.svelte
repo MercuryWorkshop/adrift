@@ -52,10 +52,12 @@
 
   let showTrackerList = false;
 
-  function onTransportOpen() {
+  async function onTransportOpen() {
     console.log("Transport opened");
 
     let connection = new Connection(transport);
+    // TODO: error handling here
+    await connection.initialize();
     let bare = new AdriftBareClient(connection);
     console.log(setBareClientImplementation);
     setBareClientImplementation(bare);

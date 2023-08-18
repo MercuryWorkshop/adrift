@@ -3,12 +3,16 @@ import { IncomingMessage, STATUS_CODES } from "http";
 import { WebSocket } from "isomorphic-ws";
 import {
   C2SRequestTypes,
+  C2S_HELLO,
   HTTPRequestPayload,
   HTTPResponsePayload,
   MAX_CHUNK_SIZE,
+  PROTOCOL_VERSION,
   ProtoBareHeaders,
   S2CRequestType,
   S2CRequestTypes,
+  S2C_HELLO_ERR,
+  S2C_HELLO_OK,
   WSClosePayload,
   WSErrorPayload,
 } from "protocol";
@@ -32,14 +36,39 @@ function bareErrorToResponse(e: BareError): {
 }
 
 export class AdriftServer {
+  initialized: boolean = false;
   send: (msg: ArrayBuffer) => void;
+  close: () => void;
   requestStreams: Record<number, Promise<Writable>> = {};
   sockets: Record<number, WebSocket> = {};
   events: EventEmitter;
 
-  constructor(send: (msg: ArrayBuffer) => void) {
+  constructor(send: (msg: ArrayBuffer) => void, close: () => void) {
     this.send = send;
+    this.close = close;
     this.events = new EventEmitter();
+  }
+
+  handleHello(msg: ArrayBuffer) {
+    try {
+      const text = new TextDecoder().decode(msg);
+      if (!text.startsWith(C2S_HELLO)) {
+        this.close();
+        return;
+      }
+      // later if we want we can supported multiple versions and run different behavior based
+      //  on which we are talking to, might be too much effort idk
+      const version = text.slice(C2S_HELLO.length);
+      if (version === PROTOCOL_VERSION) {
+        this.send(new TextEncoder().encode(S2C_HELLO_OK));
+        this.initialized = true;
+      } else {
+        this.send(new TextEncoder().encode(S2C_HELLO_ERR + PROTOCOL_VERSION));
+        this.close();
+      }
+    } catch (_) {
+      this.close();
+    }
   }
 
   static parseMsgInit(
@@ -207,6 +236,11 @@ export class AdriftServer {
   }
 
   async onMsg(msg: ArrayBuffer) {
+    if (!this.initialized) {
+      this.handleHello(msg);
+      return;
+    }
+
     const init = AdriftServer.parseMsgInit(msg);
     if (!init) return;
     const { cursor, seq, op } = init;

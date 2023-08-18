@@ -24,4 +24,8 @@ export class DevWsTransport extends Transport {
   send(data: ArrayBuffer) {
     this.ws.send(data);
   }
+
+  close() {
+    this.ws.close();
+  }
 }

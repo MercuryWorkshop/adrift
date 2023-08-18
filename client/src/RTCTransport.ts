@@ -8,10 +8,8 @@ const rtcConf = {
   ],
 };
 
-
 export type Offer = { offer: any; localCandidates: any };
 export type Answer = { answer: any; candidates: any };
-
 
 export class RTCTransport extends Transport {
   peer: RTCPeerConnection;
@@ -55,6 +53,10 @@ export class RTCTransport extends Transport {
 
   send(data: ArrayBuffer) {
     this.dataChannel.send(data);
+  }
+
+  close() {
+    this.dataChannel.close();
   }
 
   async createOffer(): Promise<Promise<Offer>> {

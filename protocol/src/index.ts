@@ -55,4 +55,11 @@ export type WSErrorPayload = {
 // WebRTC max is 16K, let's say 12K to be safe
 export const MAX_CHUNK_SIZE = 12 * 1024;
 
+export const S2C_HELLO_OK = ":3";
+// these two end with a version string
+export const C2S_HELLO = "haiii ";
+export const S2C_HELLO_ERR = ":< ";
+
+export const PROTOCOL_VERSION = "1.0";
+
 export { Transport } from "./Transport";
