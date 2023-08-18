@@ -9,7 +9,7 @@ if (process.platform == "win32") {
     appname += ".exe";
 }
 https.get(
-    "https://github.com/MercuryWorkshop/adrift/releases/latest/download/adrift-server-${}", resp => {
+    `https://github.com/MercuryWorkshop/adrift/releases/latest/download/adrift-server-${appname}`, resp => {
         let file = fs.createWriteStream(`${dir}/${appname}`);
         resp.pipe(file);
 
