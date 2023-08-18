@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -23,8 +23,8 @@ importers:
         specifier: ^6.10.2
         version: 6.10.2
       '@tomphttp/bare-client':
-        specifier: ^2.2.0-alpha
-        version: 2.2.0-alpha
+        specifier: file:../bare-client-custom
+        version: file:bare-client-custom
       '@tomphttp/bare-server-node':
         specifier: ^2.0.1
         version: 2.0.1
@@ -94,10 +94,14 @@ importers:
         version: 5.1.6
 
   Ultraviolet:
+    dependencies:
+      bare-client-custom:
+        specifier: workspace:2.2.0-alpha
+        version: link:../bare-client-custom
     devDependencies:
       '@tomphttp/bare-client':
-        specifier: ^2.2.0-alpha
-        version: 2.2.0-alpha
+        specifier: file:../bare-client-custom/
+        version: file:bare-client-custom
       css-tree:
         specifier: ^2.3.1
         version: 2.3.1
@@ -197,7 +201,7 @@ importers:
   corium:
     dependencies:
       '@rollup/browser':
-        specifier: ^3.17.2
+        specifier: ^3.28.0
         version: 3.28.0
       '@swc/helpers':
         specifier: ^0.4.14
@@ -379,6 +383,9 @@ importers:
       '@inquirer/select':
         specifier: ^1.2.7
         version: 1.2.7
+      '@types/follow-redirects':
+        specifier: ^1.14.1
+        version: 1.14.1
       boxen:
         specifier: ^7.1.1
         version: 7.1.1
@@ -400,6 +407,9 @@ importers:
       firebase:
         specifier: ^10.1.0
         version: 10.1.0(react-native@0.72.3)
+      follow-redirects:
+        specifier: ^1.15.2
+        version: 1.15.2
       inquirer:
         specifier: ^9.2.10
         version: 9.2.10
@@ -4409,9 +4419,6 @@ packages:
     resolution: {integrity: sha512-WyIVnSAqzfrLejmOhh/l/LtDOeK+SHnBGi/z+QyliVP1T1JxoNE5eecwxlV+osM9J6FTAYVGNHr8/5bubaIj6Q==}
     dev: false
 
-  /@tomphttp/bare-client@2.2.0-alpha:
-    resolution: {integrity: sha512-xhcflOpwr92tkpp8SoDhB3nK3LHMBIjx+vgow37XobQew2k0/mXSxmaU7BsDFpOIa1CcLCEsR8gWn0v7Cy9+7Q==}
-
   /@tomphttp/bare-server-node@2.0.1:
     resolution: {integrity: sha512-L42TC/AldYRFBRZSxhkI0FC5TL8EC/NAsepNC/cWYTTiHQJ7mGg/vdTqNz8ShTYHr6LTHYkuD3/81nhX55SYtA==}
     engines: {node: '>=18.0.0'}
@@ -4533,6 +4540,12 @@ packages:
       '@types/express-serve-static-core': 4.17.35
       '@types/qs': 6.9.7
       '@types/serve-static': 1.15.2
+
+  /@types/follow-redirects@1.14.1:
+    resolution: {integrity: sha512-THBEFwqsLuU/K62B5JRwab9NW97cFmL4Iy34NTMX0bMycQVzq2q7PKOkhfivIwxdpa/J72RppgC42vCHfwKJ0Q==}
+    dependencies:
+      '@types/node': 20.4.10
+    dev: false
 
   /@types/glob@8.1.0:
     resolution: {integrity: sha512-IO+MJPVhoqz+28h1qLAcBEH2+xHMK6MTyHJc7MTnnYb6wsoLR29POVGJ7LycmVXIqyy/4/2ShP5sUwTXuOwb/w==}
@@ -4702,7 +4715,6 @@ packages:
 
   /@types/uuid@9.0.2:
     resolution: {integrity: sha512-kNnC1GFBLuhImSnV7w4njQkUiJi0ZXUycu1rUaouPqiKlXkh77JKgdRnTAp1x5eBwcIwbtI+3otwzuIDEuDoxQ==}
-    dev: false
 
   /@types/webrtc@0.0.36:
     resolution: {integrity: sha512-tYFarc92EluXU7XyRmWbkQXSbZIOHTdDOudFPal9u/TNTQuouWpIHV/2o9bNAdqvTJFjLJh/zflCOLWbL30tEQ==}
@@ -7762,6 +7774,16 @@ packages:
   /flow-parser@0.206.0:
     resolution: {integrity: sha512-HVzoK3r6Vsg+lKvlIZzaWNBVai+FXTX1wdYhz/wVlH13tb/gOdLXmlTqy6odmTBhT5UoWUbq0k8263Qhr9d88w==}
     engines: {node: '>=0.4.0'}
+    dev: false
+
+  /follow-redirects@1.15.2:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
     dev: false
 
   /for-each@0.3.3:
@@ -12827,7 +12849,6 @@ packages:
   /uuid@9.0.0:
     resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
     hasBin: true
-    dev: false
 
   /v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
@@ -13314,14 +13335,15 @@ packages:
   file:bare-client-custom:
     resolution: {directory: bare-client-custom, type: directory}
     name: bare-client-custom
+    version: 2.2.0-alpha
     dependencies:
       '@types/uuid': 9.0.2
       uuid: 9.0.0
-    dev: false
 
   file:corium:
     resolution: {directory: corium, type: directory}
     name: corium
+    version: 1.0.0-alpha.2
     dependencies:
       '@rollup/browser': 3.28.0
       '@swc/helpers': 0.4.14
