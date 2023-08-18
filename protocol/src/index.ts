@@ -52,7 +52,7 @@ export type WSErrorPayload = {
   message: string;
 };
 
-// WebRTC max is 16K, let's say 8K to be safe
-export const MAX_CHUNK_SIZE = 8 * 1024;
+// WebRTC max is 16K, let's say 12K to be safe
+export const MAX_CHUNK_SIZE = 12 * 1024;
 
 export { Transport } from "./Transport";
