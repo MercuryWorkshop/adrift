@@ -12,6 +12,7 @@
     Card,
     CircularProgressIndeterminate,
     Dialog,
+    RadioAnim3,
     SegmentedButtonContainer,
     SegmentedButtonItem,
     StyleFromScheme,
@@ -34,6 +35,7 @@
     Idle,
     Connecting,
     Connected,
+    AccountCreation,
   }
   let state = ReadyState.Idle;
 
@@ -165,6 +167,8 @@
 
 {#if state == ReadyState.Connected}
   <Proxy />
+{:else if state == ReadyState.AccountCreation}
+  <AccountCreationScreen />
 {:else if state == ReadyState.Connecting}
   <div class="h-full w-full flex justify-center items-center">
     <Card type="outlined">
@@ -248,20 +252,27 @@
           <h2 class="text-4xl">Select a Tracker</h2>
           <h2 class="text-1xl">Trackers allow you to connect to Adrift</h2>
           <div class="mt-5">
-            <SegmentedButtonContainer>
-              {#each Object.keys(TrackerList) as tracker}
-                <input
-                  type="radio"
-                  id={tracker}
-                  name="tabs"
-                  value={tracker}
-                  bind:group={chosenTracker}
-                />
-                <SegmentedButtonItem input={tracker}
-                  >{tracker}</SegmentedButtonItem
-                >
-              {/each}
-            </SegmentedButtonContainer>
+            {#each Object.keys(TrackerList) as tracker}
+              <label>
+                <div class="flex items-center">
+                  <svelte:component this={RadioAnim3}>
+                    <input
+                      type="radio"
+                      id={tracker}
+                      name="tabs"
+                      value={tracker}
+                      bind:group={chosenTracker}
+                    />
+                  </svelte:component>
+                  <p class="m-3 text-xl">
+                    {tracker}
+                  </p>
+                </div>
+                <p>
+                  {TrackerList[tracker].description}
+                </p>
+              </label>
+            {/each}
           </div>
           <div class="flex-1" />
           <div class="mt-5 flex">
@@ -290,7 +301,13 @@
             >
           </Dialog>
 
-          <Dialog headline="Log in to Connect" bind:open={showLogin}>
+          <Dialog headline="Log in to connect" bind:open={showLogin}>
+            <button
+              class="text-primary my-3"
+              on:click={() => (state = ReadyState.AccountCreation)}
+              >New here? Create an account</button
+            >
+            <br />
             <TextField name="email" bind:value={email} />
             <TextField
               name="password"
@@ -298,7 +315,7 @@
               extraOptions={{ type: "password" }}
             />
 
-            <div class="flex">
+            <div class="flex mt-5">
               <Button type="outlined" on:click={() => (showLogin = false)}
                 >Cancel</Button
               >
@@ -321,7 +338,8 @@
               <a class="text-1xl" href="https://discord.gg/bAgNyGpXSx"
                 >discord</a
               >
-              <a class="text-1xl" href="https://discord.gg/bAgNyGpXSx">github</a
+              <a class="text-1xl" href="https://github.com/MercuryWorkshop"
+                >github</a
               >
             </div>
             <div />
