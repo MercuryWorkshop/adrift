@@ -96,7 +96,7 @@ export async function answerRtc(data: any, onrespond: (answer: any) => void) {
         server.onMsg(bufferToArrayBuffer(event.data));
         return;
       }
-      throw new Error("Unexpected datachannel message type");
+      // ignore text and other types of messages
     };
   }
 }
