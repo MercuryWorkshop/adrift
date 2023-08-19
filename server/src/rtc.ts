@@ -87,6 +87,7 @@ export async function answerRtc(data: any, onrespond: (answer: any) => void) {
       server.onClose();
     };
     dataChannel.onmessage = (event) => {
+      if (!server) return;
       if (event.data instanceof ArrayBuffer) {
         server.onMsg(event.data);
         return;
