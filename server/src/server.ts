@@ -11,6 +11,7 @@ import {
   ProtoBareHeaders,
   S2CRequestType,
   S2CRequestTypes,
+  S2CWSOpenPayload,
   S2C_HELLO_ERR,
   S2C_HELLO_OK,
   WSClosePayload,
@@ -199,8 +200,8 @@ export class AdriftServer {
     this._sendSimpleRes(seq, S2CRequestTypes.HTTPResponseEnd);
   }
 
-  sendWSOpen(seq: number) {
-    this._sendSimpleRes(seq, S2CRequestTypes.WSOpen);
+  sendWSOpen(seq: number, payload: S2CWSOpenPayload) {
+    this._sendJSONRes(seq, S2CRequestTypes.WSOpen, payload);
   }
 
   sendWSClose(seq: number, payload: WSClosePayload) {
@@ -318,7 +319,7 @@ export class AdriftServer {
           // onclose will be called after this with code 1006, reason "" and wasClean false
         };
         ws.onopen = () => {
-          this.sendWSOpen(seq);
+          this.sendWSOpen(seq, { protocol: ws.protocol });
         };
         ws.onclose = (e) => {
           this.sendWSClose(seq, {

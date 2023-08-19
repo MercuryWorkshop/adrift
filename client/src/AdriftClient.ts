@@ -182,8 +182,9 @@ export class AdriftBareClient extends Client {
     let { send, close } = this.connection.wsconnect(
       remote,
       protocols,
-      () => {
+      (protocol: string) => {
         onReadyState(WebSocket.OPEN);
+        (ws as any).protocol = protocol;
         ws.dispatchEvent(new Event("open"));
       },
       (code: number, reason: string, wasClean: boolean) => {

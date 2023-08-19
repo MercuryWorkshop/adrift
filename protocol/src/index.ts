@@ -44,6 +44,10 @@ export type C2SWSOpenPayload = {
   protocols: string | string[];
 };
 
+export type S2CWSOpenPayload = {
+  protocol: string;
+};
+
 export type WSClosePayload = {
   code: number;
   reason: string;
