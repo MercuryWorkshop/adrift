@@ -9,6 +9,7 @@ import {
   ProtoBareHeaders,
   S2CRequestType,
   S2CRequestTypes,
+  S2CWSOpenPayload,
   S2C_HELLO_ERR,
   S2C_HELLO_OK,
   Transport,
@@ -17,7 +18,7 @@ import {
 } from "protocol";
 
 type OpenWSMeta = {
-  onopen: () => void;
+  onopen: (protocol: string) => void;
   onclose: (code: number, reason: string, wasClean: boolean) => void;
   onmessage: (data: ReadableStream, isBinary: boolean) => void;
   onerror: (message: string) => void;
@@ -126,12 +127,15 @@ export class Connection {
         delete this.openRequestStreams[requestID];
         break;
 
-      case S2CRequestTypes.WSOpen:
+      case S2CRequestTypes.WSOpen: {
         const socketMeta = this.openingSockets[requestID];
+        if (!socketMeta) return;
+        const payload: S2CWSOpenPayload = msgJSON();
         delete this.openingSockets[requestID];
         this.openSockets[requestID] = socketMeta;
-        setTimeout(() => socketMeta.onopen());
+        setTimeout(() => socketMeta.onopen(payload.protocol));
         break;
+      }
 
       case S2CRequestTypes.WSBinaryStart:
       case S2CRequestTypes.WSTextStart: {
@@ -270,7 +274,7 @@ export class Connection {
   wsconnect(
     url: URL,
     protocols: string | string[],
-    onopen: () => void,
+    onopen: (protocol: string) => void,
     onclose: (code: number, reason: string, wasClean: boolean) => void,
     onmessage: (data: ReadableStream, isBinary: boolean) => void,
     onerror: (message: string) => void,
