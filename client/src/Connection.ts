@@ -19,7 +19,7 @@ import {
 type OpenWSMeta = {
   onopen: () => void;
   onclose: (code: number, reason: string, wasClean: boolean) => void;
-  onmessage: (data: any) => void;
+  onmessage: (data: ReadableStream, isBinary: boolean) => void;
   onerror: (message: string) => void;
 };
 
@@ -42,6 +42,7 @@ export class Connection {
   openRequestStreams: Record<number, ReadableStreamDefaultController<any>> = {};
   openingSockets: Record<number, OpenWSMeta> = {};
   openSockets: Record<number, OpenWSMeta> = {};
+  wsMsgStreams: Record<number, ReadableStreamDefaultController<any>> = {};
 
   counter: number = 0;
 
@@ -132,18 +133,45 @@ export class Connection {
         setTimeout(() => socketMeta.onopen());
         break;
 
-      case S2CRequestTypes.WSDataText: {
+      case S2CRequestTypes.WSBinaryStart:
+      case S2CRequestTypes.WSTextStart: {
         const socketMeta = this.openSockets[requestID];
         if (!socketMeta) return;
-        setTimeout(() => socketMeta.onmessage(msgText()));
+        const stream = new ReadableStream({
+          start: (controller) => {
+            this.wsMsgStreams[requestID] = controller;
+          },
+          pull: (constroller) => {
+            // not needed
+          },
+          cancel: () => {
+            // TODO
+          },
+        });
+        setTimeout(() =>
+          socketMeta.onmessage(
+            stream,
+            requestType === S2CRequestTypes.WSBinaryStart
+              ? true
+              : requestType === S2CRequestTypes.WSTextStart
+              ? false
+              : (() => {
+                  throw new Error("unreachable");
+                })()
+          )
+        );
         break;
       }
 
-      case S2CRequestTypes.WSDataBinary: {
-        const socketMeta = this.openSockets[requestID];
-        if (!socketMeta) return;
-        let slice = data.slice(cursor);
-        setTimeout(() => socketMeta.onmessage(slice));
+      case S2CRequestTypes.WSDataChunk: {
+        const stream = this.wsMsgStreams[requestID];
+        stream?.enqueue(new Uint8Array(data.slice(cursor)));
+        break;
+      }
+
+      case S2CRequestTypes.WSDataEnd: {
+        const stream = this.wsMsgStreams[requestID];
+        stream?.close();
         break;
       }
 
@@ -244,7 +272,7 @@ export class Connection {
     protocols: string | string[],
     onopen: () => void,
     onclose: (code: number, reason: string, wasClean: boolean) => void,
-    onmessage: (data: any) => void,
+    onmessage: (data: ReadableStream, isBinary: boolean) => void,
     onerror: (message: string) => void,
     arrayBufferImpl: ArrayBufferConstructor
   ): {

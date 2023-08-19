@@ -16,9 +16,11 @@ export const S2CRequestTypes = {
   HTTPResponseEnd: 2,
   WSOpen: 3,
   WSClose: 4,
-  WSDataText: 5,
-  WSDataBinary: 6,
-  WSError: 7,
+  WSTextStart: 5,
+  WSBinaryStart: 6,
+  WSDataChunk: 7,
+  WSDataEnd: 8,
+  WSError: 9,
 } as const;
 export type S2CRequestType = ObjectValues<typeof S2CRequestTypes>;
 
@@ -60,6 +62,6 @@ export const S2C_HELLO_OK = ":3";
 export const C2S_HELLO = "haiii ";
 export const S2C_HELLO_ERR = ":< ";
 
-export const PROTOCOL_VERSION = "1.0";
+export const PROTOCOL_VERSION = "2.0";
 
 export { Transport } from "./Transport";

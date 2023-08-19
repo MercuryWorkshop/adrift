@@ -156,35 +156,6 @@ export class AdriftServer {
     };
   }
 
-  _sendJSONRes(seq: number, op: S2CRequestType, payload: any) {
-    const payloadBuffer = new TextEncoder().encode(JSON.stringify(payload));
-    const buf = new ArrayBuffer(2 + 1 + payloadBuffer.length);
-    const dataView = new DataView(buf);
-    let cursor = 0;
-    dataView.setUint16(cursor, seq);
-    cursor += 2;
-    dataView.setUint8(cursor, op);
-    cursor += 1;
-    new Uint8Array(buf).set(payloadBuffer, cursor);
-    this.send(buf);
-  }
-
-  sendHTTPResponseStart(seq: number, payload: HTTPResponsePayload) {
-    this._sendJSONRes(seq, S2CRequestTypes.HTTPResponseStart, payload);
-  }
-
-  sendHTTPResponseChunk(seq: number, chunk: Uint8Array) {
-    const buf = new ArrayBuffer(2 + 1 + chunk.byteLength);
-    const dataView = new DataView(buf);
-    let cursor = 0;
-    dataView.setUint16(cursor, seq);
-    cursor += 2;
-    dataView.setUint8(cursor, S2CRequestTypes.HTTPResponseChunk);
-    cursor += 1;
-    new Uint8Array(buf).set(chunk, cursor);
-    this.send(buf);
-  }
-
   _sendSimpleRes(seq: number, op: S2CRequestType) {
     const buf = new ArrayBuffer(2 + 1);
     const dataView = new DataView(buf);
@@ -193,6 +164,35 @@ export class AdriftServer {
     cursor += 2;
     dataView.setUint8(cursor, op);
     this.send(buf);
+  }
+
+  _sendBufRes(seq: number, op: S2CRequestType, payload: Uint8Array) {
+    const payloadArr = new Uint8Array(payload);
+    const buf = new ArrayBuffer(2 + 1 + payloadArr.length);
+    const dataView = new DataView(buf);
+    let cursor = 0;
+    dataView.setUint16(cursor, seq);
+    cursor += 2;
+    dataView.setUint8(cursor, op);
+    cursor += 1;
+    new Uint8Array(buf).set(payloadArr, cursor);
+    this.send(buf);
+  }
+
+  _sendJSONRes(seq: number, op: S2CRequestType, payload: any) {
+    this._sendBufRes(
+      seq,
+      op,
+      new TextEncoder().encode(JSON.stringify(payload))
+    );
+  }
+
+  sendHTTPResponseStart(seq: number, payload: HTTPResponsePayload) {
+    this._sendJSONRes(seq, S2CRequestTypes.HTTPResponseStart, payload);
+  }
+
+  sendHTTPResponseChunk(seq: number, chunk: Uint8Array) {
+    this._sendBufRes(seq, S2CRequestTypes.HTTPResponseChunk, chunk);
   }
 
   sendHTTPResponseEnd(seq: number) {
@@ -211,28 +211,18 @@ export class AdriftServer {
     this._sendJSONRes(seq, S2CRequestTypes.WSError, payload);
   }
 
-  sendWSText(seq: number, textEncoded: ArrayBuffer) {
-    const buf = new ArrayBuffer(2 + 1 + textEncoded.byteLength);
-    const dataView = new DataView(buf);
-    let cursor = 0;
-    dataView.setUint16(cursor, seq);
-    cursor += 2;
-    dataView.setUint8(cursor, S2CRequestTypes.WSDataText);
-    cursor += 1;
-    new Uint8Array(buf).set(new Uint8Array(textEncoded), cursor);
-    this.send(buf);
-  }
-
-  sendWSBinary(seq: number, msg: ArrayBuffer) {
-    const buf = new ArrayBuffer(2 + 1 + msg.byteLength);
-    const dataView = new DataView(buf);
-    let cursor = 0;
-    dataView.setUint16(cursor, seq);
-    cursor += 2;
-    dataView.setUint8(cursor, S2CRequestTypes.WSDataBinary);
-    cursor += 1;
-    new Uint8Array(buf).set(new Uint8Array(msg), cursor);
-    this.send(buf);
+  streamWSData(seq: number, isBinary: boolean, textEncoded: ArrayBuffer) {
+    this._sendSimpleRes(
+      seq,
+      isBinary ? S2CRequestTypes.WSBinaryStart : S2CRequestTypes.WSTextStart
+    );
+    let remaining = textEncoded;
+    do {
+      const chunk = remaining.slice(0, MAX_CHUNK_SIZE);
+      remaining = remaining.slice(MAX_CHUNK_SIZE);
+      this._sendBufRes(seq, S2CRequestTypes.WSDataChunk, new Uint8Array(chunk));
+    } while (remaining.byteLength > 0);
+    this._sendSimpleRes(seq, S2CRequestTypes.WSDataEnd);
   }
 
   async onMsg(msg: ArrayBuffer) {
@@ -348,20 +338,20 @@ export class AdriftServer {
           // web ws: first arg is an event, event.data is string if text or
           //  arraybuffer|blob depending on binaryType.
           if (dataOrEvent instanceof ArrayBuffer) {
-            if (isBinary) {
-              this.sendWSBinary(seq, dataOrEvent);
-              return;
-            }
-            this.sendWSText(seq, dataOrEvent);
+            this.streamWSData(seq, Boolean(isBinary), dataOrEvent);
             return;
           }
           // unless we set binaryType incorrectly, we should be on the web here.
           if (typeof dataOrEvent.data === "string") {
-            this.sendWSText(seq, new TextEncoder().encode(dataOrEvent.data));
+            this.streamWSData(
+              seq,
+              false,
+              new TextEncoder().encode(dataOrEvent.data)
+            );
             return;
           }
           if (dataOrEvent.data instanceof ArrayBuffer) {
-            this.sendWSBinary(seq, dataOrEvent.data);
+            this.streamWSData(seq, true, dataOrEvent.data);
             return;
           }
           console.error({ dataOrEvent, isBinary });
