@@ -45,7 +45,6 @@ export class RTCTransport extends Transport {
 
     this.dataChannel.onclose = onclose;
     this.dataChannel.onmessage = async (event) => {
-      console.log(event);
       let buf = event.data;
       this.ondata(buf);
     };

@@ -1,6 +1,5 @@
 import { registerRemoteListener } from "bare-client-custom";
 import App from "./App.svelte";
-import "@fontsource/cabin";
 
 import "./index.css";
 if (import.meta.env.VITE_ADRIFT_DEV) {
