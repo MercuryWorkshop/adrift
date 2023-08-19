@@ -194,6 +194,7 @@ export class AdriftBareClient extends Client {
         let data: ArrayBuffer | string = await new Response(
           stream
         ).arrayBuffer();
+        (data as any).__proto__ = arrayBufferImpl.prototype;
         if (!isBinary) {
           try {
             data = new TextDecoder().decode();
