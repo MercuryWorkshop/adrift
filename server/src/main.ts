@@ -18,6 +18,7 @@ import TrackerList from "tracker-list";
 import fs from "fs";
 import { exit } from "process";
 import { datadir } from "./lib";
+import { PROTOCOL_VERSION } from "protocol";
 
 
 async function config() {
@@ -112,7 +113,7 @@ async function start() {
     console.log(chalk.blue("Starting server!"));
     if (conf.type == "swarm") {
         let connect = () => {
-            let trackerws = new WebSocket(tracker.tracker + "/join");
+            let trackerws = new WebSocket(`${tracker.tracker}/join?protocol=${PROTOCOL_VERSION}`);
             trackerws.onclose = () => {
                 console.log(`Disconnected from tracker. Retrying...`);
                 setTimeout(() => {

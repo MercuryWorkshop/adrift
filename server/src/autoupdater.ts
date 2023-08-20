@@ -9,18 +9,20 @@ let appname = `adrift-server-${platform}`;
 if (process.platform == "win32") {
     appname += ".exe";
 }
-https.get(
-    `https://github.com/MercuryWorkshop/adrift/releases/latest/download/${appname}`, resp => {
-        let file = fs.createWriteStream(`${dir}/${appname}`);
-        resp.pipe(file);
+function downloadAndStart() {
+    https.get(
+        `https://github.com/MercuryWorkshop/adrift/releases/latest/download/${appname}`, resp => {
+            let file = fs.createWriteStream(`${dir}/${appname}`);
+            resp.pipe(file);
 
 
-        file.on("finish", () => {
-            fs.chmodSync(`${dir}/${appname}`, "755");
-            // this timeout shouldn't be needed, but it is
-            setTimeout(start, 2000);
-        });
-    })
+            file.on("finish", () => {
+                fs.chmodSync(`${dir}/${appname}`, "755");
+                // this timeout shouldn't be needed, but it is
+                setTimeout(start, 2000);
+            });
+        })
+}
 
 function start() {
     console.log(chalk.blue(`Starting adrift...`));
@@ -28,6 +30,12 @@ function start() {
     let child = spawn(`${dir}/${appname}`, ["--start"], { stdio: ["inherit", "inherit", "pipe"] });
 
     let errbuf = "";
+    let timeout = setTimeout(() => {
+        console.log(chalk.blueBright("server's been up for a while, attempting to update..."));
+        child.removeAllListeners("exit");
+        child.kill();
+        downloadAndStart();
+    }, 1000 * 60 * 60 * 4); // 4 hours
 
     child.stderr!.on("data", e => {
         let err = e.toString();
@@ -37,7 +45,13 @@ function start() {
     child.on("exit", (e) => {
         // upload `err` as telemetry?
         console.log(chalk.red(`Adrift crashed! exit code ${e}`));
-        console.log(chalk.green("restarting in 3 seconds"));
-        setTimeout(start, 3000);
+        console.log(chalk.green("restarting in 30 seconds"));
+
+        clearTimeout(timeout);
+        setTimeout(downloadAndStart, 30000);
     });
+
 }
+
+// downloadAndStart();
+start();
