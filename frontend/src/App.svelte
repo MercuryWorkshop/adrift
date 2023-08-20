@@ -35,6 +35,8 @@
     signInWithEmailAndPassword,
   } from "firebase/auth";
 
+  import logo from "./logo.png";
+
   enum ReadyState {
     Idle,
     Connecting,
@@ -191,7 +193,8 @@
     <div id="topbar" class="flex justify-between items-center p-4">
       <div id="logo">
         <Card type="">
-          <h3 class="text-xl">(logo goes here)</h3>
+          <img height="100" width="100" src={logo} />
+          <!-- <h3 class="text-xl">(logo goes here)</h3> -->
         </Card>
       </div>
       <div id="nav">
