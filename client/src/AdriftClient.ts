@@ -184,7 +184,7 @@ export class AdriftBareClient extends Client {
       protocols,
       (protocol: string) => {
         onReadyState(WebSocket.OPEN);
-        (ws as any).protocol = protocol;
+        (ws as any).__defineGetter__("protocol", () => { return protocol });
         ws.dispatchEvent(new Event("open"));
       },
       (code: number, reason: string, wasClean: boolean) => {
