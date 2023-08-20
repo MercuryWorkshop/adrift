@@ -193,7 +193,11 @@
     <div id="topbar" class="flex justify-between items-center p-4">
       <div id="logo">
         <Card type="">
-          <img height="100" width="100" src={logo} />
+          <div class="flex items-center text-3xl">
+            <Icon icon="material-symbols:sailing" />
+            <p class="text-2xl ml-3">Adrift</p>
+          </div>
+          <!-- <img height="100" width="100" src={logo} /> -->
           <!-- <h3 class="text-xl">(logo goes here)</h3> -->
         </Card>
       </div>
