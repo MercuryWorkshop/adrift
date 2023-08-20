@@ -13,6 +13,7 @@
     CircularProgressIndeterminate,
     Dialog,
     RadioAnim3,
+    SnackbarAnim,
     StyleFromScheme,
     TextField,
   } from "m3-svelte";
@@ -30,12 +31,15 @@
   import TrackerList from "tracker-list";
   import {
     browserLocalPersistence,
+    createUserWithEmailAndPassword,
     getAuth,
     setPersistence,
     signInWithEmailAndPassword,
   } from "firebase/auth";
 
   import logo from "./logo.png";
+  import AccountCreation from "./AccountCreation.svelte";
+  import { SnackbarIn } from "m3-svelte/package/containers/Snackbar.svelte";
 
   enum ReadyState {
     Idle,
@@ -59,6 +63,10 @@
   let chosenTracker: keyof typeof TrackerList | undefined;
 
   let showTrackerList = false;
+
+  let createaccount = false;
+
+  let snackbar: (data: SnackbarIn) => void;
 
   async function onTransportOpen() {
     console.log("Transport opened");
@@ -168,8 +176,6 @@
 
 {#if state == ReadyState.Connected}
   <Proxy />
-{:else if state == ReadyState.AccountCreation}
-  <AccountCreationScreen />
 {:else if state == ReadyState.Connecting}
   <div class="h-full w-full flex justify-center items-center">
     <Card type="outlined">
@@ -197,21 +203,9 @@
             <Icon icon="material-symbols:sailing" />
             <p class="text-2xl ml-3">Adrift</p>
           </div>
-          <!-- <img height="100" width="100" src={logo} /> -->
-          <!-- <h3 class="text-xl">(logo goes here)</h3> -->
         </Card>
       </div>
-      <div id="nav">
-        <!-- <Card type="outlined">
-        <div id="quickmenu">
-          <a href="httsp" class="text-med m-2">About</a>
-          <a
-            href="https://github.com/MercuryWorkshop/adrift"
-            class="text-med m-2">Source</a
-          >
-        </div>
-      </Card> -->
-      </div>
+      <div id="nav" />
       <div id="links">
         <Card type="elevated">
           <div class="flex">
@@ -306,9 +300,9 @@
 
           <Dialog headline="WARNING" bind:open={showSwarmWarning}>
             <h2 class="text-2xl">
-              TLS has not currently been implemented for the Adrift Swarm. Your
-              data will not be private, and you should not sign into any
-              accounts that you care much about
+              TLS has not currently been implemented for the Adrift Swarm. It
+              will later, but until then your data will not be private, and you
+              should not enter any sensitive information on any page
             </h2>
             <br />
             <Button type="filled" on:click={() => (showLogin = false)}
@@ -322,7 +316,7 @@
           <Dialog headline="Log in to connect" bind:open={showLogin}>
             <button
               class="text-primary my-3"
-              on:click={() => (state = ReadyState.AccountCreation)}
+              on:click={() => ((createaccount = true), (showLogin = false))}
               >New here? Create an account</button
             >
             <br />
@@ -340,12 +334,51 @@
               <Button
                 type="filled"
                 on:click={async () => {
-                  await signInWithEmailAndPassword(getAuth(), email, password);
-                  connectAccount();
+                  try {
+                    await signInWithEmailAndPassword(
+                      getAuth(),
+                      email,
+                      password
+                    );
+                    connectAccount();
+                  } catch (e) {
+                    snackbar({ message: e, closable: true });
+                  }
                 }}>Connect</Button
               >
             </div>
           </Dialog>
+          <Dialog bind:open={createaccount} headline="Create an account">
+            <TextField name="email" bind:value={email} />
+            <TextField
+              name="password"
+              bind:value={password}
+              extraOptions={{ type: "password" }}
+            />
+
+            <p>
+              Note: to be able to connect, you'll need to download an exit node
+              and run it on a computer with an uncensored internet connection
+            </p>
+
+            <div class="flex mt-5">
+              <Button
+                type="filled"
+                on:click={async () => {
+                  try {
+                    await createUserWithEmailAndPassword(
+                      getAuth(),
+                      email,
+                      password
+                    );
+                    createaccount = false;
+                  } catch (e) {
+                    snackbar({ message: e, closable: true });
+                  }
+                }}>Create Account</Button
+              >
+            </div></Dialog
+          >
         </Card>
       </div>
       <div class="flex m-4">
@@ -389,6 +422,7 @@
     </Card>
   </div>
 {/if}
+<svelte:component this={SnackbarAnim} bind:show={snackbar} />
 
 <StyleFromScheme
   lightScheme={{
