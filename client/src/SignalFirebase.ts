@@ -3,7 +3,7 @@ import { getDatabase, onValue, ref, set, remove } from "firebase/database";
 
 import { v4 as uuid } from "uuid";
 import { Answer } from "./RTCTransport";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { browserLocalPersistence, getAuth, setPersistence, signInWithEmailAndPassword } from "firebase/auth";
 
 
 export async function signalSwarm(offer: string): Promise<Answer> {
@@ -40,13 +40,16 @@ export async function signalSwarm(offer: string): Promise<Answer> {
 
   });
 }
-export async function signalAccount(offer: string, email: string, password: string): Promise<Answer> {
+export async function signalAccount(offer: string): Promise<Answer> {
 
   let auth = getAuth();
-  let creds = await signInWithEmailAndPassword(auth, email, password);
+
+  if (!auth.currentUser)
+    throw new Error("not signed in");
+
 
   const db = getDatabase();
-  let peer = ref(db, `/peers/${creds.user.uid}`);
+  let peer = ref(db, `/peers/${auth.currentUser!.uid}`);
 
 
 

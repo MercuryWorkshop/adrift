@@ -13,8 +13,6 @@
     CircularProgressIndeterminate,
     Dialog,
     RadioAnim3,
-    SegmentedButtonContainer,
-    SegmentedButtonItem,
     StyleFromScheme,
     TextField,
   } from "m3-svelte";
@@ -30,6 +28,12 @@
   import { initializeApp } from "firebase/app";
 
   import TrackerList from "tracker-list";
+  import {
+    browserLocalPersistence,
+    getAuth,
+    setPersistence,
+    signInWithEmailAndPassword,
+  } from "firebase/auth";
 
   enum ReadyState {
     Idle,
@@ -43,8 +47,8 @@
 
   let rtctransport: RTCTransport | undefined;
 
-  let email = "test@test.com";
-  let password = "123456";
+  let email = "";
+  let password = "";
 
   let connectionState = "";
 
@@ -98,17 +102,12 @@
   }
 
   async function connectAccount() {
-    await initFirebase();
     rtctransport = transport = createRTCTransport();
 
     state = ReadyState.Connecting;
     let offer = await rtctransport.createOffer();
     connectionState = "Finding your node...";
-    let answer = await SignalFirebase.signalAccount(
-      JSON.stringify(offer),
-      email,
-      password
-    );
+    let answer = await SignalFirebase.signalAccount(JSON.stringify(offer));
     connectionState = "Linking to node...";
     await new Promise((r) => {
       setTimeout(r, 1000);
@@ -280,8 +279,20 @@
               <Button type="elevated" on:click={() => (showSwarmWarning = true)}
                 >Connect to the swarm</Button
               >
-              <Button type="filled" on:click={() => (showLogin = true)}
-                >Connect with login</Button
+              <Button
+                type="filled"
+                on:click={async () => {
+                  await initFirebase();
+
+                  let auth = getAuth();
+                  await setPersistence(auth, browserLocalPersistence);
+
+                  if (!auth.currentUser) {
+                    showLogin = true;
+                  } else {
+                    await connectAccount();
+                  }
+                }}>Connect with login</Button
               >
             {/if}
           </div>
@@ -319,7 +330,13 @@
               <Button type="outlined" on:click={() => (showLogin = false)}
                 >Cancel</Button
               >
-              <Button type="filled" on:click={connectAccount}>Connect</Button>
+              <Button
+                type="filled"
+                on:click={async () => {
+                  await signInWithEmailAndPassword(getAuth(), email, password);
+                  connectAccount();
+                }}>Connect</Button
+              >
             </div>
           </Dialog>
         </Card>
