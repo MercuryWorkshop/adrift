@@ -480,6 +480,9 @@ importers:
       firebase-admin:
         specifier: ^11.10.1
         version: 11.10.1
+      protocol:
+        specifier: workspace:*
+        version: link:../protocol
       tracker-list:
         specifier: workspace:*
         version: link:../tracker-list

@@ -6,6 +6,7 @@ import { AdriftServer, connectTracker } from "./server";
 
 import WebSocket from "isomorphic-ws";
 import { answerRtc, bufferToArrayBuffer } from "./rtc";
+import { PROTOCOL_VERSION } from "protocol";
 
 dotenv.config();
 
@@ -50,9 +51,9 @@ app.ws("/dev-ws", (ws, _req) => {
 });
 
 try {
-  let tracker = new WebSocket("ws://localhost:17776/join");
+  let tracker = new WebSocket(`ws://localhost:17776/join?protocol=${PROTOCOL_VERSION}`);
   tracker.onerror = console.error;
   connectTracker(tracker);
-} catch (_) {}
+} catch (_) { }
 
 app.listen(3000, () => console.log("listening"));

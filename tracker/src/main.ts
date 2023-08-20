@@ -10,6 +10,8 @@ import { WebSocket } from "ws";
 
 import { v4 as uuid } from "uuid";
 
+import { PROTOCOL_VERSION } from "protocol";
+
 dotenv.config();
 
 let members: Record<string, WebSocket> = {};
@@ -70,16 +72,21 @@ reff.on("value", snapshot => {
 });
 
 
-app.ws("/join", (ws, _req) => {
+app.ws("/join", (ws, req) => {
+  let ver = new URL(`https://a/${req.url}`).searchParams.get("protocol");
+
+  if (ver != PROTOCOL_VERSION) {
+    ws.close();
+  }
 
   let id = uuid();
-  console.log(_req.ip);
+  console.log(req.ip);
   console.log(`ws connect of id ${id}`);
 
   members[id] = ws;
 
   ws.onclose = () => {
-    console.log(`${_req.ip} disconnected`);
+    console.log(`${req.ip} disconnected`);
     delete members[id];
   };
   setInterval(() => {

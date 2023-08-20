@@ -17,10 +17,8 @@ https.get(
 
         file.on("finish", () => {
             fs.chmodSync(`${dir}/${appname}`, "755");
-            setTimeout(() => {
-                // this timeout shouldn't be needed, but it is
-                start();
-            }, 2000);
+            // this timeout shouldn't be needed, but it is
+            setTimeout(start, 2000);
         });
     })
 
