@@ -19,6 +19,7 @@ import fs from "fs";
 import { exit } from "process";
 import { datadir } from "./lib";
 
+
 async function config() {
     let dir = datadir();
 
@@ -97,7 +98,7 @@ async function login(credentials: any) {
         }
     }
 }
-(async () => {
+async function start() {
     let dir = datadir();
 
     let conf;
@@ -152,4 +153,12 @@ async function login(credentials: any) {
             }
         });
     }
-})();
+}
+
+
+if (process.argv[2] != "--start") {
+    console.error(chalk.red.bold("DO NOT LAUNCH THIS DIRECTLY, YOU SHOULD HAVE DOWNLOADED THE 'autoupdater' BINARY"))
+    setTimeout(() => process.exit(1), 5000);
+} else {
+    start();
+}

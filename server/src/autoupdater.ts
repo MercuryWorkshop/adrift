@@ -27,7 +27,7 @@ https.get(
 function start() {
     console.log(chalk.blue(`Starting adrift...`));
 
-    let child = spawn(`${dir}/${appname}`, [], { stdio: ["inherit", "inherit", "pipe"] });
+    let child = spawn(`${dir}/${appname}`, ["--start"], { stdio: ["inherit", "inherit", "pipe"] });
 
     let errbuf = "";
 
