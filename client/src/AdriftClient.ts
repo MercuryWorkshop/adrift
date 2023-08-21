@@ -158,7 +158,7 @@ export class AdriftBareClient extends Client {
     webSocketImpl: WebSocketImpl,
     arrayBufferImpl: ArrayBufferConstructor
   ): WebSocket {
-    const ws = new webSocketImpl("ws:null", protocols);
+    const ws = new webSocketImpl("wss:null", protocols);
     // this will error. that's okay
     let initalCloseHappened = false;
     ws.addEventListener("close", (e) => {
