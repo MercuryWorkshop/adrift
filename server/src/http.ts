@@ -28,7 +28,6 @@ export class BareError extends Error {
   }
 }
 
-setServers(["1.1.1.3", "1.0.0.3"]);
 export const options: BareServerOptions = {
   logErrors: true,
   filterRemote: (url) => {
@@ -37,7 +36,8 @@ export const options: BareServerOptions = {
     if (isValid(url.hostname) && parse(url.hostname).range() !== "unicast")
       throw new RangeError("Forbidden IP");
   },
-  lookup: (hostname, options, callback) =>
+  lookup: (hostname, options, callback) => {
+    setServers(["1.1.1.3", "1.0.0.3"]);
 
     lookup(hostname, options, (err: any, address: any, family: any) => {
       if (
@@ -48,7 +48,8 @@ export const options: BareServerOptions = {
       )
         callback(new RangeError("Forbidden IP"), [], -1);
       else callback(err, address, family);
-    }),
+    })
+  },
   httpAgent: new HTTPAgent({
     keepAlive: true,
   }),

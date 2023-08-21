@@ -7,7 +7,7 @@ export default defineConfig({
     svelte({
 
     }),
-    process.env.VITE_ADRIFT_SINGLEFILE && viteSingleFile()
+    (process.env.VITE_ADRIFT_SINGLEFILE && !process.env.VITE_ADRIFT_CDN) && viteSingleFile()
   ],
   build: {
     dev: true,

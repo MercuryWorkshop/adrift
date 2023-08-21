@@ -1,3 +1,8 @@
+if (import.meta.env.VITE_ADRIFT_CDN && import.meta.env.VITE_ADRIFT_SINGLEFILE) {
+  document.body.innerHTML = `<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/adriftnet/static/index-861d7b8d.css' /> <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cabin"><div id='app' />`;
+}
+
+
 import { registerRemoteListener } from "bare-client-custom";
 import App from "./App.svelte";
 
