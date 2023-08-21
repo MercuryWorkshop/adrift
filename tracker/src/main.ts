@@ -25,7 +25,7 @@ app.use(express.json());
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as ServiceAccount),
-  databaseURL: "https://adrift-6c1f6-default-rtdb.firebaseio.com"
+  databaseURL: process.env.DB_URL
 });
 let db = admin.database();
 let reff = db.ref("/swarm");
@@ -49,7 +49,7 @@ reff.on("value", snapshot => {
 
   for (let key of newkeys) {
     let offer = val[key];
-    console.log("new offer:" + offer);
+    console.log("new offer");
 
     if (Object.keys(members).length < 1) {
       db.ref(`/swarm/${key}`).set(JSON.stringify({ error: "no swarm members found" }));
@@ -58,10 +58,11 @@ reff.on("value", snapshot => {
     }
 
     let selectedid = Object.keys(members)[Math.floor(Math.random() * Object.keys(members).length)];
+    console.log("sending offer to " + selectedid);
 
     let selectedmember = members[selectedid];
     selectedmember.once("message", (answer) => {
-      console.log("setting answer" + answer);
+      console.log("recieved answer");
       db.ref(`/swarm/${key}`).set(answer);
     });
     selectedmember.send(offer);
@@ -71,6 +72,11 @@ reff.on("value", snapshot => {
   ids = ids.concat(newkeys);
 });
 
+app.get("/stats", (req, res) => {
+  res.send({
+    members: Object.keys(members)
+  });
+})
 
 app.ws("/join", (ws, req) => {
   let ver = new URL(`https://a/${req.url}`).searchParams.get("protocol");
@@ -94,8 +100,5 @@ app.ws("/join", (ws, req) => {
   }, 10000);
 
 });
-setInterval(() => {
-  console.log(`${Object.keys(members).length} members`);
-}, 5000);
 
-app.listen(17776, () => console.log("listening"));
+app.listen(process.env.PORT, () => console.log("listening"));
