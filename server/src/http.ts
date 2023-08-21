@@ -1,4 +1,4 @@
-import { LookupAddress, LookupAllOptions, lookup } from "dns";
+import { LookupAddress, LookupAllOptions, Resolver, lookup, setServers } from "dns";
 import {
   ClientRequest,
   Agent as HTTPAgent,
@@ -27,6 +27,8 @@ export class BareError extends Error {
     this.body = body;
   }
 }
+
+setServers(["1.1.1.3", "1.0.0.3"]);
 export const options: BareServerOptions = {
   logErrors: true,
   filterRemote: (url) => {
@@ -36,6 +38,7 @@ export const options: BareServerOptions = {
       throw new RangeError("Forbidden IP");
   },
   lookup: (hostname, options, callback) =>
+
     lookup(hostname, options, (err: any, address: any, family: any) => {
       if (
         address &&
