@@ -238,12 +238,14 @@
             <Button type="filled" on:click={() => (showTrackerList = true)}
               >Start Browsing</Button
             >
-            <Button
-              type="text"
-              on:click={() => {
-                downloadShortcut("adrift.html", "Homework");
-              }}>Get Shortcut</Button
-            >
+            {#if !import.meta.env.VITE_ADRIFT_SINGLEFILE}
+              <Button
+                type="text"
+                on:click={() => {
+                  downloadShortcut("adrift.html", "Homework");
+                }}>Get Shortcut</Button
+              >
+            {/if}
           </div>
         </Card>
       </div>
