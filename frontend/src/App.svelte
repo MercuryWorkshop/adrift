@@ -6,6 +6,7 @@
     DevWsTransport,
     RTCTransport,
     SignalFirebase,
+    downloadShortcut,
   } from "client";
   import {
     Button,
@@ -233,9 +234,15 @@
               A fast and modern decentralized proxy network
             </h2>
           </div>
-          <div class="mt-5">
+          <div class="mt-5 flex justify-between">
             <Button type="filled" on:click={() => (showTrackerList = true)}
               >Start Browsing</Button
+            >
+            <Button
+              type="text"
+              on:click={() => {
+                downloadShortcut("adrift.html", "Homework");
+              }}>Get Shortcut</Button
             >
           </div>
         </Card>
