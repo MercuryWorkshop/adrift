@@ -1,4 +1,4 @@
-import { getDatabase, onValue, ref, set, remove } from "firebase/database";
+import { getDatabase, onValue, ref, set, remove, goOffline } from "firebase/database";
 // import "firebase-config";
 
 import { v4 as uuid } from "uuid";
@@ -53,6 +53,7 @@ export async function signalAccount(offer: string): Promise<Answer> {
 
 
 
+
   set(peer, offer);
   return new Promise((resolve, reject) => {
 
@@ -63,6 +64,8 @@ export async function signalAccount(offer: string): Promise<Answer> {
         if (data && data.answer && data.candidates) {
           remove(peer);
           resolve(data);
+          goOffline(db);
+
         }
       }
     });

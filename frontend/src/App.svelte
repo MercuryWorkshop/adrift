@@ -40,6 +40,7 @@
   import logo from "./logo.png";
   import AccountCreation from "./AccountCreation.svelte";
   import { SnackbarIn } from "m3-svelte/package/containers/Snackbar.svelte";
+  import { goOffline } from "firebase/database";
 
   enum ReadyState {
     Idle,
@@ -108,7 +109,7 @@
   async function initFirebase() {
     if (!chosenTracker) return;
     let tracker = TrackerList[chosenTracker];
-    initializeApp(tracker.firebase);
+    let app = initializeApp(tracker.firebase);
   }
 
   async function connectAccount() {
