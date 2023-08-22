@@ -21,6 +21,14 @@ const app = express() as unknown as expressWs.Application;
 expressWs(app);
 
 app.use(express.json());
+app.use((_req, res, next) => {
+  res.header("x-robots-tag", "noindex");
+  res.header("access-control-allow-headers", "*");
+  res.header("access-control-allow-origin", "*");
+  res.header("access-control-allow-methods", "*");
+  res.header("access-control-expose-headers", "*");
+  next();
+});
 
 
 admin.initializeApp({

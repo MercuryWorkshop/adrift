@@ -40,7 +40,6 @@
 
   import logo from "./logo.png";
   import AccountCreation from "./AccountCreation.svelte";
-  import { SnackbarIn } from "m3-svelte/package/containers/Snackbar.svelte";
   import { goOffline } from "firebase/database";
 
   enum ReadyState {
@@ -62,13 +61,16 @@
 
   let showSwarmWarning = false;
   let showLogin = false;
-  let chosenTracker: keyof typeof TrackerList | undefined;
+  type TrackerID = keyof typeof TrackerList;
+  type Tracker = typeof TrackerList[TrackerID];
+
+  let chosenTracker: TrackerID | undefined;
 
   let showTrackerList = false;
 
   let createaccount = false;
 
-  let snackbar: (data: SnackbarIn) => void;
+  let snackbar: (data: any) => void;
 
   async function onTransportOpen() {
     console.log("Transport opened");
@@ -174,6 +176,19 @@
       console.log("onclose")
     );
   }
+
+  let trackerstatuses: Partial<Record<TrackerID, object | null>> = {};
+  for (let id in TrackerList) {
+    let tracker = TrackerList[id as TrackerID];
+    trackerstatuses[id as TrackerID] = null;
+
+    let url = new URL(`${tracker.tracker}/stats`);
+    url.protocol = "https://";
+    fetch(url).then(async (data) => {
+      trackerstatuses[id as TrackerID] = await data.json();
+      console.log(trackerstatuses);
+    });
+  }
 </script>
 
 {#if state == ReadyState.Connected}
@@ -261,27 +276,34 @@
         >
           <h2 class="text-4xl">Select a Tracker</h2>
           <h2 class="text-1xl">Trackers allow you to connect to Adrift</h2>
-          <div class="mt-5">
+          <div class="mt-5 space-y-3">
             {#each Object.keys(TrackerList) as tracker}
-              <label>
-                <div class="flex items-center">
-                  <svelte:component this={RadioAnim3}>
-                    <input
-                      type="radio"
-                      id={tracker}
-                      name="tabs"
-                      value={tracker}
-                      bind:group={chosenTracker}
-                    />
-                  </svelte:component>
-                  <p class="m-3 text-xl">
-                    {tracker}
+              <Card type="outlined">
+                <label>
+                  <div class="flex items-center">
+                    <svelte:component this={RadioAnim3}>
+                      <input
+                        type="radio"
+                        id={tracker}
+                        name="tabs"
+                        value={tracker}
+                        bind:group={chosenTracker}
+                      />
+                    </svelte:component>
+                    <p class="ml-3 text-xl">
+                      {tracker}
+                    </p>
+                  </div>
+                  <p>
+                    {TrackerList[tracker].description}
                   </p>
-                </div>
-                <p>
-                  {TrackerList[tracker].description}
-                </p>
-              </label>
+                  <p class="opacity-50">
+                    {trackerstatuses[tracker]
+                      ? trackerstatuses[tracker]?.members?.length
+                      : "loading"} swarm members
+                  </p>
+                </label>
+              </Card>
             {/each}
           </div>
           <div class="flex-1" />
