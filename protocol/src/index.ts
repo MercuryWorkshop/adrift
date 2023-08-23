@@ -66,6 +66,6 @@ export const S2C_HELLO_OK = ":3";
 export const C2S_HELLO = "haiii ";
 export const S2C_HELLO_ERR = ":< ";
 
-export const PROTOCOL_VERSION = "2.0";
+export const PROTOCOL_VERSION = "3.0";
 
 export { Transport } from "./Transport";

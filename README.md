@@ -8,6 +8,12 @@ Clients will invisibly connect to one of several tracking servers to exchange an
 
 See a functional demo [here](https://adrift-6c1f6.web.app/)
 
+# For users:
+
+Head over to [releases](https://github.com/MercuryWorkshop/adrift/releases/latest) and download the autoupdating binary corresponding to your platform. On windows, download `adrift-server-windows-x64.exe`, move it to `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp` and launch it. On Linux, use systemd or cron.
+
+# For contributors:
+
 ### Before everything..
 
 install dependencies and build bare-client-custom

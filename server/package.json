@@ -6,7 +6,7 @@
   "scripts": {
     "start": "tsx src/main.ts --start",
     "dev": "nodemon -x tsx src/dev.ts",
-    "prod": "node esbuild.bundle.js && pkg dist/main.js --targets node18 -o dist/adrift-server && pkg dist/autoupdater.js --targets node18 -o dist/adrift-server-autoupdate"
+    "prod": "node esbuild.bundle.js && pkg dist/main.js --compress GZip  --targets node18 -o dist/adrift-server && pkg dist/autoupdater.js --compress GZip  --targets node18 -o dist/adrift-server-autoupdate"
   },
   "keywords": [],
   "author": "",

@@ -10,8 +10,8 @@ export default defineConfig({
     (process.env.VITE_ADRIFT_SINGLEFILE && !process.env.VITE_ADRIFT_CDN) && viteSingleFile()
   ],
   build: {
-    dev: true,
-    minify: false,
+    dev: !process.env.VITE_ADRIFT_PROD,
+    minify: process.env.VITE_ADRIFT_PROD,
     target: "esnext",
     outDir: "dist",
     sourcemap: true,
