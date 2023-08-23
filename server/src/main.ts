@@ -20,6 +20,8 @@ import { exit } from "process";
 import { datadir } from "./lib";
 import { PROTOCOL_VERSION } from "protocol";
 
+export const SERVER_MILESTONE = "1.0";
+
 
 async function config() {
     let dir = datadir();
@@ -102,6 +104,7 @@ async function login(credentials: any) {
 async function start() {
     let dir = datadir();
 
+
     let conf;
     try {
         conf = JSON.parse(fs.readFileSync(`${dir}/config.json`).toString());
@@ -111,6 +114,8 @@ async function start() {
     let tracker = TrackerList[conf.tracker as keyof typeof TrackerList];
 
     console.log(chalk.blue("Starting server!"));
+    console.log(chalk.blue(`Server version: ${SERVER_MILESTONE} - Protocol version: ${PROTOCOL_VERSION}`));
+
     if (conf.type == "swarm") {
         let connect = () => {
             let trackerws = new WebSocket(`${tracker.tracker}/join?protocol=${PROTOCOL_VERSION}`);

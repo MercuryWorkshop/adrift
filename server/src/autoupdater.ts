@@ -53,5 +53,4 @@ function start() {
 
 }
 
-// downloadAndStart();
-start();
+downloadAndStart();

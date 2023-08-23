@@ -26,5 +26,5 @@ let trackers = {
     tracker: "wss://rafftracker.mercurywork.shop",
     description: "a second official backup tracker",
   }
-};
+} as const;
 export default trackers;

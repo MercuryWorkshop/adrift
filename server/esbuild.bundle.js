@@ -12,7 +12,19 @@ build({
     platform: "node",
     // format: "esm",
     bundle: true,
+    minify: true,
+
     outfile: "dist/main.js",
+    plugins: [
+        makeAllPackagesExternalPlugin
+    ],
+})
+build({
+    entryPoints: ["src/autoupdater.ts"],
+    platform: "node",
+    bundle: true,
+    minify: true,
+    outfile: "dist/autoupdater.js",
     plugins: [
         makeAllPackagesExternalPlugin
     ],
