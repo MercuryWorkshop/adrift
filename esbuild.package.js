@@ -2,7 +2,7 @@ const { dtsPlugin } = require("esbuild-plugin-d.ts");
 const { build } = require("esbuild");
 
 
-for (let project of ["client", "protocol"]) {
+for (let project of ["client", "protocol", "tracker-list"]) {
     build({
         bundle: true,
         format: "esm",

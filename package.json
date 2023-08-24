@@ -1,6 +1,6 @@
 {
   "name": "@mercuryworkshop/adrift",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,7 @@
         "import": "./dist/protocol.mjs"
       }
     },
-    "./browser": {
+    "./client": {
       "types": "./dist/browser/index.d.ts",
       "node": {
         "require": "./dist/browser.cjs",
@@ -31,6 +31,16 @@
       "browser": {
         "require": "./dist/browser.cjs",
         "import": "./dist/browser.mjs"
+      }
+    },
+    "./tracker-list": {
+      "node": {
+        "require": "./dist/tracker-list.cjs",
+        "import": "./dist/tracker-list.mjs"
+      },
+      "browser": {
+        "require": "./dist/tracker-list.cjs",
+        "import": "./dist/tracker-list.mjs"
       }
     }
   },

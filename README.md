@@ -6,7 +6,7 @@ Adrift is a fast and modern decentralized web proxy network, utilizing transport
 
 Clients will invisibly connect to one of several tracking servers to exchange an "offer". From there, it uses NAT traversal to link up with a random exit node also running adrift, without the need to port forward. This lightens the load on individial server hosters and makes the network difficult to effectively block. If you're familiar with [tor snowflake](https://snowflake.torproject.org/), you can think of this as tor for the web
 
-See a functional demo [here](https://adrift-6c1f6.web.app/). There is also a limited standalone HTML file build in [releases](https://github.com/MercuryWorkshop/adrift/releases/latest)
+See a functional demo [here](https://adrift-6c1f6.web.app/). There is also a WIP limited standalone HTML file build in [releases](https://github.com/MercuryWorkshop/adrift/releases/latest)
 
 # For users:
 
@@ -15,6 +15,47 @@ If you want to contribute to the project and share your connection the best way 
 Head over to [releases](https://github.com/MercuryWorkshop/adrift/releases/latest) and download the autoupdating binary corresponding to your platform. On windows, download `adrift-server-windows-x64.exe`, move it to `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp` and launch it. On Linux, use systemd or cron.
 
 # For frontend creators:
+
+Adrift can be integrated very easily into existing proxy frontends using UV or Dynamic. First, download our prebuilt UV and/or Dynamic bundles from `frontend/public`. Then `npm install @mercuryworkshop/adrift`, `@mercuryworkshop/bare-client-custom` and firebase. Here's a quick code example for connecting to Adrift
+
+```js
+import { initializeApp } from "firebase/app";
+import TrackerList from "@mercuryworkshop/adrift/tracker-list";
+import {
+  SignalFirebase,
+  AdriftBareClient,
+} from "@mercuryworkshop/adrift/client";
+import {
+  registerRemoteListener,
+  setBareClientImplementation,
+} from "bare-client-custom";
+registerRemoteListener();
+let tracker = TrackerList["us-central-1"];
+initializeApp(tracker.firebase);
+
+async function onTransportOpen() {
+  console.log("Transport opened");
+  let connection = new Connection(transport);
+  await connection.initialize();
+  let bare = new AdriftBareClient(connection);
+  setBareClientImplementation(bare);
+}
+
+async function connect() {
+  let rtctransport = new RTCTransport(onTransportOpen, () =>
+    console.log("transport closed")
+  );
+
+  let offer = await rtctransport.createOffer();
+  console.log("Routing you to an available node...");
+  let answer = await SignalFirebase.signalSwarm(JSON.stringify(offer));
+  console.log("Linking to node...");
+  rtctransport.answer(answer.answer, answer.candidates);
+}
+
+connect();
+// after connect returns, UV/Dynamic can be used as it normally would
+```
 
 # For contributors:
 
