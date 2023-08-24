@@ -4,13 +4,17 @@ _surf_the_web_adrift_fix_ --------- "ce why do you keep making stupid proxies wi
 
 Adrift is a fast and modern decentralized web proxy network, utilizing transport over WebRTC.
 
-Clients will invisibly connect to one of several tracking servers to exchange an "offer". From there, it uses NAT traversal to link up with a random exit node also running adrift, without the need to port forward. This lightens the load on individial server hosters and makes the network difficult to effectively block. [more information](https://coolelectronics.me/blog/surf-the-web-adrift)
+Clients will invisibly connect to one of several tracking servers to exchange an "offer". From there, it uses NAT traversal to link up with a random exit node also running adrift, without the need to port forward. This lightens the load on individial server hosters and makes the network difficult to effectively block. If you're familiar with [tor snowflake](https://snowflake.torproject.org/), you can think of this as tor for the web
 
-See a functional demo [here](https://adrift-6c1f6.web.app/)
+See a functional demo [here](https://adrift-6c1f6.web.app/). There is also a limited standalone HTML file build in [releases](https://github.com/MercuryWorkshop/adrift/releases/latest)
 
 # For users:
 
+If you want to contribute to the project and share your connection the best way is to host your own exit node. This does not require port forwarding and is very simple to setup.
+
 Head over to [releases](https://github.com/MercuryWorkshop/adrift/releases/latest) and download the autoupdating binary corresponding to your platform. On windows, download `adrift-server-windows-x64.exe`, move it to `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp` and launch it. On Linux, use systemd or cron.
+
+# For frontend creators:
 
 # For contributors:
 
