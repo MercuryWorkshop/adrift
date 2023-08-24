@@ -1,19 +1,46 @@
 {
-  "name": "adrift",
+  "name": "@mercuryworkshop/adrift",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "workspace": [
+  "workspaces": [
     "protocol",
-    "server",
-    "frontend",
-    "client",
-    "firebase-config"
+    "client"
   ],
+  "exports": {
+    "./protocol": {
+      "types": "./dist/protocol/index.d.ts",
+      "node": {
+        "require": "./dist/protocol.cjs",
+        "import": "./dist/protocol.mjs"
+      },
+      "browser": {
+        "require": "./dist/protocol.cjs",
+        "import": "./dist/protocol.mjs"
+      }
+    },
+    "./browser": {
+      "types": "./dist/browser/index.d.ts",
+      "node": {
+        "require": "./dist/browser.cjs",
+        "import": "./dist/browser.mjs"
+      },
+      "browser": {
+        "require": "./dist/browser.cjs",
+        "import": "./dist/browser.mjs"
+      }
+    }
+  },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.19.2",
+    "esbuild-plugin-d.ts": "^1.1.0",
+    "estrella": "^1.4.1",
+    "tsc": "^2.0.4"
+  }
 }

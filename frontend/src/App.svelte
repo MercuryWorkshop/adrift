@@ -79,7 +79,6 @@
     // TODO: error handling here
     await connection.initialize();
     let bare = new AdriftBareClient(connection);
-    console.log(setBareClientImplementation);
     setBareClientImplementation(bare);
     state = ReadyState.Connected;
   }

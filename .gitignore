@@ -2,7 +2,7 @@ node_modules
 dist.js
 dist.js.map
 dist.html
-dist/
+*/dist/
 admin-creds.json
 server/config.json
 .firebaserrc
