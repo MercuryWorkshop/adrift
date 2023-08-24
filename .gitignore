@@ -8,3 +8,4 @@ server/config.json
 .firebaserrc
 .firebase
 .env
+pnpm-lock.yaml
