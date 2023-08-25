@@ -38,6 +38,8 @@
     signInWithEmailAndPassword,
   } from "firebase/auth";
 
+  import { getAnalytics } from "firebase/analytics";
+
   import logo from "./logo.png";
   import AccountCreation from "./AccountCreation.svelte";
   import { goOffline } from "firebase/database";
@@ -112,6 +114,7 @@
     if (!chosenTracker) return;
     let tracker = TrackerList[chosenTracker];
     let app = initializeApp(tracker.firebase);
+    getAnalytics(app);
   }
 
   async function connectAccount() {
