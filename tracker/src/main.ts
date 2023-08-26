@@ -106,6 +106,7 @@ app.ws("/join", (ws, req) => {
   setInterval(() => {
     ws.ping()
   }, 10000);
+  ws.on("error", console.error);
 
 });
 
