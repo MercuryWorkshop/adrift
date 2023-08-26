@@ -27,29 +27,35 @@ function downloadAndStart() {
 function start() {
     console.log(chalk.blue(`Starting adrift...`));
 
-    let child = spawn(`${dir}/${appname}`, ["--start"], { stdio: ["inherit", "inherit", "pipe"] });
+    try {
+        let child = spawn(`${dir}/${appname}`, ["--start"], { stdio: ["inherit", "inherit", "pipe"] });
 
-    let errbuf = "";
-    let timeout = setTimeout(() => {
-        console.log(chalk.blueBright("server's been up for a while, attempting to update..."));
-        child.removeAllListeners("exit");
-        child.kill();
-        downloadAndStart();
-    }, 1000 * 60 * 60 * 4); // 4 hours
+        let errbuf = "";
+        let timeout = setTimeout(() => {
+            console.log(chalk.blueBright("server's been up for a while, attempting to update..."));
+            child.removeAllListeners("exit");
+            child.kill();
+            downloadAndStart();
+        }, 1000 * 60 * 60 * 4); // 4 hours
 
-    child.stderr!.on("data", e => {
-        let err = e.toString();
-        console.error(err);
-        errbuf += err;
-    });
-    child.on("exit", (e) => {
-        // upload `err` as telemetry?
-        console.log(chalk.red(`Adrift crashed! exit code ${e}`));
-        console.log(chalk.green("restarting in 30 seconds"));
+        child.stderr!.on("data", e => {
+            let err = e.toString();
+            console.error(err);
+            errbuf += err;
+        });
+        child.on("exit", (e) => {
+            // upload `err` as telemetry?
+            console.log(chalk.red(`Adrift crashed! exit code ${e}`));
+            console.log(chalk.green("restarting in 30 seconds"));
 
-        clearTimeout(timeout);
+            clearTimeout(timeout);
+            setTimeout(downloadAndStart, 30000);
+        });
+    } catch (e) {
+
+        console.error(e);
         setTimeout(downloadAndStart, 30000);
-    });
+    }
 
 }
 
