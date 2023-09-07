@@ -3,6 +3,8 @@ dist.js
 dist.js.map
 dist.html
 */dist/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
 admin-creds.json
 server/config.json
 .firebaserrc
