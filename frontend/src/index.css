@@ -1,6 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-*{
-    font-family: "Cabin";
+html {
+  background-color: rgb(var(--m3-scheme-background));
+  color: rgb(var(--m3-scheme-on-background));
+  --m3-font-display: Cabin, system-ui, sans-serif;
+  --m3-font-headline: Cabin, system-ui, sans-serif;
+  --m3-font-title: Cabin, system-ui, sans-serif;
+  --m3-font-label: Cabin, system-ui, sans-serif;
+  --m3-font-label-large-tracking: 0.25px;
+  --m3-font-label-medium-tracking: 1px;
+  --m3-font-label-small-tracking: 1px;
+  --m3-font-body: Cabin, system-ui, sans-serif;
+}
+#app {
+  display: contents;
 }

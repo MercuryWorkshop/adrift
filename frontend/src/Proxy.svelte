@@ -3,9 +3,6 @@
   import { Win, openWindow } from "../../corium";
   import Icon from "@iconify/svelte";
 
-  let selectedProxy = "ultraviolet";
-
-  let url: string = "http://google.com";
   import { onMount } from "svelte";
   import {
     Dialog,
@@ -14,9 +11,13 @@
     TextField,
   } from "m3-svelte";
 
+  let url = "http://google.com";
+
   let proxyIframe: HTMLIFrameElement;
 
   let settingsenabled: boolean = false;
+
+  let selectedProxy = "ultraviolet";
 
   let searchengine = "https://google.com/search?q=";
 
@@ -59,96 +60,92 @@
   });
 </script>
 
-<div class="h-full w-full flex flex-col">
+<div class="h-full flex flex-col">
   <div class="flex p-2">
-    <div class="flex text-xl items-center w-full">
+    <button
+      class="text-2xl p-2 hover:text-primary"
+      on:click={() => {
+        proxyIframe.contentWindow?.history.back();
+      }}
+    >
+      <Icon icon="ic:round-arrow-back" />
+    </button>
+    <button
+      class="text-2xl p-2 hover:text-primary"
+      on:click={() => {
+        proxyIframe.contentWindow?.history.forward();
+      }}
+    >
+      <Icon icon="ic:round-arrow-forward" />
+    </button>
+    <button
+      class="text-2xl p-2 hover:text-primary"
+      on:click={() => {
+        visitURL(url);
+      }}
+    >
+      <Icon icon="ic:round-refresh" />
+    </button>
+    <div class="flex flex-1 mx-2 border border-outline rounded-xl">
       <button
-        on:click={() => {
-          proxyIframe.contentWindow?.history.back();
-        }}
-      >
-        <Icon icon="fluent-mdl2:back" />
-      </button>
-      <div class="p-2" />
-      <button
-        on:click={() => {
-          proxyIframe.contentWindow?.history.forward();
-        }}
-      >
-        <Icon icon="fluent-mdl2:forward" />
-      </button>
-      <button
-        class="text-2xl px-4"
+        class="text-2xl px-2 hover:text-primary"
         on:click={() => {
           visitURL(url);
         }}
       >
-        <Icon icon="tabler:reload" />
+        <Icon icon="ic:round-search" />
       </button>
-      <div class="urlbar flex items-center flex-1">
-        <button
-          class="text-2xl px-2"
-          on:click={() => {
+      <input
+        bind:value={url}
+        type="text"
+        class="flex-1 w-0 pr-2 text-xl"
+        on:keydown={(e) => {
+          if (e.key === "Enter") {
             visitURL(url);
-          }}
-        >
-          <Icon icon="ic:round-search" />
-        </button>
-        <input
-          bind:value={url}
-          type="text"
-          class="flex-1"
-          on:keydown={(e) => {
-            if (e.key === "Enter") {
-              visitURL(url);
-            }
-          }}
-        />
-      </div>
-
-      <button class="text-2xl pl-3" on:click={() => (settingsenabled = true)}>
-        <Icon icon="ic:round-settings" />
-      </button>
+          }
+        }}
+      />
     </div>
-    <Dialog bind:open={settingsenabled} headline="Proxy Settings">
-      {#if !import.meta.env.VITE_ADRIFT_SINGLEFILE}
-        <div>
-          <SegmentedButtonContainer>
-            <input
-              type="radio"
-              name="selectedProxy"
-              bind:group={selectedProxy}
-              value="ultraviolet"
-              id="ultraviolet"
-            />
-            <SegmentedButtonItem input="ultraviolet"
-              >Ultraviolet</SegmentedButtonItem
-            >
-            <input
-              type="radio"
-              name="selectedProxy"
-              bind:group={selectedProxy}
-              value="dynamic"
-              id="dynamic"
-            />
-            <SegmentedButtonItem input="dynamic">Dynamic</SegmentedButtonItem>
-          </SegmentedButtonContainer>
-        </div>
-        <br />
-
-        <TextField name="Default Search Engine" bind:value={searchengine} />
-      {/if}
-    </Dialog>
+    <button
+      class="text-2xl p-2 hover:text-primary"
+      on:click={() => (settingsenabled = true)}
+    >
+      <Icon icon="ic:round-settings" />
+    </button>
   </div>
   <iframe class="flex-1" bind:this={proxyIframe} on:load={frameLoad} />
 </div>
+<Dialog bind:open={settingsenabled} headline="Proxy Settings">
+  {#if !import.meta.env.VITE_ADRIFT_SINGLEFILE}
+    <div>
+      <SegmentedButtonContainer>
+        <input
+          type="radio"
+          name="selectedProxy"
+          bind:group={selectedProxy}
+          value="ultraviolet"
+          id="ultraviolet"
+        />
+        <SegmentedButtonItem input="ultraviolet">
+          Ultraviolet
+        </SegmentedButtonItem>
+        <input
+          type="radio"
+          name="selectedProxy"
+          bind:group={selectedProxy}
+          value="dynamic"
+          id="dynamic"
+        />
+        <SegmentedButtonItem input="dynamic">Dynamic</SegmentedButtonItem>
+      </SegmentedButtonContainer>
+    </div>
+    <br />
+
+    <TextField name="Default Search Engine" bind:value={searchengine} />
+  {/if}
+</Dialog>
 
 <style>
-  .urlbar {
-    border: solid 0.0625rem rgb(var(--m3-scheme-outline));
-    padding: 0.25rem;
-    border-radius: 0.75rem;
-  }
   input {
     background-color: transparent;
     outline: none;
