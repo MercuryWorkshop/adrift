@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BareClient } from "bare-client-custom";
+  import { BareClient } from "@mercuryworkshop/bare-client-custom";
   import { Win, openWindow } from "../../corium";
   import Icon from "@iconify/svelte";
 

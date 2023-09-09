@@ -6,7 +6,7 @@ import {
   MetaCallback,
   ReadyStateCallback,
   WebSocketImpl,
-} from "bare-client-custom";
+} from "@mercuryworkshop/bare-client-custom";
 import { MAX_CHUNK_SIZE } from "protocol";
 import { Connection } from "./Connection";
 

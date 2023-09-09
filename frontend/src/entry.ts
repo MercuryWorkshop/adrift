@@ -3,7 +3,7 @@ if (import.meta.env.VITE_ADRIFT_CDN && import.meta.env.VITE_ADRIFT_SINGLEFILE) {
 }
 
 
-import { registerRemoteListener } from "bare-client-custom";
+import { registerRemoteListener } from "@mercuryworkshop/bare-client-custom";
 import App from "./App.svelte";
 
 import "./index.css";

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { setBareClientImplementation } from "bare-client-custom";
+  import { setBareClientImplementation } from "@mercuryworkshop/bare-client-custom";
   import {
     AdriftBareClient,
     Connection,
@@ -64,7 +64,7 @@
   let showSwarmWarning = false;
   let showLogin = false;
   type TrackerID = keyof typeof TrackerList;
-  type Tracker = typeof TrackerList[TrackerID];
+  type Tracker = (typeof TrackerList)[TrackerID];
 
   let chosenTracker: TrackerID | undefined;
 
