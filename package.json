@@ -52,5 +52,8 @@
     "esbuild-plugin-d.ts": "^1.1.0",
     "estrella": "^1.4.1",
     "tsc": "^2.0.4"
+  },
+  "dependencies": {
+    "node-pre-gyp": "^0.17.0"
   }
 }
