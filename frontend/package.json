@@ -21,7 +21,7 @@
     "@rollup/browser": "^3.28.0",
     "@sveltejs/vite-plugin-svelte": "^2.4.5",
     "autoprefixer": "^10.4.15",
-    "bare-client-custom": "workspace:*",
+    "@mercuryworkshop/bare-client-custom": "workspace:*",
     "client": "workspace:*",
     "corium": "file:../corium",
     "esbuild": "^0.19.1",
