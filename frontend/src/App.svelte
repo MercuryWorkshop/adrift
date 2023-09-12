@@ -109,21 +109,21 @@
     </Card>
   </div>
 {:else}
-  <div class="h-full flex flex-col p-4 gap-6">
-    <div class="flex">
-      <div class="flex flex-col flex-1 items-center gap-2 text-3xl px-2">
-        <Icon icon="material-symbols:sailing" />
+  <div class="h-full flex flex-col p-6 gap-6 justify-center">
+    <div class="flex justify-between items-center">
+      <div class="flex gap-2 text-2xl">
         <p>Adrift</p>
+        <Icon icon="material-symbols:sailing" />
       </div>
-      <div class="flex flex-col flex-1 text-center justify-end px-2">
-        <p class="sm:text-xl lg:text-2xl">
+      <div class="flex flex-col text-center justify-end px-2">
+        <p class="sm:text-xl lg:text-xl">
           A fast and modern decentralized proxy network
         </p>
       </div>
-      <div class="flex flex-col flex-1 items-center justify-center px-2">
+      <div class="">
         {#if !import.meta.env.VITE_ADRIFT_SINGLEFILE}
           <Button
-            type="tonal"
+            type="text"
             on:click={() => downloadShortcut("adrift.html", "Homework")}
           >
             Get shortcut
