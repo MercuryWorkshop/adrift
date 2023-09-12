@@ -2,21 +2,22 @@
   import { initializeApp } from "firebase/app";
   import {
     Auth,
-    browserLocalPersistence,
     createUserWithEmailAndPassword,
     getAuth,
-    setPersistence,
     signInWithEmailAndPassword,
+    browserLocalPersistence,
+    setPersistence,
   } from "firebase/auth";
   import {
     Button,
     Dialog,
+    SnackbarAnim,
+    TextField,
     Divider,
     ListItemLabel,
     RadioAnim2,
-    SnackbarAnim,
-    TextField,
   } from "m3-svelte";
+  import Icon from "@iconify/svelte";
 
   import { setBareClientImplementation } from "@mercuryworkshop/bare-client-custom";
   import {
@@ -29,8 +30,6 @@
   import { UIState } from "./state";
 
   type valueof<T> = T[keyof T];
-
-  export let dialogConnection: boolean;
   let tlsWarningShown = false;
   let selectedTracker = Object.keys(trackerList)[0] as keyof typeof trackerList;
 
@@ -119,8 +118,12 @@
   }
 </script>
 
-<Dialog bind:open={dialogConnection} headline="Connect to a tracker">
-  <div class="flex flex-col -mx-4">
+<div
+  class="vertical-container m-auto rounded-2xl bg-surface-container-high p-6"
+>
+  <Icon icon="ic:round-cable" height={24} class="text-secondary" />
+  <p class="m3-font-headline-small">Connect to a tracker</p>
+  <div class="flex flex-col w-full -mx-4">
     {#each Object.entries(trackerList) as [trackerId, tracker], i}
       {#if i != 0}
         <Divider />
@@ -144,15 +147,12 @@
       </ListItemLabel>
     {/each}
   </div>
-  <p class="font-bold mt-4" class:hide-warning={!tlsWarningShown}>
+  <p class="tls-warning mt-4" class:hidden={!tlsWarningShown}>
     Your data is not end-to-end encrypted, and will not be private. While TLS
     will be implemented later, for now do not enter any private information.
     Click connect again to continue.
   </p>
-  <svelte:fragment slot="buttons">
-    <Button type="text" on:click={() => (dialogConnection = false)}>
-      Cancel
-    </Button>
+  <div class="flex gap-2 items-center mt-2 px-6">
     <Button
       type="text"
       on:click={() => {
@@ -163,27 +163,25 @@
         if (auth.currentUser) {
           connectNode();
         } else {
-          dialogConnection = false;
           dialogAccount = true;
         }
       }}
     >
-      Connect to your node
+      Connect to home node
     </Button>
     <Button
       type="tonal"
       on:click={() => {
         if (tlsWarningShown) {
           connectSwarm();
-          dialogConnection = false;
         }
         tlsWarningShown = true;
       }}
     >
       Connect
     </Button>
-  </svelte:fragment>
-</Dialog>
+  </div>
+</div>
 <Dialog bind:open={dialogAccount} headline="Sign in">
   <div class="flex gap-4 flex-col">
     <TextField name="Email" bind:value={email} />
@@ -226,9 +224,14 @@
 <SnackbarAnim bind:show={snackbar} />
 
 <style>
-  .hide-warning {
-    margin: 0;
-    height: 0;
-    visibility: hidden;
+  .vertical-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .tls-warning {
+    font-weight: bold;
+    max-width: 60ch;
   }
 </style>

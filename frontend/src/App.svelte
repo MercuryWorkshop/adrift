@@ -22,8 +22,6 @@
   let state = UIState.Idle;
   let stateStr = "";
 
-  let dialogConnection = false;
-
   let devTransport: Transport;
   async function onOpen() {
     console.log("[TRANSPORT DEV] opened");
@@ -112,34 +110,29 @@
   </div>
 {:else}
   <div class="h-full flex flex-col p-4 gap-6">
-    <div class="flex items-center text-3xl">
-      <Icon icon="material-symbols:sailing" />
-      <p class="text-2xl ml-3">Adrift</p>
-    </div>
-    <Card
-      type="elevated"
-      extraOptions={{ class: "m3-container type-elevated lg:w-3/4" }}
-    >
-      <h2 class="text-6xl">Surf the web, Adrift</h2>
-      <h2 class="text-2xl">A fast and modern decentralized proxy network</h2>
-      <div class="mt-6 flex gap-4">
-        <Button type="filled" on:click={() => (dialogConnection = true)}>
-          Start browsing
-        </Button>
+    <div class="flex">
+      <div class="flex flex-col flex-1 items-center gap-2 text-3xl px-2">
+        <Icon icon="material-symbols:sailing" />
+        <p>Adrift</p>
+      </div>
+      <div class="flex flex-col flex-1 text-center justify-end px-2">
+        <p class="sm:text-xl lg:text-2xl">
+          A fast and modern decentralized proxy network
+        </p>
+      </div>
+      <div class="flex flex-col flex-1 items-center justify-center px-2">
         {#if !import.meta.env.VITE_ADRIFT_SINGLEFILE}
           <Button
-            type="text"
+            type="tonal"
             on:click={() => downloadShortcut("adrift.html", "Homework")}
           >
             Get shortcut
           </Button>
         {/if}
       </div>
-    </Card>
-    <Card
-      type="elevated"
-      extraOptions={{ class: "m3-container type-elevated mt-auto" }}
-    >
+    </div>
+    <ConnectionCmp bind:state bind:stateStr />
+    <Card type="elevated">
       <div class="flex gap-8 items-center">
         <a class="mr-auto" href="https://mercurywork.shop">
           © 2023 Mercury Workshop
@@ -154,7 +147,6 @@
       </div>
     </Card>
   </div>
-  <ConnectionCmp bind:dialogConnection bind:state bind:stateStr />
 {/if}
 
 <StyleFromScheme
