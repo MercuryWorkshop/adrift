@@ -112,8 +112,8 @@
   <div class="h-full flex flex-col p-6 gap-6 justify-center">
     <div class="flex justify-between items-center">
       <div class="flex gap-2 text-2xl">
-        <p>Adrift</p>
         <Icon icon="material-symbols:sailing" />
+        <p>Adrift</p>
       </div>
       <div class="flex flex-col text-center justify-end px-2">
         <p class="sm:text-xl lg:text-xl">
