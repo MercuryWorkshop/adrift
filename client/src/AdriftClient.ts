@@ -195,19 +195,18 @@ export class AdriftBareClient extends Client {
         ws.dispatchEvent(new CloseEvent("close", { code, reason, wasClean }));
       },
       async (stream, isBinary) => {
-        let v = (await stream.getReader().read()).value;
-        console.log(v.buffer);
-        let data: ArrayBuffer | string = v.buffer;
+        let data: ArrayBuffer | string = await new Response(
+          stream
+        ).arrayBuffer();
         (data as any).__proto__ = arrayBufferImpl.prototype;
         if (!isBinary) {
           try {
-            data = new TextDecoder().decode(v.buffer);
+            data = new TextDecoder().decode(data);
           } catch (e) {
             console.error(e);
             return;
           }
         }
-        console.log(data);
         ws.dispatchEvent(new MessageEvent("message", { data }));
       },
       (message: string) => {
