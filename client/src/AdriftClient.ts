@@ -179,6 +179,8 @@ export class AdriftBareClient extends Client {
       }
     });
 
+    // coerce iframe Array type to our window array type
+    protocols = Array.from(protocols);
     let { send, close } = this.connection.wsconnect(
       remote,
       protocols,
