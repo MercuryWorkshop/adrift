@@ -1,6 +1,7 @@
 import EventEmitter from "events";
 import { IncomingMessage, STATUS_CODES } from "http";
 import { WebSocket } from "isomorphic-ws";
+import { WebSocket as nodews } from "ws";
 import {
   C2SRequestTypes,
   C2S_HELLO,
@@ -309,9 +310,15 @@ export class AdriftServer {
 
       case C2SRequestTypes.WSOpen: {
         const payload = AdriftServer.tryParseJSONPayload(msg.slice(cursor));
+        console.log(payload.host);
         const ws = (this.sockets[seq] = new WebSocket(
           payload.url,
-          payload.protocols
+          payload.protocols,
+          {
+            headers: {
+              "Origin": payload.host,
+            }
+          }
         ));
         ws.binaryType = "arraybuffer";
         ws.onerror = (e) => {

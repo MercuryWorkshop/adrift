@@ -158,6 +158,7 @@ export class AdriftBareClient extends Client {
     webSocketImpl: WebSocketImpl,
     arrayBufferImpl: ArrayBufferConstructor
   ): WebSocket {
+    console.log(arguments);
     const ws = new webSocketImpl("wss:null", protocols);
     // this will error. that's okay
     let initalCloseHappened = false;
@@ -194,25 +195,27 @@ export class AdriftBareClient extends Client {
         ws.dispatchEvent(new CloseEvent("close", { code, reason, wasClean }));
       },
       async (stream, isBinary) => {
-        let data: ArrayBuffer | string = await new Response(
-          stream
-        ).arrayBuffer();
+        let v = (await stream.getReader().read()).value;
+        console.log(v.buffer);
+        let data: ArrayBuffer | string = v.buffer;
         (data as any).__proto__ = arrayBufferImpl.prototype;
         if (!isBinary) {
           try {
-            data = new TextDecoder().decode();
+            data = new TextDecoder().decode(v.buffer);
           } catch (e) {
             console.error(e);
             return;
           }
         }
+        console.log(data);
         ws.dispatchEvent(new MessageEvent("message", { data }));
       },
       (message: string) => {
         console.log({ message });
         ws.dispatchEvent(new ErrorEvent("error", { message }));
       },
-      arrayBufferImpl
+      arrayBufferImpl,
+      arrayBufferImpl.prototype.constructor.constructor("return __uv$location")().origin,
     );
 
     ws.send = (data: any) => {

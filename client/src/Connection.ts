@@ -24,7 +24,7 @@ type OpenWSMeta = {
   onerror: (message: string) => void;
 };
 
-(ReadableStream as any).prototype[Symbol.asyncIterator] = async function* () {
+(ReadableStream as any).prototype[Symbol.asyncIterator] = async function*() {
   const reader = this.getReader();
   try {
     while (true) {
@@ -73,7 +73,7 @@ export class Connection {
       const expectedVersion = msgText.slice(S2C_HELLO_ERR.length);
       throw new Error(
         `We are running protocol version ${PROTOCOL_VERSION}, ` +
-          `but server expected ${expectedVersion}`
+        `but server expected ${expectedVersion}`
       );
     } else {
       throw new Error("Unexpected server hello response");
@@ -158,8 +158,8 @@ export class Connection {
             requestType === S2CRequestTypes.WSBinaryStart
               ? true
               : requestType === S2CRequestTypes.WSTextStart
-              ? false
-              : (() => {
+                ? false
+                : (() => {
                   throw new Error("unreachable");
                 })()
           )
@@ -278,7 +278,8 @@ export class Connection {
     onclose: (code: number, reason: string, wasClean: boolean) => void,
     onmessage: (data: ReadableStream, isBinary: boolean) => void,
     onerror: (message: string) => void,
-    arrayBufferImpl: ArrayBufferConstructor
+    arrayBufferImpl: ArrayBufferConstructor,
+    host: string
   ): {
     send: (data: any) => void;
     close: (code?: number, reason?: string) => void;
@@ -287,7 +288,7 @@ export class Connection {
       Connection.uninitializedError();
     }
 
-    const payload: C2SWSOpenPayload = { url: url.toString(), protocols };
+    const payload: C2SWSOpenPayload = { url: url.toString(), protocols, host };
     const payloadJSON = JSON.stringify(payload);
     let seq = this.nextSeq();
     // todo: onerror

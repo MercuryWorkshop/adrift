@@ -1,8 +1,12 @@
 import { WebSocketServer } from "ws";
 
-const wss = new WebSocketServer({ host: "127.0.0.1", port: 3002 });
+const wss = new WebSocketServer({ host: "0.0.0.0", port: 3002 });
 
+wss.on("headers", jeaders => {
+  console.log(jeaders);
+});
 wss.on("connection", (ws) => {
+
   console.log("new connection", { protocol: ws.protocol });
   ws.binaryType = "nodebuffer";
 
