@@ -1,5 +1,3 @@
-_surf_the_web_adrift_fix_ --------- "ce why do you keep making stupid proxies with zero use case"
-
 # Adrift
 
 Adrift is a fast and modern decentralized web proxy network, utilizing transport over WebRTC.
