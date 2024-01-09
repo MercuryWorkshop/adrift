@@ -1,0 +1,12 @@
+node_modules
+dist.js
+dist.js.map
+dist.html
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+admin-creds.json
+server/config.json
+.firebaserrc
+.firebase
+.env
+pnpm-lock.yaml

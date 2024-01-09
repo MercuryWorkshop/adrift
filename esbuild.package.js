@@ -1,6 +1,13 @@
 const { dtsPlugin } = require("esbuild-plugin-d.ts");
 const { build } = require("esbuild");
 
+let makeAllPackagesExternalPlugin = {
+    name: 'make-all-packages-external',
+    setup(build) {
+        let filter = /^[^.\/]|^\.[^.\/]|^\.\.[^\/]/ // Must not start with "/" or "./" or "../"
+        build.onResolve({ filter }, args => ({ path: args.path, external: true }))
+    },
+}
 
 for (let project of ["client", "protocol", "tracker-list"]) {
     build({
@@ -8,6 +15,7 @@ for (let project of ["client", "protocol", "tracker-list"]) {
         format: "esm",
         entryPoints: [`./${project}/src/index.ts`],
         outfile: `./dist/${project}.mjs`,
+        plugins: [makeAllPackagesExternalPlugin]
     })
     build({
         bundle: true,
