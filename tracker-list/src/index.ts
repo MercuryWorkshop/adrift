@@ -28,3 +28,5 @@ let trackers = {
   }
 } as const;
 export default trackers;
+
+export const defaultTracker = "us-central-1";

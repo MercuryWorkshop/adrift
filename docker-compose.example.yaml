@@ -1,0 +1,14 @@
+services:
+  adrift:
+    image: mercuryworkshop/adrift-server
+    environment:
+      # You don't have to set this or the type
+      - ADRIFT_TRACKER: "us-central-1"
+      - ADRIFT_TYPE: "swarm"
+      # Only used with "account" type
+      #- ADRIFT_CREDENTIALS: '{"email": "", "password": ""}'
+  # Auto update docker image
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

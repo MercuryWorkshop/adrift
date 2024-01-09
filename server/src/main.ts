@@ -13,10 +13,10 @@ import select from "@inquirer/select";
 import boxen from "boxen";
 import chalk from "chalk";
 
-import TrackerList from "tracker-list";
+import TrackerList, { defaultTracker } from "tracker-list";
 
 import fs from "fs";
-import { exit } from "process";
+import { exit, env } from "process";
 import { datadir } from "./lib";
 import { PROTOCOL_VERSION } from "protocol";
 
@@ -24,6 +24,12 @@ export const SERVER_MILESTONE = "1.0";
 
 
 async function config() {
+	if(env.ADRIFT_IS_DOCKER) return {
+		/* Default values so users can just docker run the image */
+		tracker: env.ADRIFT_TRACKER || defaultTracker,
+		type: env.ADRIFT_TYPE || "swarm",
+		credentials: env.ADRIFT_CREDENTIALS ? JSON.parse(env.ADRIFT_CREDENTIALS) : {}
+	};
     let dir = datadir();
 
     if (
