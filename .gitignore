@@ -3,6 +3,7 @@ dist.js
 dist.js.map
 dist.html
 */dist/
+dist/
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 admin-creds.json

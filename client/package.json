@@ -12,6 +12,7 @@
   "dependencies": {
     "@types/uuid": "^9.0.2",
     "@mercuryworkshop/bare-client-custom": "file:../bare-client-custom",
+    "@mercuryworkshop/adrift": "workspace*",
     "firebase": "^10.1.0",
     "protocol": "workspace:*",
     "uuid": "^9.0.0",

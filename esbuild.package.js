@@ -4,6 +4,8 @@ const { build } = require("esbuild");
 let makeAllPackagesExternalPlugin = {
     name: 'make-all-packages-external',
     setup(build) {
+
+        build.onResolve({ filter: /protocol/ }, args => ({ external: false }))
         let filter = /^[^.\/]|^\.[^.\/]|^\.\.[^\/]/ // Must not start with "/" or "./" or "../"
         build.onResolve({ filter }, args => ({ path: args.path, external: true }))
     },
