@@ -3,7 +3,7 @@ import { Transport } from "protocol";
 const rtcConf = {
   iceServers: [
     {
-      urls: "stun:stun.l.google.com:19302",
+      urls: "stun:stun.voip.blackberry.com:3478",
     },
   ],
 };
